@@ -20,6 +20,8 @@ AliMed/
 ├── assets/
 │   └── images/
 │       └── logo.png
+├── docs/
+│   └── brand-guidelines.md
 ├── LICENSE
 └── README.md
 ```
@@ -28,7 +30,7 @@ Zasoby graficzne, w tym logo projektu, trafiają do katalogu `assets/images/` w 
 
 -----
 
-## � Paleta kolorów
+## 🎨 Paleta kolorów
 
 Poniższe kolory tworzą podstawową identyfikację wizualną systemu AliMed. Stosuj je konsekwentnie w interfejsie oraz materiałach promocyjnych.
 
@@ -40,7 +42,22 @@ Dbaj o kontrast z tekstem, szczególnie na jasno-niebieskich tłach, aby zachowa
 
 -----
 
-## �🎯 Opis projektu
+## ✒️ Typografia i logotyp
+
+- Logo wykorzystuje krój Lunchtype24 autorstwa Stefana Wetterstranda.
+- Lunchtype24 jest objęty licencją SIL Open Font License (OFL) w wersji 1.1.
+- Szczegóły licencyjne oraz wytyczne dotyczące wykorzystania logo znajdują się w `docs/brand-guidelines.md` oraz `LICENSE`.
+
+-----
+
+## 📚 Dodatkowa dokumentacja
+
+- `docs/brand-guidelines.md` — rozszerzone wytyczne identyfikacji wizualnej (logo, kolory, typografia).
+- `LICENSE` — zestawienie licencji projektu i zasobów zewnętrznych (w tym Lunchtype24).
+
+-----
+
+## 🎯 Opis projektu
 
 Zespół realizuje projekt polegający na stworzeniu internetowego systemu rejestracji pacjentów z wykorzystaniem wyłącznie darmowych usług i narzędzi dostępnych w ekosystemie **Alibaba Cloud**.
 

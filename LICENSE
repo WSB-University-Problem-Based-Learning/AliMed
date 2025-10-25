@@ -1,3 +1,8 @@
+# License
+
+## Project Code — MIT License
+
+```
 MIT License
 
 Copyright (c) 2025 WSB University - Problem Based Learning
@@ -19,3 +24,13 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+```
+
+## Third-Party Assets
+
+### Lunchtype24 Font
+
+- Author: Stefan Wetterstrand
+- Usage: Logo lettering in `assets/images/logo.png`
+- License: SIL Open Font License (OFL) v1.1
+- License text: https://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&id=OFL
