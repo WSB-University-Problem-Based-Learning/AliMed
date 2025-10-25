@@ -1,5 +1,7 @@
 # 🏥 AliMed - Internetowy System Rejestracji Pacjentów
 
+![AliMed Logo](assets/images/logo.png)
+
 ## 👨‍💻 Zespół (Grupa nr 3)
 
   * Grzegorz Matusewicz
@@ -8,6 +10,21 @@
   * Damian Litewka
   * Łukasz Antoniewicz
   * Aleksander Kutycki
+
+-----
+
+## 🗂️ Struktura repozytorium
+
+```
+AliMed/
+├── assets/
+│   └── images/
+│       └── logo.png
+├── LICENSE
+└── README.md
+```
+
+Zasoby graficzne, w tym logo projektu, trafiają do katalogu `assets/images/` w celu łatwego odnajdywania i dalszego wykorzystania w materiałach projektowych.
 
 -----
 
