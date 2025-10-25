@@ -1,6 +1,6 @@
 # 🏥 AliMed - Internetowy System Rejestracji Pacjentów
 
-<img src="assets/images/logo.png" alt="AliMed Logo" style="width: 50%; max-width: 240px;" />
+<img src="assets/images/logo-vector.svg" alt="AliMed Logo" style="width: 50%; max-width: 240px;" />
 
 ## 👨‍💻 Zespół (Grupa nr 3)
 
