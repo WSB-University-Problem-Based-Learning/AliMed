@@ -1,0 +1,18 @@
+{
+  "name": "alimed",
+  "version": "1.0.0",
+  "description": "<img src=\"assets/images/logo-vector.svg\" alt=\"AliMed Logo\" style=\"width: 50%; max-width: 240px;\" />",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "jest": "^30.2.0"
+  }
+}
