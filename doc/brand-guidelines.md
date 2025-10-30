@@ -2,7 +2,7 @@
 
 ## Logo
 
-- Primary logo: `assets/images/logo.png`
+- Primary logo: `res/images/logo.png`
 - Logo font: Lunchtype24 by Stefan Wetterstrand, licensed under the SIL Open Font License (OFL) — zobacz `LICENSE`.
 - Retain clear space equal to the height of the letter "A" around the logo to preserve legibility.
 
@@ -23,5 +23,5 @@
 
 ## Asset Storage
 
-- Graphic assets live under `assets/` and are grouped by type.
+- Graphic assets live under `res/` and are grouped by type.
 - Use descriptive filenames (e.g., `logo.png`, `logo-dark.svg`) to keep future variants organized.

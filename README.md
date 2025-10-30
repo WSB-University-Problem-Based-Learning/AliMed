@@ -1,6 +1,6 @@
 # 🏥 AliMed - Internetowy System Rejestracji Pacjentów
 
-<img src="assets/images/logo-vector.svg" alt="AliMed Logo" style="width: 50%; max-width: 240px;" />
+<img src="res/images/logo-vector.svg" alt="AliMed Logo" style="width: 50%; max-width: 240px;" />
 
 ## 👨‍💻 Zespół (Grupa nr 3)
 
@@ -17,16 +17,27 @@
 
 ```
 AliMed/
-├── assets/
-│   └── images/
-│       └── logo.png
-├── docs/
+├── .build/
+├── .config/
+├── dep/
+├── doc/
 │   └── brand-guidelines.md
+├── res/
+│   └── images/
+│       ├── logo-vector-full.ai
+│       ├── logo-vector-full.png
+│       ├── logo-vector-full.svg
+│       ├── logo-vector.svg
+│       └── logo.png
+├── samples/
+├── src/
+├── test/
+├── tools/
 ├── LICENSE
 └── README.md
 ```
 
-Zasoby graficzne, w tym logo projektu, trafiają do katalogu `assets/images/` w celu łatwego odnajdywania i dalszego wykorzystania w materiałach projektowych.
+Kod źródłowy i testy znajdują się odpowiednio w `src/` oraz `test/`. Konfiguracje lokalne umieszczamy w `.config/`, skrypty budujące w `.build/`, a zależności zewnętrzne w `dep/`. Zasoby statyczne, w tym logo projektu, trafiają do katalogu `res/` w celu łatwego odnajdywania i dalszego wykorzystania w materiałach projektowych. Przykładowe fragmenty kodu pomocniczego można umieszczać w `samples/`, a automatyzację zadań w `tools/`.
 
 -----
 
@@ -46,13 +57,13 @@ Dbaj o kontrast z tekstem, szczególnie na jasno-niebieskich tłach, aby zachowa
 
 - Logo wykorzystuje krój Lunchtype24 autorstwa Stefana Wetterstranda.
 - Lunchtype24 jest objęty licencją SIL Open Font License (OFL) w wersji 1.1.
-- Szczegóły licencyjne oraz wytyczne dotyczące wykorzystania logo znajdują się w `docs/brand-guidelines.md` oraz `LICENSE`.
+- Szczegóły licencyjne oraz wytyczne dotyczące wykorzystania logo znajdują się w `doc/brand-guidelines.md` oraz `LICENSE`.
 
 -----
 
 ## 📚 Dodatkowa dokumentacja
 
-- `docs/brand-guidelines.md` — rozszerzone wytyczne identyfikacji wizualnej (logo, kolory, typografia).
+- `doc/brand-guidelines.md` — rozszerzone wytyczne identyfikacji wizualnej (logo, kolory, typografia).
 - `LICENSE` — zestawienie licencji projektu i zasobów zewnętrznych (w tym Lunchtype24).
 
 -----
