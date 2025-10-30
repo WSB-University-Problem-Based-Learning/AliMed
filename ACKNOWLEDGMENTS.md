@@ -1,4 +1,4 @@
-# Podziękowania
+# Acknowledgments
 
-- Alibaba Cloud za udostępnienie warstwy Free Tier wykorzystywanej w testach rozwiązania.
-- Społeczności open source za bibliotekę Lunchtype24 objętą licencją SIL Open Font License.
+- Alibaba Cloud for providing Free Tier resources used while testing the solution.
+- The open source community for maintaining the Lunchtype24 typeface under the SIL Open Font License.

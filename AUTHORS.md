@@ -1,3 +1,3 @@
 # Autorzy
 
-Ten projekt jest rozwijany przez zespół projektowy AliMed (Grupa nr 3) w ramach zajęć problem-based learning na WSB University.
+Projekt jest rozwijany przez zespół AliMed (grupa nr 3) w ramach przedmiotu „Systemy chmurowe” na Akademii WSB w Dąbrowie Górniczej, pod kierunkiem mgr. inż. Dawida Jurczyńskiego.
