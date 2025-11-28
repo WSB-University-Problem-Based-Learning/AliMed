@@ -400,3 +400,4 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/API/API.AliMed/Migrations
