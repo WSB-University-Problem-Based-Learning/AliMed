@@ -16,15 +16,13 @@ namespace API.AliMed.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // ------------------ KONFIGURACJA ENTYTETÓW WŁASNYCH (OwnsOne) ------------------
-
-            // Konfiguracja Adresu w Pacjencie
+            // own entity
             modelBuilder.Entity<Pacjent>().OwnsOne(p => p.AdresZamieszkania);
 
-            // Konfiguracja Adresu w Placówce
+            // own entity
             modelBuilder.Entity<Placowka>().OwnsOne(p => p.AdresPlacowki);
 
-            // ------------------ KONFIGURACJA RELACJI I OGRANICZEŃ ------------------
+            // ------------------ relacje i fk ------------------
 
             // wymuszenie unikalny PESELa
             modelBuilder.Entity<Pacjent>()
