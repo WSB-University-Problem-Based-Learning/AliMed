@@ -31,7 +31,10 @@ const mockWizyty: Wizyta[] = [
 ];
 
 const DashboardPage: React.FC = () => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user] = useState<User | null>(() => {
+    const userData = localStorage.getItem('alimed_user');
+    return userData ? JSON.parse(userData) : null;
+  });
   const [wizyty] = useState<Wizyta[]>(mockWizyty);
   const navigate = useNavigate();
 
@@ -41,10 +44,7 @@ const DashboardPage: React.FC = () => {
     
     if (!token || !userData) {
       navigate('/login');
-      return;
     }
-
-    setUser(JSON.parse(userData));
   }, [navigate]);
 
   const handleLogout = () => {
@@ -73,10 +73,10 @@ const DashboardPage: React.FC = () => {
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
+          <div className="flex justify-between items-center">
             {/* Logo */}
-            <div className="flex items-center gap-2">
-              <img src="/logo.svg" alt="AliMed" className="h-10 w-auto" />
+            <div className="flex items-center">
+              <img src="/logo.svg" alt="AliMed" className="h-20" />
             </div>
 
             {/* User info */}

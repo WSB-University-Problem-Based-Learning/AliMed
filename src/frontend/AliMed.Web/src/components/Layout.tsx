@@ -14,10 +14,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     <div className="min-h-screen bg-slate-100">
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-4">
+          <div className="flex items-center justify-between">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2">
-              <img src="/logo.svg" alt="AliMed" className="h-10 w-auto" />
+            <Link to="/" className="flex items-center">
+              <img src="/logo.svg" alt="AliMed" className="h-20" />
             </Link>
 
             {/* Navigation */}

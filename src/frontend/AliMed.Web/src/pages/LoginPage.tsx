@@ -32,7 +32,7 @@ const LoginPage: React.FC = () => {
       <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-md">
         {/* Logo */}
         <div className="flex items-center justify-center mb-6">
-          <img src="/logo.svg" alt="AliMed" className="h-14 w-auto" />
+          <img src="/logo.svg" alt="AliMed" className="h-20 w-auto" />
         </div>
 
         <h2 className="text-xl font-semibold text-center text-gray-800 mb-8">

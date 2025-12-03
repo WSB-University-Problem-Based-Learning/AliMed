@@ -14,10 +14,10 @@ const LandingPage: React.FC = () => {
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
+          <div className="flex justify-between items-center">
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-2">
-              <img src="/logo.svg" alt="AliMed" className="h-12 w-auto" />
+            <Link to="/" className="flex items-center">
+              <img src="/logo.svg" alt="AliMed" className="h-20" />
             </Link>
 
             {/* Navigation */}
