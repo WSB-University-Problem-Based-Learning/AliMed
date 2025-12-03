@@ -1,0 +1,8 @@
+@import "tailwindcss";
+
+/* Brand colors as CSS variables for Tailwind v4 */
+@theme {
+  --color-alimed-blue: #1673b2;
+  --color-alimed-light-blue: #4cb4e3;
+  --color-alimed-green: #acd045;
+}
