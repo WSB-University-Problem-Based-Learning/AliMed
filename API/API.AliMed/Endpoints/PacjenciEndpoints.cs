@@ -13,20 +13,19 @@ namespace API.AliMed.Endpoints
             var pacjenciEndPoint = app.MapGroup(BasePath);
 
             // pacjenci endpoints declaration
-
-
             pacjenciEndPoint.MapGet("/", GetAllPacjenci);
             pacjenciEndPoint.MapGet("/{id:int}", GetPacjentById);
-            pacjenciEndPoint.MapPost("/", CreatePacjent);
-            pacjenciEndPoint.MapPut("/{id:int}", UpdatePacjent);
-            pacjenciEndPoint.MapDelete("/{id:int}", DeletePacjent);
+            //pacjenciEndPoint.MapPost("/", CreatePacjent);
+            //pacjenciEndPoint.MapPut("/{id:int}", UpdatePacjent);
+            //pacjenciEndPoint.MapDelete("/{id:int}", DeletePacjent);
+        }
 
-            private static async Task<IResult> GetAllPacjenci(AppDbContext db) 
+        private static async Task<IResult> GetAllPacjenci(AppDbContext db)
                 => Results.Ok(await db.Pacjenci.ToListAsync());
 
-            private static async Task<IResult> GetPacjentById(int id, AppDbContext db)
-                => await db.Pacjenci.FindAsync(id) 
-                    is Pacjent p ? Results.Ok(p) : Results.NotFound();
-    }
-    }
+        private static async Task<IResult> GetPacjentById(int id, AppDbContext db)
+            => await db.Pacjenci.FindAsync(id)
+                is Pacjent p ? Results.Ok(p) : Results.NotFound();
+
+    } 
 }
