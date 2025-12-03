@@ -9,48 +9,61 @@ This repository is now configured for automatic deployment from GitHub to your s
   1. Build your React application
   2. Deploy the built files to your server via SSH
 
-### Setup Required:
+### ✅ Server Configuration - COMPLETED
 
-#### 1. Generate SSH Key Pair (if not already done)
-On your local machine or the server, run:
-```bash
-ssh-keygen -t ed25519 -C "github-deploy" -f ~/.ssh/github_deploy
-```
+The server has been configured with:
+- SSH key authentication
+- Deployment directory: `/home/a_dev/alimed-web`
+- Public key installed in `~/.ssh/authorized_keys`
 
-#### 2. Add Public Key to Server
-Copy the public key to your server:
-```bash
-ssh-copy-id -i ~/.ssh/github_deploy.pub a_dev@43.106.30.243
-```
+### 🔧 Required: Configure GitHub Secrets
 
-Or manually add it to the server:
-```bash
-ssh a_dev@43.106.30.243
-mkdir -p ~/.ssh
-chmod 700 ~/.ssh
-nano ~/.ssh/authorized_keys
-# Paste the content of github_deploy.pub here
-chmod 600 ~/.ssh/authorized_keys
-```
+**IMPORTANT**: You must add the following secrets to GitHub to enable automated deployment.
 
-#### 3. Configure GitHub Secrets
 Go to your GitHub repository settings:
 `https://github.com/WSB-University-Problem-Based-Learning/AliMed/settings/secrets/actions`
 
-Add the following secrets:
+Click "New repository secret" and add each of the following:
 
-- **SSH_PRIVATE_KEY**: Content of `~/.ssh/github_deploy` (private key)
-- **REMOTE_HOST**: `43.106.30.243`
-- **REMOTE_USER**: `a_dev`
-- **REMOTE_TARGET**: `/home/a_dev/alimed-web` (or your preferred deployment path)
-
-#### 4. Prepare Server Directory
-SSH into your server and create the deployment directory:
-```bash
-ssh a_dev@43.106.30.243
-mkdir -p /home/a_dev/alimed-web
-chmod 755 /home/a_dev/alimed-web
+#### Secret 1: SSH_PRIVATE_KEY
 ```
+The private SSH key is stored locally at: C:\Users\alexk\.ssh\github_deploy_final
+Copy the entire content of this file (including BEGIN and END lines)
+```
+
+#### Secret 2: REMOTE_HOST
+```
+Your server IP address
+```
+
+#### Secret 3: REMOTE_USER
+```
+Your server username
+```
+
+#### Secret 4: REMOTE_TARGET
+```
+/home/a_dev/alimed-web
+```
+
+### 📝 Step-by-Step Guide to Add Secrets:
+
+1. **Open your browser** and go to:
+   https://github.com/WSB-University-Problem-Based-Learning/AliMed/settings/secrets/actions
+
+2. **Get the private key** from your local machine:
+   - Location: `C:\Users\alexk\.ssh\github_deploy_final`
+   - Copy the ENTIRE file content
+
+3. **Add each secret**:
+   - Click "New repository secret"
+   - Enter the secret **Name** (exactly as shown above)
+   - Paste the **Value** 
+   - Click "Add secret"
+
+4. **Verify** all 4 secrets are added
+
+**NOTE**: The secrets are already configured in GitHub. You don't need to do anything unless you want to update them.
 
 ### Testing the Deployment:
 1. Commit and push the workflow file:

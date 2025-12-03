@@ -401,3 +401,9 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /API/API.AliMed/Migrations
+
+# SSH Keys and Secrets
+GITHUB_SECRETS_VALUES.txt
+*.pem
+*.key
+*_deploy*
