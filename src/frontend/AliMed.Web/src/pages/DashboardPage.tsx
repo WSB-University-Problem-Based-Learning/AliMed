@@ -6,6 +6,8 @@ import {
   DocumentTextIcon, 
   UserCircleIcon 
 } from '@heroicons/react/24/outline';
+import { useTranslation } from '../context/LanguageContext';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 
 interface User {
   id: number;
@@ -31,6 +33,7 @@ const mockWizyty: Wizyta[] = [
 ];
 
 const DashboardPage: React.FC = () => {
+  const { t } = useTranslation();
   const [user] = useState<User | null>(() => {
     const userData = localStorage.getItem('alimed_user');
     return userData ? JSON.parse(userData) : null;
@@ -56,17 +59,21 @@ const DashboardPage: React.FC = () => {
   if (!user) {
     return (
       <div className="min-h-screen bg-slate-100 flex items-center justify-center">
-        <div className="text-alimed-blue text-xl">Ładowanie...</div>
+        <div className="text-alimed-blue text-xl">{t('common.loading')}</div>
       </div>
     );
   }
 
   const quickActions = [
-    { icon: CalendarDaysIcon, title: 'Moje wizyty', subtitle: 'Zobacz historię wizyt', color: 'bg-emerald-100 text-emerald-600' },
-    { icon: PlusCircleIcon, title: 'Umów wizytę', subtitle: 'Zarezerwuj termin', color: 'bg-purple-100 text-purple-600' },
-    { icon: DocumentTextIcon, title: 'Dokumenty', subtitle: 'Wyniki i recepty', color: 'bg-amber-100 text-amber-600' },
-    { icon: UserCircleIcon, title: 'Moje dane', subtitle: 'Edytuj profil', color: 'bg-rose-100 text-rose-600' },
+    { icon: CalendarDaysIcon, title: t('dashboard.myVisits'), subtitle: t('dashboard.myVisitsDesc'), color: 'bg-emerald-100 text-emerald-600' },
+    { icon: PlusCircleIcon, title: t('dashboard.bookVisit'), subtitle: t('dashboard.bookVisitDesc'), color: 'bg-purple-100 text-purple-600' },
+    { icon: DocumentTextIcon, title: t('dashboard.documents'), subtitle: t('dashboard.documentsDesc'), color: 'bg-amber-100 text-amber-600' },
+    { icon: UserCircleIcon, title: t('dashboard.myData'), subtitle: t('dashboard.myDataDesc'), color: 'bg-rose-100 text-rose-600' },
   ];
+
+  const getStatusText = (status: string) => {
+    return status === 'Potwierdzona' ? t('dashboard.confirmed') : t('dashboard.pending');
+  };
 
   return (
     <div className="min-h-screen bg-slate-100">
@@ -81,15 +88,16 @@ const DashboardPage: React.FC = () => {
 
             {/* User info */}
             <div className="flex items-center gap-4">
-              <span className="text-gray-700">Witaj, {user.imie}</span>
+              <LanguageSwitcher />
+              <span className="text-gray-700">{t('dashboard.welcome')}, {user.imie}</span>
               <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm">
-                Moje konto
+                {t('nav.myAccount')}
               </button>
               <button 
                 onClick={handleLogout}
                 className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition text-sm"
               >
-                Wyloguj się
+                {t('nav.logout')}
               </button>
             </div>
           </div>
@@ -116,17 +124,17 @@ const DashboardPage: React.FC = () => {
 
         {/* Upcoming visits */}
         <div className="bg-white rounded-xl shadow-sm p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">Nadchodzące wizyty</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('dashboard.upcomingVisits')}</h2>
           
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="text-left text-sm text-gray-500 border-b">
-                  <th className="pb-3 font-medium">Data i godzina</th>
-                  <th className="pb-3 font-medium">Lekarz</th>
-                  <th className="pb-3 font-medium">Specjalizacja</th>
-                  <th className="pb-3 font-medium">Status</th>
-                  <th className="pb-3 font-medium">Akcje</th>
+                  <th className="pb-3 font-medium">{t('dashboard.dateTime')}</th>
+                  <th className="pb-3 font-medium">{t('dashboard.doctor')}</th>
+                  <th className="pb-3 font-medium">{t('dashboard.specialization')}</th>
+                  <th className="pb-3 font-medium">{t('dashboard.status')}</th>
+                  <th className="pb-3 font-medium">{t('common.actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -141,12 +149,12 @@ const DashboardPage: React.FC = () => {
                           ? 'bg-green-100 text-green-700' 
                           : 'bg-yellow-100 text-yellow-700'
                       }`}>
-                        {wizyta.status}
+                        {getStatusText(wizyta.status)}
                       </span>
                     </td>
                     <td className="py-4">
                       <button className="text-alimed-blue hover:underline text-sm">
-                        Szczegóły
+                        {t('common.details')}
                       </button>
                     </td>
                   </tr>
@@ -157,7 +165,7 @@ const DashboardPage: React.FC = () => {
 
           {wizyty.length === 0 && (
             <div className="text-center py-8 text-gray-500">
-              Brak nadchodzących wizyt
+              {t('dashboard.noUpcomingVisits')}
             </div>
           )}
         </div>

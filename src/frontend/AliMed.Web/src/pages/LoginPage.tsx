@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from '../context/LanguageContext';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,20 +26,25 @@ const LoginPage: React.FC = () => {
       }));
       navigate('/dashboard');
     } else {
-      setError('Proszę wypełnić wszystkie pola');
+      setError(t('login.fillAllFields'));
     }
   };
 
   return (
     <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-md">
+        {/* Language Switcher */}
+        <div className="flex justify-end mb-4">
+          <LanguageSwitcher />
+        </div>
+
         {/* Logo */}
         <div className="flex items-center justify-center mb-6">
           <img src="/logo.svg" alt="AliMed" className="h-20 w-auto" />
         </div>
 
         <h2 className="text-xl font-semibold text-center text-gray-800 mb-8">
-          Zaloguj się do AliMed
+          {t('login.title')}
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -49,7 +57,7 @@ const LoginPage: React.FC = () => {
           <div>
             <input
               type="email"
-              placeholder="Adres e-mail"
+              placeholder={t('login.email')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-alimed-light-blue focus:border-transparent transition"
@@ -59,7 +67,7 @@ const LoginPage: React.FC = () => {
           <div>
             <input
               type="password"
-              placeholder="Hasło"
+              placeholder={t('login.password')}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-alimed-light-blue focus:border-transparent transition"
@@ -70,13 +78,13 @@ const LoginPage: React.FC = () => {
             type="submit"
             className="w-full bg-alimed-light-blue hover:bg-alimed-blue text-white font-medium py-3 px-4 rounded-lg transition-colors"
           >
-            zaloguj się
+            {t('login.submit')}
           </button>
         </form>
 
         <div className="mt-6 text-center">
           <a href="#" className="text-alimed-blue hover:underline text-sm">
-            Zapomniałeś hasła?
+            {t('login.forgotPassword')}
           </a>
         </div>
       </div>

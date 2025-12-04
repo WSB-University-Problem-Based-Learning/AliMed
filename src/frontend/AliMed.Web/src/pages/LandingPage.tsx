@@ -7,8 +7,12 @@ import {
   CalendarIcon,
   CheckCircleIcon
 } from '@heroicons/react/24/outline';
+import { useTranslation } from '../context/LanguageContext';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 
 const LandingPage: React.FC = () => {
+  const { t } = useTranslation();
+
   return (
     <div className="min-h-screen bg-slate-100">
       {/* Header */}
@@ -23,16 +27,17 @@ const LandingPage: React.FC = () => {
             {/* Navigation */}
             <nav className="flex items-center gap-6">
               <Link to="/" className="text-gray-700 hover:text-alimed-blue transition">
-                Strona główna
+                {t('nav.home')}
               </Link>
               <Link to="/pacjenci" className="text-gray-700 hover:text-alimed-blue transition">
-                Funkcjonalność
+                {t('nav.functionality')}
               </Link>
+              <LanguageSwitcher />
               <Link 
                 to="/login" 
                 className="bg-alimed-blue text-white px-4 py-2 rounded-lg hover:bg-alimed-light-blue transition"
               >
-                Zaloguj się
+                {t('nav.login')}
               </Link>
             </nav>
           </div>
@@ -44,24 +49,24 @@ const LandingPage: React.FC = () => {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div>
             <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-              AliMed – Internetowa
-              <span className="text-alimed-blue block">Rejestracja Pacjentów</span>
+              {t('landing.heroTitle')}
+              <span className="text-alimed-blue block">{t('landing.heroTitleHighlight')}</span>
             </h1>
             <p className="text-lg text-gray-600 mb-8">
-              Zarządzaj wizytami i dokumentacją medyczną. Prosty i bezpieczny system dla pacjentów i personelu medycznego.
+              {t('landing.heroDescription')}
             </p>
             <div className="flex gap-4">
               <Link 
                 to="/login" 
                 className="bg-[#ACD045] text-white px-6 py-3 rounded-lg hover:bg-[#9bc03d] transition font-medium"
               >
-                Zarejestruj się
+                {t('landing.register')}
               </Link>
               <Link 
                 to="/login" 
                 className="bg-gray-800 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition font-medium"
               >
-                Zaloguj się
+                {t('nav.login')}
               </Link>
             </div>
           </div>
@@ -85,28 +90,28 @@ const LandingPage: React.FC = () => {
               <div className="w-10 h-10 bg-alimed-light-blue/20 rounded-full flex items-center justify-center">
                 <UserGroupIcon className="w-5 h-5 text-alimed-blue" />
               </div>
-              <h3 className="text-lg font-semibold text-alimed-blue">Dla pacjenta</h3>
+              <h3 className="text-lg font-semibold text-alimed-blue">{t('landing.forPatient')}</h3>
             </div>
             <ul className="space-y-4">
               <li className="flex items-start gap-3">
                 <ClipboardDocumentListIcon className="w-5 h-5 text-gray-400 mt-0.5" />
                 <div>
-                  <p className="font-medium text-gray-900">Rejestracja wizyt</p>
-                  <p className="text-sm text-gray-500">Umów wizytę online w dowolnym czasie</p>
+                  <p className="font-medium text-gray-900">{t('landing.visitRegistration')}</p>
+                  <p className="text-sm text-gray-500">{t('landing.visitRegistrationDesc')}</p>
                 </div>
               </li>
               <li className="flex items-start gap-3">
                 <DocumentMagnifyingGlassIcon className="w-5 h-5 text-gray-400 mt-0.5" />
                 <div>
-                  <p className="font-medium text-gray-900">Historia medyczna</p>
-                  <p className="text-sm text-gray-500">Przeglądaj swoją dokumentację medyczną</p>
+                  <p className="font-medium text-gray-900">{t('landing.medicalHistory')}</p>
+                  <p className="text-sm text-gray-500">{t('landing.medicalHistoryDesc')}</p>
                 </div>
               </li>
               <li className="flex items-start gap-3">
                 <UserGroupIcon className="w-5 h-5 text-gray-400 mt-0.5" />
                 <div>
-                  <p className="font-medium text-gray-900">Zarządzanie danymi</p>
-                  <p className="text-sm text-gray-500">Aktualizuj swoje dane osobowe</p>
+                  <p className="font-medium text-gray-900">{t('landing.dataManagement')}</p>
+                  <p className="text-sm text-gray-500">{t('landing.dataManagementDesc')}</p>
                 </div>
               </li>
             </ul>
@@ -118,28 +123,28 @@ const LandingPage: React.FC = () => {
               <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
                 <CalendarIcon className="w-5 h-5 text-amber-600" />
               </div>
-              <h3 className="text-lg font-semibold text-amber-600">Dla personelu</h3>
+              <h3 className="text-lg font-semibold text-amber-600">{t('landing.forStaff')}</h3>
             </div>
             <ul className="space-y-4">
               <li className="flex items-start gap-3">
                 <UserGroupIcon className="w-5 h-5 text-gray-400 mt-0.5" />
                 <div>
-                  <p className="font-medium text-gray-900">Lista pacjentów</p>
-                  <p className="text-sm text-gray-500">Przeglądaj i zarządzaj bazą pacjentów</p>
+                  <p className="font-medium text-gray-900">{t('landing.patientList')}</p>
+                  <p className="text-sm text-gray-500">{t('landing.patientListDesc')}</p>
                 </div>
               </li>
               <li className="flex items-start gap-3">
                 <CalendarIcon className="w-5 h-5 text-gray-400 mt-0.5" />
                 <div>
-                  <p className="font-medium text-gray-900">Terminy wizyt</p>
-                  <p className="text-sm text-gray-500">Aktualizuj i zarządzaj terminarzem</p>
+                  <p className="font-medium text-gray-900">{t('landing.visitSchedule')}</p>
+                  <p className="text-sm text-gray-500">{t('landing.visitScheduleDesc')}</p>
                 </div>
               </li>
               <li className="flex items-start gap-3">
                 <CheckCircleIcon className="w-5 h-5 text-gray-400 mt-0.5" />
                 <div>
-                  <p className="font-medium text-gray-900">Potwierdzenia</p>
-                  <p className="text-sm text-gray-500">Potwierdzaj rezerwacje pacjentów</p>
+                  <p className="font-medium text-gray-900">{t('landing.confirmations')}</p>
+                  <p className="text-sm text-gray-500">{t('landing.confirmationsDesc')}</p>
                 </div>
               </li>
             </ul>
@@ -150,7 +155,7 @@ const LandingPage: React.FC = () => {
       {/* Footer */}
       <footer className="bg-alimed-blue text-white mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
-          <p>&copy; 2025 AliMed - Zespół nr 3 WSB. Wszystkie prawa zastrzeżone.</p>
+          <p>&copy; 2025 AliMed - {t('common.teamWSB')}. {t('common.allRightsReserved')}.</p>
         </div>
       </footer>
     </div>
