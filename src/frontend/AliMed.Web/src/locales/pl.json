@@ -44,7 +44,10 @@
     "visitSchedule": "Terminy wizyt",
     "visitScheduleDesc": "Aktualizuj i zarządzaj terminarzem",
     "confirmations": "Potwierdzenia",
-    "confirmationsDesc": "Potwierdzaj rezerwacje pacjentów"
+    "confirmationsDesc": "Potwierdzaj rezerwacje pacjentów",
+    "tryDemo": "Wypróbuj DEMO",
+    "demoDescription": "Zapoznaj się z systemem bez konieczności rejestracji",
+    "demoMode": "Tryb demonstracyjny"
   },
   "login": {
     "title": "Zaloguj się do AliMed",
@@ -79,7 +82,8 @@
     "status": "Status",
     "confirmed": "Potwierdzona",
     "pending": "Oczekująca",
-    "noUpcomingVisits": "Brak nadchodzących wizyt"
+    "noUpcomingVisits": "Brak nadchodzących wizyt",
+    "demoNotice": "🎭 Jesteś w trybie demonstracyjnym. Dane są przykładowe i nie będą zapisane."
   },
   "patients": {
     "title": "Lista Pacjentów",

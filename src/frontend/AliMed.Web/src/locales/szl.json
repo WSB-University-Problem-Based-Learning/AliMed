@@ -44,7 +44,10 @@
     "visitSchedule": "Terminy wizyt",
     "visitScheduleDesc": "Zaktualizuj i zawiaduj terminorzym",
     "confirmations": "Potwierdzynie",
-    "confirmationsDesc": "Potwierdź rezerwacyje pacjyntōw"
+    "confirmationsDesc": "Potwierdź rezerwacyje pacjyntōw",
+    "tryDemo": "Sprōbuj DEMO",
+    "demoDescription": "Poznŏj systym bez registracyje",
+    "demoMode": "Tryb demōnstracyjny"
   },
   "login": {
     "title": "Wlyź do AliMed",
@@ -79,7 +82,8 @@
     "status": "Status",
     "confirmed": "Potwierdzynō",
     "pending": "Czeko",
-    "noUpcomingVisits": "Niy ma nadchodzōncych wizyt"
+    "noUpcomingVisits": "Niy ma nadchodzōncych wizyt",
+    "demoNotice": "🎭 Jeżeś w trybie demōnstracyjnym. Dane sōm přikładowe i niy bydōm spamiyntane."
   },
   "patients": {
     "title": "Lista Pacjyntōw",
