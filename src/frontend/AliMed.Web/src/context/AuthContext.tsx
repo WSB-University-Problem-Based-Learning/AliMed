@@ -72,11 +72,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const enableDemoMode = () => {
     const demoUser: User = {
-      id: 'demo-user',
+      userId: 'demo-user',
       email: 'demo@alimed.pl',
       firstName: 'Demo',
       lastName: 'User',
-      role: 'Patient' as const,
+      role: 0, // UserRole.User = 0 (Patient)
     };
     
     setUserState(demoUser);

@@ -9,15 +9,7 @@ import {
 import { useTranslation } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import LanguageSwitcher from '../components/LanguageSwitcher';
-
-interface User {
-  id: number | string;
-  imie?: string;
-  nazwisko?: string;
-  firstName?: string;
-  lastName?: string;
-  email: string;
-}
+import type { User } from '../types/api';
 
 interface Wizyta {
   id: number;
@@ -39,7 +31,7 @@ const DashboardPage: React.FC = () => {
   const { t } = useTranslation();
   const { user: authUser, logout, isDemoMode } = useAuth();
   const [user] = useState<User | null>(() => {
-    if (authUser) return authUser as User;
+    if (authUser) return authUser;
     const userData = localStorage.getItem('alimed_user');
     return userData ? JSON.parse(userData) : null;
   });
@@ -79,7 +71,7 @@ const DashboardPage: React.FC = () => {
     return status === 'Potwierdzona' ? t('dashboard.confirmed') : t('dashboard.pending');
   };
 
-  const userName = user.imie || user.firstName || 'User';
+  const userName = user.firstName || user.username || user.githubName || 'User';
 
   return (
     <div className="min-h-screen bg-slate-100">

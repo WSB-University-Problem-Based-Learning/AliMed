@@ -48,6 +48,9 @@ export interface User {
   githubId?: string;
   githubName?: string;
   username?: string;
+  email?: string;
+  firstName?: string;
+  lastName?: string;
   role: UserRole;
 }
 
