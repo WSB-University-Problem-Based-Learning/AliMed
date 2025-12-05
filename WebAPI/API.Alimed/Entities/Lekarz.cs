@@ -9,7 +9,7 @@
         public string? Specjalizacja { get; set; }
 
         // foreign key do placowki
-        public int PlacowkaId { get; set; }
+        public int? PlacowkaId { get; set; }
         // prop nawigacyjne do relacji 1:N
         public Placowka? Placowka { get; set; }
 

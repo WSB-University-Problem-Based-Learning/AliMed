@@ -10,15 +10,15 @@
 
         // --- Relacje i klucze obce (FK) ---
         // foreign key do Pacjenta
-        public int PacjentId { get; set; }
+        public int? PacjentId { get; set; }
         public Pacjent? Pacjent { get; set; }
 
         // foreign key do Lekarza
-        public int LekarzId { get; set; }
+        public int? LekarzId { get; set; }
         public Lekarz? Lekarz { get; set; }
 
         // foreign key do Placowki
-        public int PlacowkaId { get; set; }
+        public int? PlacowkaId { get; set; }
         public Placowka? Placowka { get; set; }
     }
 }

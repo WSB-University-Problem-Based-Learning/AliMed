@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using API.Alimed.Interfaces;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using System.Net.Http.Headers;
 using System.Text.Json;
 
@@ -11,22 +14,27 @@ namespace API.Alimed.Controllers
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IJwtService _jwtService;
         private readonly IUserService _userService;
+        private readonly IConfiguration _configuration;
 
-        // github secrets
-        // TODO - ustawic w env variable
-        private const string GITHUB_CLIENT_ID = "";
-        private const string GITHUB_CLIENT_SECRET = "";
+        private const string? GITHUB_CLIENT_ID = "Ov23liVc5BhNQu3ak43m";
+        private const string? GITHUB_CLIENT_SECRET = "ce76eb423af872d4e710cdce762f55a7e6677714";
 
-        public AuthController(IHttpClientFactory httpClientFactory, IJwtService jwtService, IUserService userService)
+        public AuthController(IHttpClientFactory httpClientFactory, IJwtService jwtService, IUserService userService, IConfiguration configuration)
         {
             _httpClientFactory = httpClientFactory;
             _jwtService = jwtService;
             _userService = userService;
+            _configuration = configuration;
+
+            // github secrets
+            // TODO - ustawic w env variable
+            //GITHUB_CLIENT_ID = _configuration["github:GITHUB_CLIENT_ID"];
+            //GITHUB_CLIENT_SECRET = _configuration["github:GITHUB_CLIENT_SECRET"];
         }
 
         public class GitHubCodeDto
         {
-            public string Code { get; set; }
+            public string? Code { get; set; }
         }
 
         public class AuthResponseDto
@@ -34,7 +42,6 @@ namespace API.Alimed.Controllers
             public string Token { get; set; } = string.Empty;
             public string RefreshToken { get; set; } = string.Empty;
         }
-
 
         [HttpPost("github")] // url = /api/auth/github
         public async Task<IActionResult> GitHubLogin([FromBody] GitHubCodeDto payload)
@@ -54,12 +61,12 @@ namespace API.Alimed.Controllers
                     // adres z github redirectUrl [na frontend]
                     // npm run dev na: http://localhost:5173/auth/github/callback
                     // TODO - zmienic na ip/domene produkcji
-                    redirect_uri = ""
+                    redirect_uri = "http://localhost:5173/auth/github/callback"
                 };
 
                 var tokenResponse = await httpClient.PostAsJsonAsync(tokenRequestUrl, tokenRequestBody);
                 Console.WriteLine($"\n\"#########################################################\\");
-                Console.Write(tokenRequestBody);
+                Console.Write($"Token req body: {tokenRequestBody}");
                 Console.WriteLine($"\n\"#########################################################\\");
 
                 if (!tokenResponse.IsSuccessStatusCode)

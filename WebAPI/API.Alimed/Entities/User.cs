@@ -1,4 +1,4 @@
-﻿using WebApiAuth.Enums;
+﻿using API.Alimed.Enums;
 
 namespace API.Alimed.Entities
 {

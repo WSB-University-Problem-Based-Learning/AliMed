@@ -7,7 +7,9 @@
       "launchBrowser": false,
       "applicationUrl": "http://localhost:5056",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "GITHUB_CLIENT_ID": "Ov23liVc5BhNQu3ak43m",
+        "GITHUB_CLIENT_SECRET": "ce76eb423af872d4e710cdce762f55a7e6677714"
       }
     },
     "https": {
@@ -16,7 +18,9 @@
       "launchBrowser": false,
       "applicationUrl": "https://localhost:7207;http://localhost:5056",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "GITHUB_CLIENT_ID": "Ov23liVc5BhNQu3ak43m",
+        "GITHUB_CLIENT_SECRET": "ce76eb423af872d4e710cdce762f55a7e6677714"
       }
     },
     "Container (Dockerfile)": {
@@ -24,7 +28,9 @@
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}",
       "environmentVariables": {
         "ASPNETCORE_HTTPS_PORTS": "8081",
-        "ASPNETCORE_HTTP_PORTS": "8080"
+        "ASPNETCORE_HTTP_PORTS": "8080",
+        "GITHUB_CLIENT_ID": "Ov23liVc5BhNQu3ak43m",
+        "GITHUB_CLIENT_SECRET": "ce76eb423af872d4e710cdce762f55a7e6677714"
       },
       "publishAllPorts": true,
       "useSSL": true

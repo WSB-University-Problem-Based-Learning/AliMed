@@ -13,12 +13,14 @@
 
         public DateTime DataUrodzenia { get; set; }
 
+        public Guid? UserId { get; set; } //FK do User
+
         // relacja 1:N
         // 1 pacjent wiele wizyt
         public ICollection<Wizyta>? Wizyty { get; set; }
         public ICollection<ZaleceniaDokument>? ZaleceniaDokumenty { get; set; }
 
-        public Guid UserId { get; set; } //FK do User
-        public User User { get; set; } = null!;
+
+        public User? User { get; set; } = null!;
     }
 }
