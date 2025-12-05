@@ -52,7 +52,15 @@
     "password": "Hasło",
     "submit": "wlyź",
     "forgotPassword": "Zapōmniołeś hasła?",
-    "fillAllFields": "Proszym wyfołnić wszyjske pola"
+    "fillAllFields": "Proszym wyfołnić wszyjske pola",
+    "githubLogin": "Wlyź bez GitHub",
+    "orLoginWith": "abo wlyź emailym",
+    "authenticating": "Uwierzytelnianie...",
+    "githubAuthError": "Feler autorizacyje GitHub",
+    "noAuthCode": "Niy ma kodu autorizacyje",
+    "authFailed": "Niy podarziło sie uwierzytelnić",
+    "error": "Feler",
+    "redirecting": "Przekierowanie..."
   },
   "dashboard": {
     "welcome": "Witej",

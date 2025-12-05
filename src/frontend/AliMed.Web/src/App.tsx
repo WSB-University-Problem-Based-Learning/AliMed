@@ -1,7 +1,10 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { LanguageProvider, useTranslation } from './context/LanguageContext';
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
+import GitHubCallbackPage from './pages/GitHubCallbackPage';
 import DashboardPage from './pages/DashboardPage';
 import PacjenciPage from './pages/PacjenciPage';
 import Layout from './components/Layout';
@@ -29,35 +32,48 @@ function VisitsPageContent() {
 
 function App() {
   return (
-    <LanguageProvider>
-      <BrowserRouter>
-        <Routes>
-          {/* Public routes */}
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          
-          {/* Protected routes */}
-          <Route path="/dashboard" element={<DashboardPage />} />
-          
-          {/* Admin/Staff routes */}
-          <Route path="/pacjenci" element={
-            <Layout>
-              <PacjenciPage />
-            </Layout>
-          } />
-          <Route path="/lekarze" element={
-            <Layout>
-              <DoctorsPageContent />
-            </Layout>
-          } />
-          <Route path="/wizyty" element={
-            <Layout>
-              <VisitsPageContent />
-            </Layout>
-          } />
-        </Routes>
-      </BrowserRouter>
-    </LanguageProvider>
+    <AuthProvider>
+      <LanguageProvider>
+        <BrowserRouter>
+          <Routes>
+            {/* Public routes */}
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/auth/github/callback" element={<GitHubCallbackPage />} />
+            
+            {/* Protected routes */}
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <DashboardPage />
+              </ProtectedRoute>
+            } />
+            
+            {/* Admin/Staff routes */}
+            <Route path="/pacjenci" element={
+              <ProtectedRoute>
+                <Layout>
+                  <PacjenciPage />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/lekarze" element={
+              <ProtectedRoute>
+                <Layout>
+                  <DoctorsPageContent />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/wizyty" element={
+              <ProtectedRoute>
+                <Layout>
+                  <VisitsPageContent />
+                </Layout>
+              </ProtectedRoute>
+            } />
+          </Routes>
+        </BrowserRouter>
+      </LanguageProvider>
+    </AuthProvider>
   );
 }
 

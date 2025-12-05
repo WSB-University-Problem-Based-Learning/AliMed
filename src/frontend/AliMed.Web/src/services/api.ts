@@ -1,43 +1,88 @@
-import type { Pacjent, Lekarz, Wizyta } from '../types/api';
+import type { Pacjent, Lekarz, Wizyta, AuthResponse } from '../types/api';
+import { config } from '../config/env';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+const API_BASE_URL = config.apiBaseUrl;
+
+// Helper function to get auth token
+const getAuthToken = (): string | null => {
+  return localStorage.getItem('alimed_token');
+};
+
+// Helper function to create headers with auth
+const getHeaders = (includeAuth = false): HeadersInit => {
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+  };
+  
+  if (includeAuth) {
+    const token = getAuthToken();
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+  }
+  
+  return headers;
+};
 
 export const apiService = {
+  // Authentication
+  async loginWithGithub(code: string): Promise<AuthResponse> {
+    const response = await fetch(`${API_BASE_URL}/api/auth/github`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ code }),
+    });
+    if (!response.ok) throw new Error('Failed to authenticate with GitHub');
+    return response.json();
+  },
+
   // Pacjenci
   async getPacjenci(): Promise<Pacjent[]> {
-    const response = await fetch(`${API_BASE_URL}/pacjenci`);
+    const response = await fetch(`${API_BASE_URL}/pacjenci`, {
+      headers: getHeaders(true),
+    });
     if (!response.ok) throw new Error('Failed to fetch pacjenci');
     return response.json();
   },
 
   async getPacjentById(id: number): Promise<Pacjent> {
-    const response = await fetch(`${API_BASE_URL}/pacjenci/${id}`);
+    const response = await fetch(`${API_BASE_URL}/pacjenci/${id}`, {
+      headers: getHeaders(true),
+    });
     if (!response.ok) throw new Error('Failed to fetch pacjent');
     return response.json();
   },
 
   // Lekarze
   async getLekarze(): Promise<Lekarz[]> {
-    const response = await fetch(`${API_BASE_URL}/lekarze`);
+    const response = await fetch(`${API_BASE_URL}/lekarze`, {
+      headers: getHeaders(true),
+    });
     if (!response.ok) throw new Error('Failed to fetch lekarze');
     return response.json();
   },
 
   async getLekarzById(id: number): Promise<Lekarz> {
-    const response = await fetch(`${API_BASE_URL}/lekarze/${id}`);
+    const response = await fetch(`${API_BASE_URL}/lekarze/${id}`, {
+      headers: getHeaders(true),
+    });
     if (!response.ok) throw new Error('Failed to fetch lekarz');
     return response.json();
   },
 
   // Wizyty
   async getWizyty(): Promise<Wizyta[]> {
-    const response = await fetch(`${API_BASE_URL}/wizyty`);
+    const response = await fetch(`${API_BASE_URL}/wizyty`, {
+      headers: getHeaders(true),
+    });
     if (!response.ok) throw new Error('Failed to fetch wizyty');
     return response.json();
   },
 
   async getWizytaById(id: number): Promise<Wizyta> {
-    const response = await fetch(`${API_BASE_URL}/wizyty/${id}`);
+    const response = await fetch(`${API_BASE_URL}/wizyty/${id}`, {
+      headers: getHeaders(true),
+    });
     if (!response.ok) throw new Error('Failed to fetch wizyta');
     return response.json();
   },
@@ -45,7 +90,7 @@ export const apiService = {
   async createWizyta(wizyta: Omit<Wizyta, 'wizytaId'>): Promise<Wizyta> {
     const response = await fetch(`${API_BASE_URL}/wizyty`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getHeaders(true),
       body: JSON.stringify(wizyta),
     });
     if (!response.ok) throw new Error('Failed to create wizyta');

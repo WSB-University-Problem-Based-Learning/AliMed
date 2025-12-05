@@ -52,7 +52,15 @@
     "password": "Hasło",
     "submit": "zaloguj się",
     "forgotPassword": "Zapomniałeś hasła?",
-    "fillAllFields": "Proszę wypełnić wszystkie pola"
+    "fillAllFields": "Proszę wypełnić wszystkie pola",
+    "githubLogin": "Zaloguj się przez GitHub",
+    "orLoginWith": "lub zaloguj się emailem",
+    "authenticating": "Uwierzytelnianie...",
+    "githubAuthError": "Błąd autoryzacji GitHub",
+    "noAuthCode": "Brak kodu autoryzacji",
+    "authFailed": "Nie udało się uwierzytelnić",
+    "error": "Błąd",
+    "redirecting": "Przekierowywanie..."
   },
   "dashboard": {
     "welcome": "Witaj",
