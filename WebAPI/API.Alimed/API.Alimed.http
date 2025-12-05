@@ -1,6 +1,0 @@
-@API.Alimed_HostAddress = http://localhost:5042
-
-GET {{API.Alimed_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
