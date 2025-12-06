@@ -29,7 +29,8 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowReactApp",
         policy =>
         {
-            policy.WithOrigins("http://localhost:5173") // przepusc frontend z local dev
+            //policy.WithOrigins("http://localhost:5173") // przepusc frontend z local dev
+                policy.AllowAnyOrigin()                  // przepusc all origins - dla test w Docker
                       .AllowAnyHeader()                     // przepusc all nag³ówki (w tym Content-Type i Authorization)
                       .AllowAnyMethod();                    // dozwolone all requesty
         });

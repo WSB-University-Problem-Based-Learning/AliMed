@@ -7,8 +7,6 @@ using System.Security.Claims;
 
 namespace API.Alimed.Controllers
 {
-    public class AuthorizedEndpoint
-    {
         [Authorize]
         [ApiController]
         [Route("api/[controller]")]
@@ -48,6 +46,20 @@ namespace API.Alimed.Controllers
             public async Task<IResult> GetAllLekarze(AppDbContext db)
                 => Results.Ok(await db.Lekarze.ToListAsync());
 
+            [HttpGet("lekarze2")]
+            [Authorize(Roles = "User")]
+            public async Task<IResult> GetAllLekarze2(AppDbContext db)
+                => Results.Ok(
+                    new List<Pacjent>
+                        {
+                            new Pacjent { PacjentId = 1, Imie = "Jan", Nazwisko = "Kowalski" },
+                            new Pacjent { PacjentId = 2, Imie = "Anna", Nazwisko = "Nowak" },
+                            new Pacjent { PacjentId = 3, Imie = "Piotr", Nazwisko = "Wiśniewski" }
+                        });
+            // End lekarze2
+
+
+
         }
-    }
 }
+
