@@ -12,20 +12,21 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
 # UWAGA: ŚCIEŻKI i NAZWA PROJEKTU zmienione na API.Alimed
-COPY ["API.Alimed/API.Alimed.csproj", "API.Alimed/"]
-RUN dotnet restore "./API.Alimed/API.Alimed.csproj"
+COPY ["API.Alimed.csproj", "./"]
+RUN dotnet restore "API.Alimed.csproj"
 
 COPY . .
-WORKDIR "/src/API.Alimed"
-RUN dotnet build "./API.Alimed.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src"
+RUN dotnet build "API.Alimed.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # Etap publish
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./API.Alimed.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "API.Alimed.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # Etap finalny (produkcyjny)
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "API.Alimed.dll"]
+
