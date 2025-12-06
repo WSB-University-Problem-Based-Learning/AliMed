@@ -36,9 +36,9 @@ export const apiService = {
     return response.json();
   },
 
-  // Pacjenci
+  // Pacjenci (requires Admin role)
   async getPacjenci(): Promise<Pacjent[]> {
-    const response = await fetch(`${API_BASE_URL}/pacjenci`, {
+    const response = await fetch(`${API_BASE_URL}/api/authorizedendpoint/pacjenci`, {
       headers: getHeaders(true),
     });
     if (!response.ok) throw new Error('Failed to fetch pacjenci');
@@ -46,16 +46,16 @@ export const apiService = {
   },
 
   async getPacjentById(id: number): Promise<Pacjent> {
-    const response = await fetch(`${API_BASE_URL}/pacjenci/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/authorizedendpoint/pacjenci/${id}`, {
       headers: getHeaders(true),
     });
     if (!response.ok) throw new Error('Failed to fetch pacjent');
     return response.json();
   },
 
-  // Lekarze
+  // Lekarze (requires User role)
   async getLekarze(): Promise<Lekarz[]> {
-    const response = await fetch(`${API_BASE_URL}/lekarze`, {
+    const response = await fetch(`${API_BASE_URL}/api/authorizedendpoint/lekarze`, {
       headers: getHeaders(true),
     });
     if (!response.ok) throw new Error('Failed to fetch lekarze');
@@ -63,7 +63,7 @@ export const apiService = {
   },
 
   async getLekarzById(id: number): Promise<Lekarz> {
-    const response = await fetch(`${API_BASE_URL}/lekarze/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/authorizedendpoint/lekarze/${id}`, {
       headers: getHeaders(true),
     });
     if (!response.ok) throw new Error('Failed to fetch lekarz');
@@ -72,7 +72,7 @@ export const apiService = {
 
   // Wizyty
   async getWizyty(): Promise<Wizyta[]> {
-    const response = await fetch(`${API_BASE_URL}/wizyty`, {
+    const response = await fetch(`${API_BASE_URL}/api/authorizedendpoint/wizyty`, {
       headers: getHeaders(true),
     });
     if (!response.ok) throw new Error('Failed to fetch wizyty');
@@ -80,7 +80,7 @@ export const apiService = {
   },
 
   async getWizytaById(id: number): Promise<Wizyta> {
-    const response = await fetch(`${API_BASE_URL}/wizyty/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/authorizedendpoint/wizyty/${id}`, {
       headers: getHeaders(true),
     });
     if (!response.ok) throw new Error('Failed to fetch wizyta');
@@ -88,7 +88,7 @@ export const apiService = {
   },
 
   async createWizyta(wizyta: Omit<Wizyta, 'wizytaId'>): Promise<Wizyta> {
-    const response = await fetch(`${API_BASE_URL}/wizyty`, {
+    const response = await fetch(`${API_BASE_URL}/api/authorizedendpoint/wizyty`, {
       method: 'POST',
       headers: getHeaders(true),
       body: JSON.stringify(wizyta),
