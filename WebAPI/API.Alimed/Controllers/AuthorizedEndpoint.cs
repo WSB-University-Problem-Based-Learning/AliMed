@@ -35,7 +35,7 @@ namespace API.Alimed.Controllers
             // tylko dla usera z rola Admin z Bazy Danych
             // path -> /api/authorizedendpoint/pacjenci
             [HttpGet("pacjenci")]
-            [Authorize(Roles = "Admin")]
+            [Authorize(Roles = "User")]
             public async Task<IResult> GetAllPacjenci(AppDbContext db)
             => Results.Ok(await db.Pacjenci.ToListAsync());
 

@@ -15,7 +15,7 @@ namespace API.Alimed.Controllers.Wizyty
         
         [HttpGet]
         [Route("{id}")]
-        [Authorize(Roles = "User")]
+        //[Authorize(Roles = "User")]
         public async Task<IResult> GetWizytaById(int id)
         {
             // TODO
