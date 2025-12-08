@@ -13,6 +13,7 @@ namespace API.Alimed.Controllers.Pacjenci
         ////////////////////////////////////////////////////////////////////////////////////////////////////////
         [HttpGet]
         [Route("moj-profil")]
+        [Authorize(Roles = "User")]
         public async Task<IResult> GetMojProfil()
         {
             // TODO
@@ -22,16 +23,21 @@ namespace API.Alimed.Controllers.Pacjenci
 
 
 
+
+
         ////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// PUT Requests
         ////////////////////////////////////////////////////////////////////////////////////////////////////////
         [HttpPut]
         [Route("moj-profil")]
+        [Authorize(Roles = "User")]
         public async Task<IResult> UpdateMojProfil()
         {
             // TODO
             return Results.Ok(new { Message = "Zaktualizowano twoje dane w profilu" });
         }
+
+
 
 
     }

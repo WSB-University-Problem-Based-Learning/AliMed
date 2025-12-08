@@ -15,6 +15,7 @@ namespace API.Alimed.Controllers.Wizyty
         
         [HttpGet]
         [Route("{id}")]
+        [Authorize(Roles = "User")]
         public async Task<IResult> GetWizytaById(int id)
         {
             // TODO
@@ -23,16 +24,8 @@ namespace API.Alimed.Controllers.Wizyty
         }
 
         [HttpGet]
-        [Route("{id}/status")]
-        public async Task<IResult> GetWizytaStatus(int id)
-        {
-            // TODO
-            // Implementacja logiki pobierania statusu wizyty po ID
-            return Results.Ok(new { Message = $"Status wizyty o ID: {id}." });
-        }
-
-        [HttpGet]
         [Route("moje-wizyty")]
+        [Authorize(Roles = "User")]
         public async Task<IResult> GetMojeWizyty()
         {
             // TODO
@@ -42,12 +35,25 @@ namespace API.Alimed.Controllers.Wizyty
 
         [HttpGet]
         [Route("dostepne")]
+        [Authorize(Roles = "User")]
         public async Task<IResult> GetDostepneWizyty()
         {
             // TODO
             // Implementacja logiki pobierania dostępnych wizyt
             return Results.Ok(new { Message = "To są dostępne wizyty." });
         }
+
+        //[HttpGet]
+        //[Route("{id}/status")]
+        //[Authorize(Roles = "User")]
+        //public async Task<IResult> GetWizytaStatus(int id)
+        //{
+        //    // TODO
+        //    // Implementacja logiki pobierania statusu wizyty po ID
+        //    return Results.Ok(new { Message = $"Status wizyty o ID: {id}." });
+        //}
+
+
 
 
 
@@ -60,6 +66,7 @@ namespace API.Alimed.Controllers.Wizyty
 
         [HttpPost]
         [Route("umow-wizyte")]
+        [Authorize(Roles = "User")]
         public async Task<IResult> UmowWizyte([FromBody] object wizytaData)
         {
             // TODO
@@ -79,6 +86,7 @@ namespace API.Alimed.Controllers.Wizyty
 
         [HttpPut]
         [Route("{id}/moje-wizyty")]
+        [Authorize(Roles = "Admin")]
         public async Task<IResult> UpdateMojeWizyty(int id, [FromBody] object updatedWizytaData)
         {
             // TODO
@@ -97,6 +105,7 @@ namespace API.Alimed.Controllers.Wizyty
 
         [HttpDelete]
         [Route("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IResult> DeleteWizyta(int id)
         {
             // TODO

@@ -15,6 +15,7 @@ namespace API.Alimed.Controllers.Lekarze
         ////////////////////////////////////////////////////////////////////////////////////////////////////////
         [HttpGet]
         [Route("moj-profil")]
+        [Authorize(Roles = "Lekarz")]
         public async Task<IResult> GetLekarzProfil()
         {
           // TODO
@@ -24,6 +25,7 @@ namespace API.Alimed.Controllers.Lekarze
 
         [HttpGet]
         [Route("wizyty/moje-wizyty")]
+        [Authorize(Roles = "Lekarz")]
         public async Task<IResult> GetLekarzMojeWizyty()
         {
             // TODO
@@ -40,6 +42,7 @@ namespace API.Alimed.Controllers.Lekarze
 
         [HttpPut]
         [Route("/moj-profil")]
+        [Authorize(Roles = "Lekarz")]
         public async Task<IResult> UpdateLekarzMojProfil()
         {
             // TODO
@@ -48,6 +51,7 @@ namespace API.Alimed.Controllers.Lekarze
 
         [HttpPut]
         [Route("wizyty/{id}/status")]
+        [Authorize(Roles = "Lekarz")]
         public async Task<IResult> UpdateLekarzWizyty()
         {
             // TODO
