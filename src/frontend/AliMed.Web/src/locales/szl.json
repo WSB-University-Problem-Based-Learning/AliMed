@@ -162,5 +162,26 @@
     "noDocumentsFound": "Niy znod dokumyntōw",
     "noDocumentsHint": "Dokumynty ze wizyt pokaziōm sie sam tukej",
     "relatedToVisit": "Powiōnzane ze wizytōm"
+  },
+  "myData": {
+    "title": "Moje dane",
+    "subtitle": "Zawiaduj swojimi danymi perschnalnymi i kōntaktowymi",
+    "personalInfo": "Dane perschnalne",
+    "contactInfo": "Dane kōntaktowe",
+    "address": "Adresa zamiyskaniŏ",
+    "firstName": "Miano",
+    "lastName": "Przizwisko",
+    "pesel": "PESEL",
+    "birthDate": "Data urodzynio",
+    "email": "Adresa e-mail",
+    "phone": "Numer telefōnu",
+    "street": "Ulica",
+    "houseNumber": "Numer dōm",
+    "apartmentNumber": "Numer mieszkaniŏ",
+    "postalCode": "Kod pocztowy",
+    "city": "Miasto",
+    "saveSuccess": "Dane były pomyślnie spamiyntane",
+    "errorLoading": "Feler przi ladowaniu danych",
+    "errorSaving": "Feler przi spamiyntowaniu danych"
   }
 }

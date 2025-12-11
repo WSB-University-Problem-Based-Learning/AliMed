@@ -87,7 +87,7 @@ const DashboardPage: React.FC = () => {
       title: t('dashboard.myData'), 
       subtitle: t('dashboard.myDataDesc'), 
       color: 'bg-rose-100 text-rose-600',
-      onClick: () => {} 
+      onClick: () => navigate('/moje-dane')
     },
   ];
 

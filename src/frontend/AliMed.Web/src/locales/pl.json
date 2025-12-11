@@ -162,5 +162,26 @@
     "noDocumentsFound": "Nie znaleziono dokumentów",
     "noDocumentsHint": "Dokumenty z wizyt pojawią się tutaj automatycznie",
     "relatedToVisit": "Powiązane z wizytą"
+  },
+  "myData": {
+    "title": "Moje dane",
+    "subtitle": "Zarządzaj swoimi danymi osobowymi i kontaktowymi",
+    "personalInfo": "Dane osobowe",
+    "contactInfo": "Dane kontaktowe",
+    "address": "Adres zamieszkania",
+    "firstName": "Imię",
+    "lastName": "Nazwisko",
+    "pesel": "PESEL",
+    "birthDate": "Data urodzenia",
+    "email": "Adres e-mail",
+    "phone": "Numer telefonu",
+    "street": "Ulica",
+    "houseNumber": "Numer domu",
+    "apartmentNumber": "Numer mieszkania",
+    "postalCode": "Kod pocztowy",
+    "city": "Miasto",
+    "saveSuccess": "Dane zostały pomyślnie zapisane",
+    "errorLoading": "Błąd podczas wczytywania danych",
+    "errorSaving": "Błąd podczas zapisywania danych"
   }
 }
