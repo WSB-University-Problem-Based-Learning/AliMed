@@ -22,6 +22,7 @@
     "patients": "Pacjynty",
     "doctors": "Dochtory",
     "visits": "Wizyty",
+    "myVisits": "Moje wizyty",
     "login": "Wlyź",
     "logout": "Wylyź",
     "myAccount": "Mōj konto"
@@ -99,6 +100,20 @@
   "visits": {
     "title": "Wizyty",
     "underConstruction": "Strōna w budowie - czekōmy na endpoint API"
+  },
+  "myVisits": {
+    "title": "Moje wizyty",
+    "all": "Wszyjske",
+    "upcoming": "Nadchodzōnce",
+    "completed": "Odbyte",
+    "doctor": "Dochtōr",
+    "diagnosis": "Diagnoza",
+    "patient": "Pacjynt",
+    "statusCompleted": "Odbyto",
+    "statusPast": "Minionŏ",
+    "statusUpcoming": "Nadchodzōncŏ",
+    "noVisits": "Niy mosz żŏdnych wizyt",
+    "noVisitsHint": "Umōw wizyta, coby widzieć jōm tukej"
   },
   "error": {
     "somethingWentWrong": "Cosik poszło niy tak",

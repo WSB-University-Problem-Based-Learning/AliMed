@@ -7,6 +7,7 @@ import LoginPage from './pages/LoginPage';
 import GitHubCallbackPage from './pages/GitHubCallbackPage';
 import DashboardPage from './pages/DashboardPage';
 import PacjenciPage from './pages/PacjenciPage';
+import MojeWizytyPage from './pages/MojeWizytyPage';
 import Layout from './components/Layout';
 
 // Placeholder components for doctors and visits pages
@@ -53,6 +54,13 @@ function App() {
               <ProtectedRoute>
                 <Layout>
                   <PacjenciPage />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/moje-wizyty" element={
+              <ProtectedRoute>
+                <Layout>
+                  <MojeWizytyPage />
                 </Layout>
               </ProtectedRoute>
             } />

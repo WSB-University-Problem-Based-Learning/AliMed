@@ -22,6 +22,7 @@
     "patients": "Pacjenci",
     "doctors": "Lekarze",
     "visits": "Wizyty",
+    "myVisits": "Moje wizyty",
     "login": "Zaloguj się",
     "logout": "Wyloguj się",
     "myAccount": "Moje konto"
@@ -99,6 +100,20 @@
   "visits": {
     "title": "Wizyty",
     "underConstruction": "Strona w budowie - czekamy na endpoint API"
+  },
+  "myVisits": {
+    "title": "Moje wizyty",
+    "all": "Wszystkie",
+    "upcoming": "Nadchodzące",
+    "completed": "Odbyte",
+    "doctor": "Lekarz",
+    "diagnosis": "Diagnoza",
+    "patient": "Pacjent",
+    "statusCompleted": "Odbyta",
+    "statusPast": "Miniona",
+    "statusUpcoming": "Nadchodząca",
+    "noVisits": "Nie masz żadnych wizyt",
+    "noVisitsHint": "Umów wizytę, aby zobaczyć ją tutaj"
   },
   "error": {
     "somethingWentWrong": "Coś poszło nie tak",
