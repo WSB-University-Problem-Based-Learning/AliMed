@@ -29,7 +29,9 @@ namespace API.Alimed.Services
                 // tworzenie Claimów - info o userze, do zapisania w tokenie
                 Subject = new ClaimsIdentity(new[]
                     {
-                        new Claim(ClaimTypes.NameIdentifier, localUserId.ToString()),
+                        //new Claim(JwtRegisteredClaimNames.Sub, localUserId),
+                        new Claim(ClaimTypes.NameIdentifier, localUserId),
+                        //new Claim(ClaimTypes.NameIdentifier, localUserId.ToString()),
                         new Claim(ClaimTypes.Name, githubLogin),
                         new Claim("github_login", githubLogin),
                         //new Claim("github_id", localUserId.ToString()),

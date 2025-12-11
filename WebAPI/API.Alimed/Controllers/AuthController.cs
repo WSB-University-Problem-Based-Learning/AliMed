@@ -295,5 +295,33 @@ namespace API.Alimed.Controllers
 
             return Ok(new { token = jwtToken });
         }
+
+
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            var refreshToken = Request.Cookies["refresh_token"];
+
+            if (!string.IsNullOrEmpty(refreshToken))
+            {
+                var token = await _db.RefreshToken.FirstOrDefaultAsync(t => t.Token == refreshToken);
+                if (token != null)
+                {
+                    token.IsRevoked = true;
+                    await _db.SaveChangesAsync();
+                }
+            }
+
+            // usuń cookie
+            Response.Cookies.Append("refresh_token", "", new CookieOptions
+            {
+                Expires = DateTime.UtcNow.AddDays(-1),
+                HttpOnly = true,
+                Secure = false,
+                SameSite = SameSiteMode.Strict
+            });
+
+            return Ok(new { message = "Wylogowano." });
+        }
     }
 }
