@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import React, { createContext, useContext, useState, type ReactNode } from 'react';
 import type { User } from '../types/api';
 
 interface AuthContextType {
@@ -15,35 +15,37 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const readStoredAuth = () => {
+  if (typeof window === 'undefined') {
+    return { storedToken: null, storedUser: null, storedDemoMode: false };
+  }
+
+  const storedToken = localStorage.getItem('alimed_token');
+  const storedDemoMode = localStorage.getItem('alimed_demo_mode') === 'true';
+
+  let storedUser: User | null = null;
+  const storedUserRaw = localStorage.getItem('alimed_user');
+
+  if (storedUserRaw) {
+    try {
+      storedUser = JSON.parse(storedUserRaw) as User;
+    } catch (e) {
+      console.error('Failed to parse stored user', e);
+    }
+  }
+
+  // RefreshToken is stored as HttpOnly cookie by backend, not in localStorage
+  return { storedToken, storedUser, storedDemoMode };
+};
+
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [user, setUserState] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [refreshToken, setRefreshToken] = useState<string | null>(null);
-  const [isDemoMode, setIsDemoMode] = useState(false);
+  const { storedToken, storedUser, storedDemoMode } = readStoredAuth();
 
-  useEffect(() => {
-    const storedToken = localStorage.getItem('alimed_token');
-    const storedUser = localStorage.getItem('alimed_user');
-    const storedDemoMode = localStorage.getItem('alimed_demo_mode');
-
-    if (storedToken) {
-      setToken(storedToken);
-      // RefreshToken is in HttpOnly cookie, managed by backend
-      setRefreshToken('stored-in-cookie');
-    }
-
-    if (storedUser) {
-      try {
-        setUserState(JSON.parse(storedUser));
-      } catch (e) {
-        console.error('Failed to parse stored user', e);
-      }
-    }
-
-    if (storedDemoMode === 'true') {
-      setIsDemoMode(true);
-    }
-  }, []);
+  const [user, setUserState] = useState<User | null>(storedUser);
+  const [token, setToken] = useState<string | null>(storedToken);
+  // RefreshToken is in HttpOnly cookie, managed by backend
+  const [refreshToken, setRefreshToken] = useState<string | null>(storedToken ? 'stored-in-cookie' : null);
+  const [isDemoMode, setIsDemoMode] = useState(storedDemoMode);
 
   const login = (newToken: string, newRefreshToken: string) => {
     setToken(newToken);
@@ -85,6 +87,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setToken('demo-token');
     setRefreshToken('demo-refresh-token');
     setIsDemoMode(true);
+    localStorage.setItem('alimed_token', 'demo-token');
+    localStorage.setItem('alimed_refresh_token', 'demo-refresh-token');
     localStorage.setItem('alimed_demo_mode', 'true');
     localStorage.setItem('alimed_user', JSON.stringify(demoUser));
   };
@@ -108,6 +112,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
