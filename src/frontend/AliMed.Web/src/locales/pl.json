@@ -202,5 +202,25 @@
     "noUpcomingVisits": "Brak nadchodzących wizyt",
     "noPendingConfirmations": "Brak oczekujących potwierdzeń",
     "tryDemoDoctor": "Wypróbuj jako lekarz"
+  },
+  "doctorVisits": {
+    "title": "Wizyty",
+    "time": "Godzina",
+    "patient": "Pacjent",
+    "visitType": "Typ wizyty",
+    "status": "Status",
+    "actions": "Akcje",
+    "details": "Szczegóły",
+    "visitDetails": "Szczegóły wizyty",
+    "statusCompleted": "Zakończona",
+    "statusInProgress": "W trakcie",
+    "statusScheduled": "Zaplanowana",
+    "medicalHistory": "Historia chorób",
+    "lastVisit": "Ostatnia wizyta",
+    "currentVisit": "Obecna wizyta",
+    "type": "Typ",
+    "addNote": "Dodaj notatkę",
+    "issuePrescription": "Wystaw receptę",
+    "selectVisit": "Wybierz wizytę z listy, aby zobaczyć szczegóły"
   }
 }

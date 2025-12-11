@@ -7,6 +7,7 @@ import LoginPage from './pages/LoginPage';
 import GitHubCallbackPage from './pages/GitHubCallbackPage';
 import DashboardPage from './pages/DashboardPage';
 import DoctorDashboardPage from './pages/DoctorDashboardPage';
+import WizytyLekarzPage from './pages/WizytyLekarzPage';
 import PacjenciPage from './pages/PacjenciPage';
 import MojeWizytyPage from './pages/MojeWizytyPage';
 import UmowWizytePage from './pages/UmowWizytePage';
@@ -55,6 +56,11 @@ function App() {
             <Route path="/panel-lekarza" element={
               <ProtectedRoute>
                 <DoctorDashboardPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/wizyty-lekarza" element={
+              <ProtectedRoute>
+                <WizytyLekarzPage />
               </ProtectedRoute>
             } />
             

@@ -202,5 +202,25 @@
     "noUpcomingVisits": "Niy ma nadchodzōncych wizyt",
     "noPendingConfirmations": "Niy ma czekajōncych potwierdzyń",
     "tryDemoDoctor": "Sprōbuj jako dochtōr"
+  },
+  "doctorVisits": {
+    "title": "Wizyty",
+    "time": "Godzina",
+    "patient": "Pacjynt",
+    "visitType": "Typ wizyty",
+    "status": "Status",
+    "actions": "Akcyje",
+    "details": "Szczygoly",
+    "visitDetails": "Szczygoly wizyty",
+    "statusCompleted": "Skunczonō",
+    "statusInProgress": "W trakcie",
+    "statusScheduled": "Zaplanowano",
+    "medicalHistory": "Historyjo chorōb",
+    "lastVisit": "Ostatnio wizyta",
+    "currentVisit": "Terazyśnio wizyta",
+    "type": "Typ",
+    "addNote": "Przidej notatka",
+    "issuePrescription": "Wystow recepta",
+    "selectVisit": "Ôbier wizyta ze listy, coby widziec szczygoly"
   }
 }

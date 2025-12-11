@@ -87,7 +87,8 @@ const DoctorDashboardPage: React.FC = () => {
       title: t('doctorDashboard.visits'), 
       value: statystyki.wizyty,
       color: 'bg-blue-100 text-blue-600',
-      borderColor: 'border-alimed-blue'
+      borderColor: 'border-alimed-blue',
+      onClick: () => navigate('/wizyty-lekarza')
     },
     { 
       id: 'pacjenci',
