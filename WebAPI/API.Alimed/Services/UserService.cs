@@ -77,7 +77,10 @@ namespace API.Alimed.Services
             {
                 Imie = user.GithubName ?? "Użytkownik",
                 Nazwisko = "GitHub",
-                Pesel = Guid.NewGuid().ToString().Substring(0, 11),
+
+                //Pesel = Guid.NewGuid().ToString().Substring(0, 11),
+                Pesel = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString().PadLeft(11, '0'),
+
                 DataUrodzenia = DateTime.UtcNow.AddYears(-25),
                 UserId = user.UserId,
                 AdresZamieszkania = new Adres

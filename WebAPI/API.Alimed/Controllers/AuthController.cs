@@ -1,6 +1,8 @@
-﻿using API.Alimed.Interfaces;
+﻿using API.Alimed.Data;
+using API.Alimed.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System.Net.Http.Headers;
 using System.Text.Json;
@@ -15,16 +17,19 @@ namespace API.Alimed.Controllers
         private readonly IJwtService _jwtService;
         private readonly IUserService _userService;
         private readonly IConfiguration _configuration;
+        private readonly AppDbContext _db;
 
         private const string? GITHUB_CLIENT_ID = "Ov23liVc5BhNQu3ak43m";
         private const string? GITHUB_CLIENT_SECRET = "ce76eb423af872d4e710cdce762f55a7e6677714";
 
-        public AuthController(IHttpClientFactory httpClientFactory, IJwtService jwtService, IUserService userService, IConfiguration configuration)
+        public AuthController(IHttpClientFactory httpClientFactory, IJwtService jwtService, IUserService userService, IConfiguration configuration, AppDbContext db)
         {
             _httpClientFactory = httpClientFactory;
             _jwtService = jwtService;
             _userService = userService;
             _configuration = configuration;
+            _db = db;
+
 
             // github secrets
             // TODO - ustawic w env variable
@@ -85,7 +90,13 @@ namespace API.Alimed.Controllers
                 }
                 // =========================================================================
 
+                // sprawdzenie czy Kod Logowania Github Już użyto (1 na minute?)
                 var tokenContent = await tokenResponse.Content.ReadAsStringAsync();
+                if(tokenContent.Contains("bad_verification_code"))
+                {
+                    return BadRequest("Kod logowania GitHub został już wykorzystany - specyfikacja OAuth 2.0");
+                }
+
                 var tokenData = JsonSerializer.Deserialize<Dictionary<string, string>>(tokenContent);
                 var githubAccessToken = tokenData?["access_token"];
 
@@ -120,16 +131,36 @@ namespace API.Alimed.Controllers
                 string refreshToken = Guid.NewGuid().ToString("N") + Guid.NewGuid().ToString();
                 await _userService.AddRefreshTokenASync(localUser.UserId, refreshToken);
 
-                return Ok(new AuthResponseDto
-                {
-                    Token = jwtToken,
-                    RefreshToken = refreshToken
-                });
+                Response.Cookies.Append(
+                    "refresh_token",
+                    refreshToken,
+                    new CookieOptions
+                    {
+                        HttpOnly = true,
+                        Secure = false, // Ustaw na true w środowisku produkcyjnym
+                        Expires = DateTimeOffset.UtcNow.AddDays(7),
+                        SameSite = SameSiteMode.Strict
+                    }
+                );
 
-                //return Ok(new { Token = jwtToken });
+                return Ok(new {token = jwtToken});
+
+
             }
             catch (Exception ex)
             {
+
+                // nowe errory
+                Console.WriteLine("Api Error (Status 500");
+                Console.WriteLine($"Wyjatek Exception: {ex.GetType().Name}");
+                Console.WriteLine($"Msg catch Exception: {ex.Message}");
+
+                if(ex.InnerException != null)
+                {
+                    Console.WriteLine($"Inner Exception: {ex.InnerException.GetType().Name}");
+                    Console.WriteLine($"Inner Msg Exception: {ex.InnerException.Message}");
+                }
+
                 // error logi status 505
                 Console.WriteLine($"\n\"#########################################################\\");
                 Console.WriteLine($"Api Error (Status 500)");
@@ -139,5 +170,45 @@ namespace API.Alimed.Controllers
                 return StatusCode(500, "Błąd serwera podczas przetwarzania logowania GitHub.");
             }
         }
+
+
+        [HttpPost("refresh")]
+        public async Task<IActionResult> RefreshToken()
+        {
+            var refreshToken = Request.Cookies["refresh_token"];
+
+            if(string.IsNullOrEmpty(refreshToken))
+            {
+                return Unauthorized("Brak refresh tokenu");
+            }
+
+            var tokenInDb = await _db.RefreshToken
+                .FirstOrDefaultAsync(t => t.Token == refreshToken);
+
+            if (tokenInDb == null || tokenInDb.IsRevoked || tokenInDb.ExpiresOnUtc < DateTime.UtcNow)
+                return Unauthorized("Refresh token wygasł lub jest nieważny.");
+
+            var user = await _db.Users
+                .FirstOrDefaultAsync(u => u.UserId == tokenInDb!.UserId);
+
+            if (user == null)
+            {
+                Unauthorized("User nie istnieje");
+            }
+            // nowy access token
+            var newAccessToken = _jwtService.GenerateToken(
+                user!.UserId.ToString(),
+                user.GithubName!,
+                user.Role.ToString()
+                );
+        
+            tokenInDb.ExpiresOnUtc = DateTime.UtcNow.AddDays(7);
+            await _db.SaveChangesAsync();
+
+            return Ok(new {accessToken = newAccessToken});
+
+        }
+    
+    
     }
 }
