@@ -9,6 +9,7 @@ import DashboardPage from './pages/DashboardPage';
 import PacjenciPage from './pages/PacjenciPage';
 import MojeWizytyPage from './pages/MojeWizytyPage';
 import UmowWizytePage from './pages/UmowWizytePage';
+import DokumentyPage from './pages/DokumentyPage';
 import Layout from './components/Layout';
 
 // Placeholder components for doctors and visits pages
@@ -69,6 +70,13 @@ function App() {
               <ProtectedRoute>
                 <Layout>
                   <UmowWizytePage />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/dokumenty" element={
+              <ProtectedRoute>
+                <Layout>
+                  <DokumentyPage />
                 </Layout>
               </ProtectedRoute>
             } />

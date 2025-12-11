@@ -23,6 +23,7 @@
     "doctors": "Lekarze",
     "visits": "Wizyty",
     "myVisits": "Moje wizyty",
+    "documents": "Dokumenty",
     "login": "Zaloguj się",
     "logout": "Wyloguj się",
     "myAccount": "Moje konto"
@@ -141,5 +142,25 @@
     "successTitle": "Wizyta zarezerwowana!",
     "successMessage": "Twoja wizyta została pomyślnie zarezerwowana",
     "redirecting": "Za chwilę zostaniesz przekierowany..."
+  },
+  "documents": {
+    "title": "Moje dokumenty medyczne",
+    "subtitle": "Przeglądaj i pobieraj swoje dokumenty medyczne",
+    "searchPlaceholder": "Szukaj dokumentów...",
+    "allTypes": "Wszystkie typy",
+    "typeRecepta": "Recepty",
+    "typeWynik": "Wyniki badań",
+    "typeSkierowanie": "Skierowania",
+    "typeInne": "Inne",
+    "sortByDate": "Sortuj po dacie",
+    "sortByName": "Sortuj po nazwie",
+    "sortByType": "Sortuj po typie",
+    "totalDocuments": "Wszystkich dokumentów",
+    "download": "Pobierz",
+    "errorDownloading": "Błąd podczas pobierania dokumentu",
+    "noDocuments": "Nie masz jeszcze żadnych dokumentów",
+    "noDocumentsFound": "Nie znaleziono dokumentów",
+    "noDocumentsHint": "Dokumenty z wizyt pojawią się tutaj automatycznie",
+    "relatedToVisit": "Powiązane z wizytą"
   }
 }

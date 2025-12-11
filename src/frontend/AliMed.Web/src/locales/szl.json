@@ -23,6 +23,7 @@
     "doctors": "Dochtory",
     "visits": "Wizyty",
     "myVisits": "Moje wizyty",
+    "documents": "Dokumynty",
     "login": "Wlyź",
     "logout": "Wylyź",
     "myAccount": "Mōj konto"
@@ -141,5 +142,25 @@
     "successTitle": "Wizyta zarezerwowano!",
     "successMessage": "Twoja wizyta była pomyślnie zarezerwowano",
     "redirecting": "Za chwila bydyš przekierowany..."
+  },
+  "documents": {
+    "title": "Moje dokumynty medyczne",
+    "subtitle": "Poglynd i poberz swoje dokumynty medyczne",
+    "searchPlaceholder": "Szukej dokumyntōw...",
+    "allTypes": "Wszyjske typy",
+    "typeRecepta": "Recepty",
+    "typeWynik": "Wyniki badań",
+    "typeSkierowanie": "Skierowania",
+    "typeInne": "Inksze",
+    "sortByDate": "Sortuj po dacie",
+    "sortByName": "Sortuj po naziwie",
+    "sortByType": "Sortuj po typie",
+    "totalDocuments": "Wszyjskich dokumyntōw",
+    "download": "Poberz",
+    "errorDownloading": "Feler przi poberaniu dokumyntu",
+    "noDocuments": "Niy mosz jeszcze żŏdnych dokumyntōw",
+    "noDocumentsFound": "Niy znod dokumyntōw",
+    "noDocumentsHint": "Dokumynty ze wizyt pokaziōm sie sam tukej",
+    "relatedToVisit": "Powiōnzane ze wizytōm"
   }
 }

@@ -80,7 +80,7 @@ const DashboardPage: React.FC = () => {
       title: t('dashboard.documents'), 
       subtitle: t('dashboard.documentsDesc'), 
       color: 'bg-amber-100 text-amber-600',
-      onClick: () => {} 
+      onClick: () => navigate('/dokumenty')
     },
     { 
       icon: UserCircleIcon, 

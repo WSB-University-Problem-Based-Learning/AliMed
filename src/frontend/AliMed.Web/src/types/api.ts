@@ -73,3 +73,14 @@ export interface ZaleceniaDokument {
   zawartoscPliku: Uint8Array;
   dataUtworzenia: string;
 }
+
+export interface Dokument {
+  dokumentId: number;
+  nazwaPliku?: string;
+  typDokumentu?: string;
+  opis?: string;
+  dataUtworzenia: string;
+  rozmiarPliku?: number;
+  wizytaId?: number;
+  pacjentId?: number;
+}

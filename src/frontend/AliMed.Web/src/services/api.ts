@@ -1,4 +1,4 @@
-import type { Pacjent, Lekarz, Wizyta, AuthResponse } from '../types/api';
+import type { Pacjent, Lekarz, Wizyta, AuthResponse, Dokument } from '../types/api';
 import { config } from '../config/env';
 
 const API_BASE_URL = config.apiBaseUrl;
@@ -108,6 +108,34 @@ export const apiService = {
     });
     if (!response.ok) throw new Error('Failed to create wizyta');
     return response.json();
+  },
+
+  // Dokumenty
+  async getDokumenty(): Promise<Dokument[]> {
+    const response = await fetch(`${API_BASE_URL}/api/dokumenty`, {
+      headers: getHeaders(true),
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to fetch dokumenty');
+    return response.json();
+  },
+
+  async getDokumentById(id: number): Promise<Dokument> {
+    const response = await fetch(`${API_BASE_URL}/api/dokumenty/${id}`, {
+      headers: getHeaders(true),
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to fetch dokument');
+    return response.json();
+  },
+
+  async downloadDokument(id: number): Promise<Blob> {
+    const response = await fetch(`${API_BASE_URL}/api/dokumenty/${id}/download`, {
+      headers: getHeaders(true),
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to download dokument');
+    return response.blob();
   },
 
   // Refresh token - call backend refresh endpoint

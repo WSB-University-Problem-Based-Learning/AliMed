@@ -55,6 +55,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               >
                 {t('nav.visits')}
               </Link>
+              <Link 
+                to="/dokumenty" 
+                className={`transition ${isActive('/dokumenty') ? 'text-alimed-blue font-medium' : 'text-gray-700 hover:text-alimed-blue'}`}
+              >
+                {t('nav.documents')}
+              </Link>
               <LanguageSwitcher />
               <Link 
                 to="/login" 
