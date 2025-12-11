@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { CalendarIcon, UserIcon, ClockIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from '../context/LanguageContext';
 import { apiService } from '../services/api';
-import type { Lekarz, Wizyta } from '../types/api';
+import type { Lekarz } from '../types/api';
+import type { WizytaCreateRequest } from '../types/api';
 
 const UmowWizytePage: React.FC = () => {
   const { t } = useTranslation();
@@ -68,11 +69,12 @@ const UmowWizytePage: React.FC = () => {
       setSubmitting(true);
       setError(null);
 
-      const wizytaData: Omit<Wizyta, 'wizytaId'> = {
+      // Use WizytaCreateRequest matching backend WizytaCreateDto
+      const wizytaData: WizytaCreateRequest = {
         dataWizyty: dateTime,
         lekarzId: selectedLekarz,
-        czyOdbyta: false,
-        diagnoza: '', // Empty for new appointments
+        // placowkaId is optional, can be added later when placowki selection is implemented
+        diagnoza: undefined,
       };
 
       await apiService.createWizyta(wizytaData);
@@ -85,7 +87,7 @@ const UmowWizytePage: React.FC = () => {
       }, 2000);
     } catch (err) {
       console.error('Error booking appointment:', err);
-      setError(t('bookVisit.errorBooking'));
+      setError(err instanceof Error ? err.message : t('bookVisit.errorBooking'));
     } finally {
       setSubmitting(false);
     }

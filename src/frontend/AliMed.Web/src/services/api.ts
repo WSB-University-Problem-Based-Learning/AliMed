@@ -1,4 +1,4 @@
-import type { Pacjent, Lekarz, Wizyta, AuthResponse, Dokument } from '../types/api';
+import type { Pacjent, Lekarz, Wizyta, AuthResponse, Dokument, RegisterRequest, LoginRequest, WizytaCreateRequest } from '../types/api';
 import { config } from '../config/env';
 
 const API_BASE_URL = config.apiBaseUrl;
@@ -25,7 +25,7 @@ const getHeaders = (includeAuth = false): HeadersInit => {
 };
 
 export const apiService = {
-  // Authentication
+  // Authentication - GitHub OAuth
   async loginWithGithub(code: string): Promise<AuthResponse> {
     const response = await fetch(`${API_BASE_URL}/api/auth/github`, {
       method: 'POST',
@@ -39,6 +39,44 @@ export const apiService = {
     return {
       token: data.token,
       refreshToken: '', // Refresh token is handled via HttpOnly cookie
+    };
+  },
+
+  // Authentication - Local login (email + password)
+  async loginLocal(credentials: LoginRequest): Promise<AuthResponse> {
+    const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(credentials),
+      credentials: 'include',
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Niepoprawny email lub hasło');
+    }
+    const data = await response.json();
+    return {
+      token: data.token,
+      refreshToken: '',
+    };
+  },
+
+  // Authentication - Register new user
+  async register(data: RegisterRequest): Promise<AuthResponse> {
+    const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(data),
+      credentials: 'include',
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Nie udało się utworzyć konta');
+    }
+    const result = await response.json();
+    return {
+      token: result.token,
+      refreshToken: '',
     };
   },
 
@@ -99,14 +137,17 @@ export const apiService = {
     return response.json();
   },
 
-  async createWizyta(wizyta: Omit<Wizyta, 'wizytaId'>): Promise<Wizyta> {
+  async createWizyta(wizyta: WizytaCreateRequest): Promise<{ message: string; wizytaId: number }> {
     const response = await fetch(`${API_BASE_URL}/api/wizyty/umow-wizyte`, {
       method: 'POST',
       headers: getHeaders(true),
       credentials: 'include',
       body: JSON.stringify(wizyta),
     });
-    if (!response.ok) throw new Error('Failed to create wizyta');
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Failed to create wizyta');
+    }
     return response.json();
   },
 

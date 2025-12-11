@@ -84,3 +84,31 @@ export interface Dokument {
   wizytaId?: number;
   pacjentId?: number;
 }
+
+// Request DTOs matching backend
+export interface RegisterRequest {
+  email: string;
+  username: string;
+  password: string;
+  firstName?: string;
+  lastName?: string;
+  pesel?: string;
+  dataUrodzenia?: string;
+  ulica?: string;
+  numerDomu?: string;
+  kodPocztowy?: string;
+  miasto?: string;
+  kraj?: string;
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface WizytaCreateRequest {
+  dataWizyty: string;
+  lekarzId?: number;
+  placowkaId?: number;
+  diagnoza?: string;
+}
