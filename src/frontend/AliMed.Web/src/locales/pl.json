@@ -253,5 +253,18 @@
     "typeOpis": "Opis",
     "typeSkierowanie": "Skierowanie",
     "noDocuments": "Brak dokumentów"
+  },
+  "doctorMyData": {
+    "title": "Moje dane",
+    "firstName": "Imię",
+    "lastName": "Nazwisko",
+    "specialization": "Specjalizacja",
+    "city": "Miasto",
+    "email": "Adres e-mail",
+    "phone": "Numer telefonu",
+    "workingHours": "Godziny pracy",
+    "save": "zapisz",
+    "saveSuccess": "Dane zostały pomyślnie zapisane",
+    "errorSaving": "Błąd podczas zapisywania danych"
   }
 }

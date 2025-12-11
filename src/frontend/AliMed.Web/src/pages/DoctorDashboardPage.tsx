@@ -115,7 +115,7 @@ const DoctorDashboardPage: React.FC = () => {
       value: null,
       color: 'bg-orange-100 text-orange-500',
       borderColor: 'border-orange-500',
-      onClick: () => navigate('/moje-dane')
+      onClick: () => navigate('/moje-dane-lekarza')
     },
   ];
 

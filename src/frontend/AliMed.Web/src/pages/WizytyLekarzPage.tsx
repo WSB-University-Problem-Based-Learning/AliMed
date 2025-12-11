@@ -168,7 +168,7 @@ const WizytyLekarzPage: React.FC = () => {
       value: null,
       color: 'bg-orange-100 text-orange-500',
       borderColor: 'border-orange-500',
-      onClick: () => navigate('/moje-dane')
+      onClick: () => navigate('/moje-dane-lekarza')
     },
   ];
 
@@ -194,7 +194,7 @@ const WizytyLekarzPage: React.FC = () => {
               </span>
               <LanguageSwitcher />
               <button 
-                onClick={() => navigate('/moje-dane')}
+                onClick={() => navigate('/moje-dane-lekarza')}
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
               >
                 {t('nav.myAccount')}

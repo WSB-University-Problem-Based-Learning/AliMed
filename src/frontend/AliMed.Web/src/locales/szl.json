@@ -253,5 +253,18 @@
     "typeOpis": "Opis",
     "typeSkierowanie": "Skiyrowanie",
     "noDocuments": "Niy ma dokumyntów"
+  },
+  "doctorMyData": {
+    "title": "Moje dane",
+    "firstName": "Miano",
+    "lastName": "Przizwisko",
+    "specialization": "Specjalizacyjo",
+    "city": "Miasto",
+    "email": "Adresa e-mail",
+    "phone": "Numer telefōnu",
+    "workingHours": "Godziny roboty",
+    "save": "spamiyntej",
+    "saveSuccess": "Dane były pomyślnie spamiyntane",
+    "errorSaving": "Feler przi spamiyntowaniu danych"
   }
 }
