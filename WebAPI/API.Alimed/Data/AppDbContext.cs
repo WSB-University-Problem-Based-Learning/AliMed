@@ -95,7 +95,56 @@ namespace API.Alimed.Data
 
 
             // ------------------ SEEDING DANYCH (HasData) ------------------
-            
+
+            // PLACÓWKI
+            modelBuilder.Entity<Placowka>()
+                .HasData(
+                new
+                {
+                    PlacowkaId = 1,
+                    Nazwa = "Przychodnia Zdrowie",
+                    NumerKonta = "12 3456 7890 1234 5678 0000"
+                }
+            );
+
+            // Owned entity for Placowka
+            modelBuilder.Entity<Placowka>()
+                .OwnsOne(p => p.AdresPlacowki)
+                .HasData(
+                new
+                {
+                    PlacowkaId = 1,
+                    Ulica = "Lipowa",
+                    NumerDomu = "10",
+                    KodPocztowy = "00-001",
+                    Miasto = "Warszawa",
+                    Kraj = "Polska"
+                }
+            );
+
+            // LEKARZE
+            modelBuilder.Entity<Lekarz>()
+                .HasData(
+                new Lekarz
+                {
+                    LekarzId = 1,
+                    Imie = "Jan",
+                    Nazwisko = "Kowalski",
+                    Specjalizacja = "Internista",
+                    PlacowkaId = 1
+                }
+            );
+
+
+
+
+
+
+
+
+
+
+
 
 
             base.OnModelCreating(modelBuilder);

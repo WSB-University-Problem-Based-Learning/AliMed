@@ -18,12 +18,19 @@ namespace API.Alimed.Services
         {
             // szuka użytkownika po githubId czy istnieje w db
             var user = await _db.Users
+                .Include(u => u.Pacjent)
                 .FirstOrDefaultAsync(u => u.GithubId == githubId);
 
             if (user != null)
             {
+                if(user.Pacjent == null)
+                {
+                    await CreatePacjentForUserAsync(user);
+                }
+
                 return user;
             }
+
             // jeśli nie istnieje, tworzy nowego użytkownika
             user = new User
             {
@@ -37,6 +44,10 @@ namespace API.Alimed.Services
             // insert nowego użytkownika do bazy danych
             _db.Users.Add(user);
             await _db.SaveChangesAsync();
+
+            // new
+            // Tworzymy pacjenta powiązanego z userem
+            await CreatePacjentForUserAsync(user);
 
             // zwrot nowo utworzonego użytkownika
             return user;
@@ -59,6 +70,29 @@ namespace API.Alimed.Services
         public async Task UpdateUserRoleAsync(Guid userId, UserRole newRole)
         {
 
+        }
+
+        public async Task CreatePacjentForUserAsync(User user)
+        {
+            var pacjent = new Pacjent
+            {
+                Imie = user.GithubName ?? "Użytkownik",
+                Nazwisko = "GitHub",
+                Pesel = Guid.NewGuid().ToString().Substring(0, 11), // fake PESEL
+                DataUrodzenia = DateTime.UtcNow.AddYears(-25),
+                UserId = user.UserId,
+                AdresZamieszkania = new Adres
+                {
+                    Ulica = "Nieznana",
+                    NumerDomu = "1",
+                    KodPocztowy = "00-001",
+                    Miasto = "Warszawa",
+                    Kraj = "Polska"
+                }
+            };
+
+            _db.Pacjenci.Add(pacjent);
+            await _db.SaveChangesAsync();
         }
     }
 }

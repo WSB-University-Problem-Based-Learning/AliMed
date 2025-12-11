@@ -47,6 +47,16 @@ namespace API.Alimed.Migrations
                     b.HasIndex("PlacowkaId");
 
                     b.ToTable("Lekarze");
+
+                    b.HasData(
+                        new
+                        {
+                            LekarzId = 1,
+                            Imie = "Jan",
+                            Nazwisko = "Kowalski",
+                            PlacowkaId = 1,
+                            Specjalizacja = "Internista"
+                        });
                 });
 
             modelBuilder.Entity("API.Alimed.Entities.Pacjent", b =>
@@ -106,6 +116,14 @@ namespace API.Alimed.Migrations
                     b.HasKey("PlacowkaId");
 
                     b.ToTable("Placowki");
+
+                    b.HasData(
+                        new
+                        {
+                            PlacowkaId = 1,
+                            Nazwa = "Przychodnia Zdrowie",
+                            NumerKonta = "12 3456 7890 1234 5678 0000"
+                        });
                 });
 
             modelBuilder.Entity("API.Alimed.Entities.RefreshToken", b =>
@@ -309,6 +327,17 @@ namespace API.Alimed.Migrations
 
                             b1.WithOwner()
                                 .HasForeignKey("PlacowkaId");
+
+                            b1.HasData(
+                                new
+                                {
+                                    PlacowkaId = 1,
+                                    KodPocztowy = "00-001",
+                                    Kraj = "Polska",
+                                    Miasto = "Warszawa",
+                                    NumerDomu = "10",
+                                    Ulica = "Lipowa"
+                                });
                         });
 
                     b.Navigation("AdresPlacowki");

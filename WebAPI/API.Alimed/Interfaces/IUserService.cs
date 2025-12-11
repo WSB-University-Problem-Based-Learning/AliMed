@@ -6,5 +6,6 @@ namespace API.Alimed.Interfaces
     {
         Task<User> FindOrCreateUserByGithubIdAsync(string githubId, string githubLogin);
         Task AddRefreshTokenASync(Guid userId, string token);
+        Task CreatePacjentForUserAsync(User user);
     }
 }

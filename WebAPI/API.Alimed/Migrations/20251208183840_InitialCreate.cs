@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace API.Alimed.Migrations
 {
     /// <inheritdoc />
-    public partial class TestWithZalecenia1 : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -209,6 +209,16 @@ namespace API.Alimed.Migrations
                         principalColumn: "PacjentId");
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.InsertData(
+                table: "Placowki",
+                columns: new[] { "PlacowkaId", "Nazwa", "NumerKonta", "AdresPlacowki_KodPocztowy", "AdresPlacowki_Kraj", "AdresPlacowki_Miasto", "AdresPlacowki_NumerDomu", "AdresPlacowki_Ulica" },
+                values: new object[] { 1, "Przychodnia Zdrowie", "12 3456 7890 1234 5678 0000", "00-001", "Polska", "Warszawa", "10", "Lipowa" });
+
+            migrationBuilder.InsertData(
+                table: "Lekarze",
+                columns: new[] { "LekarzId", "Imie", "Nazwisko", "PlacowkaId", "Specjalizacja" },
+                values: new object[] { 1, "Jan", "Kowalski", 1, "Internista" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Lekarze_PlacowkaId",

@@ -34,7 +34,8 @@ namespace API.Alimed.Services
                         new Claim(ClaimTypes.NameIdentifier, localUserId.ToString()),
                         new Claim(ClaimTypes.Name, githubLogin),
                         new Claim("github_login", githubLogin),
-                        new Claim("github_id", localUserId.ToString()),
+                        //new Claim("github_id", localUserId.ToString()),
+                        new Claim("github_id", githubLogin),
                         new Claim(ClaimTypes.Role, role)
                     }),
                 Expires = DateTime.UtcNow.AddMinutes(2), // Token ważny przez 2 minuty (testy)
