@@ -151,14 +151,6 @@ namespace API.Alimed.Data
             // LEKARZE
             modelBuilder.Entity<Lekarz>()
                 .HasData(
-                //new Lekarz
-                //{
-                //    LekarzId = 1,
-                //    Imie = "Jan",
-                //    Nazwisko = "Kowalski",
-                //    Specjalizacja = "Internista",
-                //    PlacowkaId = 1
-                //}
                 new[]
                 {
                     // === PLACÓWKA 1 (3 lekarzy) ===
