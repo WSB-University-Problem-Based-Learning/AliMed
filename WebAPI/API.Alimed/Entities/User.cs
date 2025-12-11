@@ -14,5 +14,11 @@ namespace API.Alimed.Entities
 
         public Pacjent? Pacjent { get; set; } //opcjonalne latwiej sie czyta
 
+        // dodane do lokalnego Form logowania / rejestracji
+        public string? Email { get; set; }
+        public string? PasswordHash { get; set; }
+        public string? PasswordSalt { get; set; }
+        public bool IsGithubUser { get; set; } = false;
+
     }
 }

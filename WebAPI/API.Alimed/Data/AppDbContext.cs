@@ -235,18 +235,69 @@ namespace API.Alimed.Data
             var user4Id = Guid.Parse("B0000000-0000-0000-0000-000000000004");
             var user5Id = Guid.Parse("B0000000-0000-0000-0000-000000000005");
 
+            //modelBuilder.Entity<User>().HasData(
+            //    new
+            //    {
+            //        UserId = adminUserId,
+            //        Username = "admin_alimed",
+            //        Role = UserRole.Admin // konto admina
+            //    },
+            //    new { UserId = user1Id, Username = "pacjent1", Role = API.Alimed.Enums.UserRole.User },
+            //    new { UserId = user2Id, Username = "pacjent2", Role = API.Alimed.Enums.UserRole.User },
+            //    new { UserId = user3Id, Username = "pacjent3", Role = API.Alimed.Enums.UserRole.User },
+            //    new { UserId = user4Id, Username = "pacjent4", Role = API.Alimed.Enums.UserRole.User },
+            //    new { UserId = user5Id, Username = "pacjent5", Role = API.Alimed.Enums.UserRole.User }
+            //);
+
             modelBuilder.Entity<User>().HasData(
                 new
                 {
                     UserId = adminUserId,
                     Username = "admin_alimed",
-                    Role = UserRole.Admin // konto admina
+                    Role = UserRole.Admin,
+                    IsGithubUser = false,
+                    GithubId = (string?)null
                 },
-                new { UserId = user1Id, Username = "pacjent1", Role = API.Alimed.Enums.UserRole.User },
-                new { UserId = user2Id, Username = "pacjent2", Role = API.Alimed.Enums.UserRole.User },
-                new { UserId = user3Id, Username = "pacjent3", Role = API.Alimed.Enums.UserRole.User },
-                new { UserId = user4Id, Username = "pacjent4", Role = API.Alimed.Enums.UserRole.User },
-                new { UserId = user5Id, Username = "pacjent5", Role = API.Alimed.Enums.UserRole.User }
+                new
+                {
+                    UserId = user1Id,
+                    Username = "pacjent1",
+                    Role = UserRole.User,
+                    IsGithubUser = false,
+                    GithubId = (string?)null
+                },
+                new
+                {
+                    UserId = user2Id,
+                    Username = "pacjent2",
+                    Role = UserRole.User,
+                    IsGithubUser = false,
+                    GithubId = (string?)null
+                },
+                new
+                {
+                    UserId = user3Id,
+                    Username = "pacjent3",
+                    Role = UserRole.User,
+                    IsGithubUser = false,
+                    GithubId = (string?)null
+                },
+                new
+                {
+                    UserId = user4Id,
+                    Username = "pacjent4",
+                    Role = UserRole.User,
+                    IsGithubUser = false,
+                    GithubId = (string?)null
+                },
+                new
+                {
+                    UserId = user5Id,
+                    Username = "pacjent5",
+                    Role = UserRole.User,
+                    IsGithubUser = false,
+                    GithubId = (string?)null
+                }
             );
 
 

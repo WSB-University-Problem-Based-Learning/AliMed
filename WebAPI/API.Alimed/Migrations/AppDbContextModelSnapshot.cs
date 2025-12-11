@@ -614,10 +614,22 @@ namespace API.Alimed.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
+                    b.Property<string>("Email")
+                        .HasColumnType("longtext");
+
                     b.Property<string>("GithubId")
                         .HasColumnType("varchar(255)");
 
                     b.Property<string>("GithubName")
+                        .HasColumnType("longtext");
+
+                    b.Property<bool>("IsGithubUser")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("PasswordSalt")
                         .HasColumnType("longtext");
 
                     b.Property<int>("Role")
@@ -640,36 +652,42 @@ namespace API.Alimed.Migrations
                         new
                         {
                             UserId = new Guid("a0000000-0000-0000-0000-000000000001"),
+                            IsGithubUser = false,
                             Role = 2,
                             Username = "admin_alimed"
                         },
                         new
                         {
                             UserId = new Guid("b0000000-0000-0000-0000-000000000001"),
+                            IsGithubUser = false,
                             Role = 0,
                             Username = "pacjent1"
                         },
                         new
                         {
                             UserId = new Guid("b0000000-0000-0000-0000-000000000002"),
+                            IsGithubUser = false,
                             Role = 0,
                             Username = "pacjent2"
                         },
                         new
                         {
                             UserId = new Guid("b0000000-0000-0000-0000-000000000003"),
+                            IsGithubUser = false,
                             Role = 0,
                             Username = "pacjent3"
                         },
                         new
                         {
                             UserId = new Guid("b0000000-0000-0000-0000-000000000004"),
+                            IsGithubUser = false,
                             Role = 0,
                             Username = "pacjent4"
                         },
                         new
                         {
                             UserId = new Guid("b0000000-0000-0000-0000-000000000005"),
+                            IsGithubUser = false,
                             Role = 0,
                             Username = "pacjent5"
                         });

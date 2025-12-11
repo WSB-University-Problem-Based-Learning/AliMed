@@ -1,5 +1,7 @@
 ﻿using API.Alimed.Data;
+using API.Alimed.Dtos;
 using API.Alimed.Interfaces;
+using API.Alimed.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,19 +19,20 @@ namespace API.Alimed.Controllers
         private readonly IJwtService _jwtService;
         private readonly IUserService _userService;
         private readonly IConfiguration _configuration;
+        private readonly IPasswordService _passwordService;
         private readonly AppDbContext _db;
 
         private const string? GITHUB_CLIENT_ID = "Ov23liVc5BhNQu3ak43m";
         private const string? GITHUB_CLIENT_SECRET = "ce76eb423af872d4e710cdce762f55a7e6677714";
 
-        public AuthController(IHttpClientFactory httpClientFactory, IJwtService jwtService, IUserService userService, IConfiguration configuration, AppDbContext db)
+        public AuthController(IHttpClientFactory httpClientFactory, IJwtService jwtService, IUserService userService, IConfiguration configuration, AppDbContext db, IPasswordService passwordService)
         {
             _httpClientFactory = httpClientFactory;
             _jwtService = jwtService;
             _userService = userService;
             _configuration = configuration;
             _db = db;
-
+            _passwordService = passwordService;
 
             // github secrets
             // TODO - ustawic w env variable
@@ -37,19 +40,10 @@ namespace API.Alimed.Controllers
             //GITHUB_CLIENT_SECRET = _configuration["github:GITHUB_CLIENT_SECRET"];
         }
 
-        public class GitHubCodeDto
-        {
-            public string? Code { get; set; }
-        }
 
-        public class AuthResponseDto
-        {
-            public string Token { get; set; } = string.Empty;
-            public string RefreshToken { get; set; } = string.Empty;
-        }
 
         [HttpPost("github")] // url = /api/auth/github
-        public async Task<IActionResult> GitHubLogin([FromBody] GitHubCodeDto payload)
+        public async Task<IActionResult> GitHubLogin([FromBody] GithubCodeDto payload)
         {
             try
             {
@@ -92,13 +86,27 @@ namespace API.Alimed.Controllers
 
                 // sprawdzenie czy Kod Logowania Github Już użyto (1 na minute?)
                 var tokenContent = await tokenResponse.Content.ReadAsStringAsync();
-                if(tokenContent.Contains("bad_verification_code"))
+                //if(tokenContent.Contains("bad_verification_code"))
+                //{
+                //    return BadRequest("Kod logowania GitHub został już wykorzystany - specyfikacja OAuth 2.0");
+                //}
+
+                var tokenJson = JsonSerializer.Deserialize<Dictionary<string, object>>(tokenContent);
+
+                if (tokenJson.ContainsKey("error"))
                 {
-                    return BadRequest("Kod logowania GitHub został już wykorzystany - specyfikacja OAuth 2.0");
+                    var err = tokenJson["error"]?.ToString();
+                    return BadRequest($"GitHub OAuth error: {err}");
                 }
 
+                if (!tokenJson.ContainsKey("access_token"))
+                {
+                    return BadRequest("GitHub nie zwrócił access_token.");
+                }
+
+
                 var tokenData = JsonSerializer.Deserialize<Dictionary<string, string>>(tokenContent);
-                var githubAccessToken = tokenData?["access_token"];
+                var githubAccessToken = tokenData?["access_token"]!.ToString();
 
                 if (string.IsNullOrEmpty(githubAccessToken))
                 {
@@ -117,8 +125,13 @@ namespace API.Alimed.Controllers
                 var githubId = userResponse.GetProperty("id").GetInt32();
                 var githubLogin = userResponse.GetProperty("login").GetString();
 
+                Console.WriteLine($"GitHub ID: {githubId}");
+                Console.WriteLine($"GitHub Login: {githubLogin}");
+
                 // sprawdzenie i utw usera w bazie
-                var localUser = await _userService.FindOrCreateUserByGithubIdAsync(githubId.ToString(), githubLogin);
+                var localUser = await _userService
+
+                    .FindOrCreateUserByGithubIdAsync(githubId.ToString(), githubLogin);
 
                 // JWT local Token
                 // var jwtToken = _jwtService.GenerateToken(githubId, githubLogin);
@@ -208,7 +221,79 @@ namespace API.Alimed.Controllers
             return Ok(new {accessToken = newAccessToken});
 
         }
-    
-    
+
+
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterDto dto)
+        {
+            // Czy email istnieje?
+            var existing = await _userService.FindByEmailAsync(dto.Email);
+            if (existing != null)
+                return BadRequest("Email jest już zajęty.");
+
+            // Hashujemy hasło
+            var (hash, salt) = _passwordService
+                .HashPassword(dto.Password);
+
+            // Tworzymy usera + pacjenta
+            var user = await _userService
+                .CreateLocalUserAsync(dto.Email, dto.Username, hash, salt);
+
+            // 🔥 Teraz tworzymy pacjenta na podstawie danych z rejestracji
+            await _userService.CreatePacjentFromRegisterDtoAsync(user, dto);
+
+            // Tworzymy access token
+            var jwtToken = _jwtService.GenerateToken(
+                user.UserId.ToString(),
+                user.Username,
+                user.Role.ToString()
+            );
+
+            // Refresh token
+            string refreshToken = Guid.NewGuid().ToString("N") + Guid.NewGuid().ToString();
+            await _userService.AddRefreshTokenASync(user.UserId, refreshToken);
+
+            Response.Cookies.Append("refresh_token", refreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.UtcNow.AddDays(7)
+            });
+
+            return Ok(new { token = jwtToken });
+        }
+
+
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginDto dto)
+        {
+            var user = await _userService.FindByEmailAsync(dto.Email);
+
+            if (user == null || user.PasswordHash == null || user.PasswordSalt == null)
+                return Unauthorized("Niepoprawny email lub hasło.");
+
+            if (!_passwordService.Verify(dto.Password, user.PasswordHash, user.PasswordSalt))
+                return Unauthorized("Niepoprawny email lub hasło.");
+
+            var jwtToken = _jwtService.GenerateToken(
+                user.UserId.ToString(),
+                user.Username,
+                user.Role.ToString()
+            );
+
+            string refreshToken = Guid.NewGuid().ToString("N") + Guid.NewGuid().ToString();
+            await _userService.AddRefreshTokenASync(user.UserId, refreshToken);
+
+            Response.Cookies.Append("refresh_token", refreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.UtcNow.AddDays(7)
+            });
+
+            return Ok(new { token = jwtToken });
+        }
     }
 }

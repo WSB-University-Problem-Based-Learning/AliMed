@@ -15,6 +15,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // Dodanie konfiguracji JWT
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IPasswordService, PasswordService>();
 builder.Services.AddCustomServices(builder.Configuration);
 
 builder.Services.AddAuthorization(); // auth attributes for endpoints
