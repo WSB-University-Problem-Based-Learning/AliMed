@@ -183,5 +183,24 @@
     "saveSuccess": "Dane zostały pomyślnie zapisane",
     "errorLoading": "Błąd podczas wczytywania danych",
     "errorSaving": "Błąd podczas zapisywania danych"
+  },
+  "doctorDashboard": {
+    "welcome": "Witaj",
+    "visits": "Wizyty",
+    "patients": "Pacjenci",
+    "documentation": "Dokumentacja",
+    "myData": "Moje dane",
+    "upcomingVisits": "Nadchodzące wizyty",
+    "pendingConfirmations": "Oczekujące potwierdzenia",
+    "seeAll": "Zobacz wszystkie",
+    "new": "nowych",
+    "today": "Dzisiaj",
+    "tomorrow": "Jutro",
+    "visit": "Wizyta",
+    "confirm": "Potwierdź",
+    "reject": "Odrzuć",
+    "noUpcomingVisits": "Brak nadchodzących wizyt",
+    "noPendingConfirmations": "Brak oczekujących potwierdzeń",
+    "tryDemoDoctor": "Wypróbuj jako lekarz"
   }
 }

@@ -183,5 +183,24 @@
     "saveSuccess": "Dane były pomyślnie spamiyntane",
     "errorLoading": "Feler przi ladowaniu danych",
     "errorSaving": "Feler przi spamiyntowaniu danych"
+  },
+  "doctorDashboard": {
+    "welcome": "Witej",
+    "visits": "Wizyty",
+    "patients": "Pacjynty",
+    "documentation": "Dokumyntacyjo",
+    "myData": "Moje dane",
+    "upcomingVisits": "Nadchodzōnce wizyty",
+    "pendingConfirmations": "Czekajōnce potwierdzynie",
+    "seeAll": "Podziywej wszyjske",
+    "new": "nowych",
+    "today": "Dzisiej",
+    "tomorrow": "Jutro",
+    "visit": "Wizyta",
+    "confirm": "Potwierdź",
+    "reject": "Ôdciep",
+    "noUpcomingVisits": "Niy ma nadchodzōncych wizyt",
+    "noPendingConfirmations": "Niy ma czekajōncych potwierdzyń",
+    "tryDemoDoctor": "Sprōbuj jako dochtōr"
   }
 }

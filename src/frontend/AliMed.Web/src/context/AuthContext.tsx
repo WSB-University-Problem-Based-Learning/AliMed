@@ -11,6 +11,7 @@ interface AuthContextType {
   logout: () => void;
   setUser: (user: User) => void;
   enableDemoMode: () => void;
+  enableDemoModeAsDoctor: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -93,6 +94,25 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     localStorage.setItem('alimed_user', JSON.stringify(demoUser));
   };
 
+  const enableDemoModeAsDoctor = () => {
+    const demoDoctor: User = {
+      userId: 'demo-doctor',
+      email: 'dr.nowak@alimed.pl',
+      firstName: 'Jan',
+      lastName: 'Nowak',
+      role: 1, // UserRole.Lekarz = 1 (Doctor)
+    };
+    
+    setUserState(demoDoctor);
+    setToken('demo-token-doctor');
+    setRefreshToken('demo-refresh-token-doctor');
+    setIsDemoMode(true);
+    localStorage.setItem('alimed_token', 'demo-token-doctor');
+    localStorage.setItem('alimed_refresh_token', 'demo-refresh-token-doctor');
+    localStorage.setItem('alimed_demo_mode', 'true');
+    localStorage.setItem('alimed_user', JSON.stringify(demoDoctor));
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -105,6 +125,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         logout,
         setUser,
         enableDemoMode,
+        enableDemoModeAsDoctor,
       }}
     >
       {children}
