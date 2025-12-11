@@ -66,14 +66,36 @@ Kolory dostępne w Tailwind jako: `alimed-blue`, `alimed-light-blue`, `alimed-gr
 
 ## 🔌 API Integration
 
-Aplikacja komunikuje się z backendem przez REST API. Endpointy:
+Aplikacja komunikuje się z backendem przez REST API. 
 
-- `GET /pacjenci` - Lista pacjentów
-- `GET /pacjenci/{id}` - Szczegóły pacjenta
-- `GET /lekarze` - Lista lekarzy
-- `GET /lekarze/{id}` - Szczegóły lekarza
-- `GET /wizyty` - Lista wizyt
-- `POST /wizyty` - Utworzenie wizyty
+### Uwierzytelnienie
+- `POST /api/auth/github` - Logowanie przez GitHub OAuth
+  - Przyjmuje: `{ code: string }`
+  - Zwraca: `{ token: string }`
+  - Refresh token przechowywany jako HttpOnly cookie
+- `POST /api/auth/refresh` - Odświeżenie tokenu dostępu (wymaga HttpOnly cookie)
+
+### Endpointy zasobów (wymagają autoryzacji)
+
+#### Pacjenci
+- `GET /api/authorizedendpoint/pacjenci` - Lista pacjentów (wymaga roli User)
+- `GET /api/authorizedendpoint/pacjenci/{id}` - Szczegóły pacjenta
+
+#### Lekarze
+- `GET /api/authorizedendpoint/lekarze` - Lista lekarzy (wymaga roli User)
+- `GET /api/authorizedendpoint/lekarze/{id}` - Szczegóły lekarza
+
+#### Wizyty
+- `GET /api/wizyty/moje-wizyty` - Moje wizyty (wymaga roli User)
+- `GET /api/wizyty/{id}` - Szczegóły wizyty
+- `POST /api/wizyty/umow-wizyte` - Umówienie wizyty (wymaga roli User)
+- `GET /api/wizyty/dostepne` - Dostępne terminy wizyt
+
+### Bezpieczeństwo
+- Tokeny JWT przechowywane w localStorage
+- Refresh token przechowywany jako HttpOnly cookie dla zwiększonego bezpieczeństwa
+- Wszystkie zapytania do API wykorzystują `credentials: 'include'` dla obsługi cookies
+- Bearer token w nagłówku `Authorization` dla uwierzytelnionych żądań
 
 ## 👥 Zespół (Grupa nr 3)
 

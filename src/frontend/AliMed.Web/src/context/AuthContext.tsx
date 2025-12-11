@@ -23,13 +23,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   useEffect(() => {
     const storedToken = localStorage.getItem('alimed_token');
-    const storedRefreshToken = localStorage.getItem('alimed_refresh_token');
     const storedUser = localStorage.getItem('alimed_user');
     const storedDemoMode = localStorage.getItem('alimed_demo_mode');
 
-    if (storedToken && storedRefreshToken) {
+    if (storedToken) {
       setToken(storedToken);
-      setRefreshToken(storedRefreshToken);
+      // RefreshToken is in HttpOnly cookie, managed by backend
+      setRefreshToken('stored-in-cookie');
     }
 
     if (storedUser) {
@@ -47,10 +47,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const login = (newToken: string, newRefreshToken: string) => {
     setToken(newToken);
-    setRefreshToken(newRefreshToken);
+    // RefreshToken is stored as HttpOnly cookie by backend, don't store it in localStorage
+    setRefreshToken(newRefreshToken || 'stored-in-cookie');
     setIsDemoMode(false);
     localStorage.setItem('alimed_token', newToken);
-    localStorage.setItem('alimed_refresh_token', newRefreshToken);
+    // Remove refresh token from localStorage as it's now handled via HttpOnly cookie
+    localStorage.removeItem('alimed_refresh_token');
     localStorage.removeItem('alimed_demo_mode');
   };
 
