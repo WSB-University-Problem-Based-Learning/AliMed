@@ -8,6 +8,7 @@ import GitHubCallbackPage from './pages/GitHubCallbackPage';
 import DashboardPage from './pages/DashboardPage';
 import PacjenciPage from './pages/PacjenciPage';
 import MojeWizytyPage from './pages/MojeWizytyPage';
+import UmowWizytePage from './pages/UmowWizytePage';
 import Layout from './components/Layout';
 
 // Placeholder components for doctors and visits pages
@@ -61,6 +62,13 @@ function App() {
               <ProtectedRoute>
                 <Layout>
                   <MojeWizytyPage />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/umow-wizyte" element={
+              <ProtectedRoute>
+                <Layout>
+                  <UmowWizytePage />
                 </Layout>
               </ProtectedRoute>
             } />

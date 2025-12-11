@@ -73,7 +73,7 @@ const DashboardPage: React.FC = () => {
       title: t('dashboard.bookVisit'), 
       subtitle: t('dashboard.bookVisitDesc'), 
       color: 'bg-purple-100 text-purple-600',
-      onClick: () => {} 
+      onClick: () => navigate('/umow-wizyte')
     },
     { 
       icon: DocumentTextIcon, 

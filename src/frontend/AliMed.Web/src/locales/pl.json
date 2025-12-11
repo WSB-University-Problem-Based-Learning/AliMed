@@ -121,5 +121,25 @@
     "technicalDetails": "Szczegóły techniczne",
     "backToHome": "Powrót do strony głównej",
     "errorOccurred": "Wystąpił błąd"
+  },
+  "bookVisit": {
+    "title": "Umów wizytę",
+    "subtitle": "Wybierz lekarza, datę i godzinę wizyty",
+    "backToDashboard": "Powrót do panelu",
+    "specialization": "Specjalizacja",
+    "allSpecializations": "Wszystkie specjalizacje",
+    "selectDoctor": "Wybierz lekarza",
+    "selectDate": "Wybierz datę",
+    "selectTime": "Wybierz godzinę",
+    "chooseTime": "Wybierz godzinę",
+    "confirmBooking": "Potwierdź rezerwację",
+    "booking": "Rezerwowanie...",
+    "fillAllFields": "Proszę wypełnić wszystkie pola",
+    "errorLoadingDoctors": "Błąd podczas wczytywania listy lekarzy",
+    "errorBooking": "Błąd podczas rezerwacji wizyty",
+    "noDoctorsAvailable": "Brak dostępnych lekarzy",
+    "successTitle": "Wizyta zarezerwowana!",
+    "successMessage": "Twoja wizyta została pomyślnie zarezerwowana",
+    "redirecting": "Za chwilę zostaniesz przekierowany..."
   }
 }

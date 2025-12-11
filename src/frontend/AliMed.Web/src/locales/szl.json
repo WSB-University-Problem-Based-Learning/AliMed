@@ -121,5 +121,25 @@
     "technicalDetails": "Techniczne szczyguły",
     "backToHome": "Nazod na głōwno strōna",
     "errorOccurred": "Zdarził sie feler"
+  },
+  "bookVisit": {
+    "title": "Umōw wizyta",
+    "subtitle": "Ôbier dochtora, data i godzina wizyty",
+    "backToDashboard": "Nazod do panelu",
+    "specialization": "Specjalizacyjo",
+    "allSpecializations": "Wszyjske specjalizacyje",
+    "selectDoctor": "Ôbier dochtora",
+    "selectDate": "Ôbier data",
+    "selectTime": "Ôbier godzina",
+    "chooseTime": "Ôbier godzina",
+    "confirmBooking": "Potwierdź rezerwacyjo",
+    "booking": "Rezerwowanie...",
+    "fillAllFields": "Proszym wyfołnić wszyjske pola",
+    "errorLoadingDoctors": "Feler przi ladowaniu listy dochtorōw",
+    "errorBooking": "Feler przi rezerwacyji wizyty",
+    "noDoctorsAvailable": "Niy ma dostympnych dochtorōw",
+    "successTitle": "Wizyta zarezerwowano!",
+    "successMessage": "Twoja wizyta była pomyślnie zarezerwowano",
+    "redirecting": "Za chwila bydyš przekierowany..."
   }
 }
