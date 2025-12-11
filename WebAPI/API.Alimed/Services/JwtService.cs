@@ -14,7 +14,6 @@ namespace API.Alimed.Services
         public JwtService(IConfiguration config)
         {
             _config = config;
-            // odczytanie klucza z appsettings i konwersja do tablicy bajtów
             _key = Encoding.UTF8.GetBytes(_config["Jwt:Key"]);
         }
 
@@ -27,8 +26,7 @@ namespace API.Alimed.Services
                         );
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                // tworzenie Claimów (oświadczeń) - info o userze, do zapisania w tokenie
-                // new[] - inicjalizacja tablicy elementów typu Claim
+                // tworzenie Claimów - info o userze, do zapisania w tokenie
                 Subject = new ClaimsIdentity(new[]
                     {
                         new Claim(ClaimTypes.NameIdentifier, localUserId.ToString()),
@@ -38,7 +36,7 @@ namespace API.Alimed.Services
                         new Claim("github_id", githubLogin),
                         new Claim(ClaimTypes.Role, role)
                     }),
-                Expires = DateTime.UtcNow.AddMinutes(2), // Token ważny przez 2 minuty (testy)
+                Expires = DateTime.UtcNow.AddHours(6), // tkn ważny 6h
                 SigningCredentials = tokenCredential,// klucz do podpisania tokenu JWT (kryptografia symetryczna)
                 Issuer = _config["Jwt:Issuer"],
                 Audience = _config["Jwt:Audience"]

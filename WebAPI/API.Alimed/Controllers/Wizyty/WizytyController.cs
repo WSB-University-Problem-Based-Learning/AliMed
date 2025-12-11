@@ -1,5 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using API.Alimed.Data;
+using API.Alimed.Dtos;
+using API.Alimed.Entities;
+using API.Alimed.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Alimed.Controllers.Wizyty
 {
@@ -8,6 +13,13 @@ namespace API.Alimed.Controllers.Wizyty
     [Route("api/[controller]")]
     public class WizytyController : ControllerBase
     {
+        private readonly AppDbContext _db;
+        private readonly IUserService _userService;
+        public WizytyController(AppDbContext db, IUserService userService)
+        {
+            _db = db;
+            _userService = userService;
+        }
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////
         /// GET Requests
@@ -15,7 +27,7 @@ namespace API.Alimed.Controllers.Wizyty
         
         [HttpGet]
         [Route("{id}")]
-        //[Authorize(Roles = "User")]
+        [Authorize(Roles = "User")]
         public async Task<IResult> GetWizytaById(int id)
         {
             // TODO
@@ -40,7 +52,8 @@ namespace API.Alimed.Controllers.Wizyty
         {
             // TODO
             // Implementacja logiki pobierania dostępnych wizyt
-            return Results.Ok(new { Message = "To są dostępne wizyty." });
+            //return Results.Ok(new { Message = "To są dostępne wizyty." });
+            return Results.Ok(await _db.Wizyty.ToListAsync());
         }
 
         //[HttpGet]
@@ -67,11 +80,68 @@ namespace API.Alimed.Controllers.Wizyty
         [HttpPost]
         [Route("umow-wizyte")]
         [Authorize(Roles = "User")]
-        public async Task<IResult> UmowWizyte([FromBody] object wizytaData)
+        public async Task<IResult> UmowWizyte([FromBody] WizytaCreateDto dto)
         {
             // TODO
             // Implementacja logiki umawiania wizyty
-            return Results.Ok(new { Message = "Wizyta została umówiona.", Data = wizytaData });
+            //return Results.Ok(new { Message = "Wizyta została umówiona.", Data = wizytaData });
+
+            if(!ModelState.IsValid)
+            {
+                return Results.BadRequest(ModelState);
+            }
+
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            if (userIdClaim == null)
+            {
+                return Results.Unauthorized();
+            }
+
+            var localUserId = Guid.Parse(userIdClaim);
+
+            var pacjent = await _db.Pacjenci
+                .FirstOrDefaultAsync(p => p.UserId == localUserId);
+
+            if (pacjent == null)
+                return Results.BadRequest("Nie znaleziono pacjenta powiązanego z użytkownikiem.");
+
+            // walidacja: czy lekarz istnieje
+            if (dto.LekarzId != null)
+            {
+                bool lekarzExists = await _db.Lekarze.AnyAsync(l => l.LekarzId == dto.LekarzId);
+                if (!lekarzExists)
+                    return Results.BadRequest("Podany lekarz nie istnieje.");
+            }
+
+            // walidacja: czy placówka istnieje
+            if (dto.PlacowkaId != null)
+            {
+                bool placowkaExists = await _db.Placowki.AnyAsync(p => p.PlacowkaId == dto.PlacowkaId);
+                if (!placowkaExists)
+                    return Results.BadRequest("Podana placówka nie istnieje.");
+            }
+
+            // tworzymy nową wizytę
+            var nowaWizyta = new Wizyta
+            {
+                DataWizyty = dto.DataWizyty,
+                Diagnoza = dto.Diagnoza,
+                PacjentId = pacjent.PacjentId,
+                LekarzId = dto.LekarzId,
+                PlacowkaId = dto.PlacowkaId,
+                CzyOdbyta = false
+            };
+
+            _db.Wizyty.Add(nowaWizyta);
+            await _db.SaveChangesAsync();
+
+            return Results.Ok(new
+            {
+                Message = "Wizyta została poprawnie umówiona.",
+                WizytaId = nowaWizyta.WizytaId
+            });
+
         }
 
 
@@ -91,7 +161,7 @@ namespace API.Alimed.Controllers.Wizyty
         {
             // TODO
             // Implementacja logiki aktualizacji wizyty użytkownika po ID
-            return Results.Ok(new { Message = $"Wizyta o ID: {id} została zaktualizowana.", Data = updatedWizytaData });
+             return Results.Ok(new { Message = $"Wizyta o ID: {id} została zaktualizowana.", Data = updatedWizytaData });
         }
 
 

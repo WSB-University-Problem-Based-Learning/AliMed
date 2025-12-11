@@ -18,7 +18,6 @@
         // relacja 1:N
         // 1 pacjent wiele wizyt
         public ICollection<Wizyta>? Wizyty { get; set; }
-        public ICollection<ZaleceniaDokument>? ZaleceniaDokumenty { get; set; }
 
 
         public User? User { get; set; } = null!;

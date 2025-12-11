@@ -31,25 +31,24 @@ namespace API.Alimed.Services
                 return user;
             }
 
-            // jeśli nie istnieje, tworzy nowego użytkownika
+            // if nie istnieje tworzy nowego użytkownika
             user = new User
             {
                 UserId = Guid.NewGuid(),
                 GithubId = githubId,
                 GithubName = githubLogin,
-                Username = githubLogin, // lub inna logika nadawania nazwy użytkownika
-                Role = UserRole.User // domyślna rola
+                Username = githubLogin, 
+                Role = UserRole.User // default rola
             };
 
-            // insert nowego użytkownika do bazy danych
+
             _db.Users.Add(user);
             await _db.SaveChangesAsync();
 
-            // new
-            // Tworzymy pacjenta powiązanego z userem
+            // utw pacjenta na podstawie zalogowanego usera
+            // TODO poprawic walidacje 
             await CreatePacjentForUserAsync(user);
 
-            // zwrot nowo utworzonego użytkownika
             return user;
         }
 
@@ -60,7 +59,7 @@ namespace API.Alimed.Services
                 Id = Guid.NewGuid(),
                 UserId = userId,
                 Token = token,
-                ExpiresOnUtc = DateTime.UtcNow.AddMinutes(3) // przykładowy czas wygaśnięcia
+                ExpiresOnUtc = DateTime.UtcNow.AddMinutes(3) // czas trwania ref tkn
             };
 
             _db.RefreshToken.Add(refreshToken);
@@ -78,7 +77,7 @@ namespace API.Alimed.Services
             {
                 Imie = user.GithubName ?? "Użytkownik",
                 Nazwisko = "GitHub",
-                Pesel = Guid.NewGuid().ToString().Substring(0, 11), // fake PESEL
+                Pesel = Guid.NewGuid().ToString().Substring(0, 11),
                 DataUrodzenia = DateTime.UtcNow.AddYears(-25),
                 UserId = user.UserId,
                 AdresZamieszkania = new Adres
@@ -94,5 +93,10 @@ namespace API.Alimed.Services
             _db.Pacjenci.Add(pacjent);
             await _db.SaveChangesAsync();
         }
+
+
+
+
+
     }
 }
