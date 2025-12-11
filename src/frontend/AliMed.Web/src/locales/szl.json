@@ -222,5 +222,14 @@
     "addNote": "Przidej notatka",
     "issuePrescription": "Wystow recepta",
     "selectVisit": "Ôbier wizyta ze listy, coby widziec szczygoly"
+  },
+  "doctorPatients": {
+    "title": "Pacjynty",
+    "patient": "Pacjynt",
+    "visitType": "Typ wizyty",
+    "actions": "Akcyje",
+    "view": "Podziywej",
+    "edit": "Poedytuj",
+    "noPatients": "Niy ma pacjyntów"
   }
 }

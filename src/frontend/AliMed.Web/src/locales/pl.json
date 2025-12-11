@@ -222,5 +222,14 @@
     "addNote": "Dodaj notatkę",
     "issuePrescription": "Wystaw receptę",
     "selectVisit": "Wybierz wizytę z listy, aby zobaczyć szczegóły"
+  },
+  "doctorPatients": {
+    "title": "Pacjenci",
+    "patient": "Pacjent",
+    "visitType": "Typ wizyty",
+    "actions": "Akcje",
+    "view": "Zobacz",
+    "edit": "Edytuj",
+    "noPatients": "Brak pacjentów"
   }
 }

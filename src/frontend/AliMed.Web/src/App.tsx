@@ -8,6 +8,7 @@ import GitHubCallbackPage from './pages/GitHubCallbackPage';
 import DashboardPage from './pages/DashboardPage';
 import DoctorDashboardPage from './pages/DoctorDashboardPage';
 import WizytyLekarzPage from './pages/WizytyLekarzPage';
+import PacjenciLekarzPage from './pages/PacjenciLekarzPage';
 import PacjenciPage from './pages/PacjenciPage';
 import MojeWizytyPage from './pages/MojeWizytyPage';
 import UmowWizytePage from './pages/UmowWizytePage';
@@ -61,6 +62,11 @@ function App() {
             <Route path="/wizyty-lekarza" element={
               <ProtectedRoute>
                 <WizytyLekarzPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/pacjenci-lekarza" element={
+              <ProtectedRoute>
+                <PacjenciLekarzPage />
               </ProtectedRoute>
             } />
             
