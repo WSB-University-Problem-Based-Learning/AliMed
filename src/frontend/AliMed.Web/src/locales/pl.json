@@ -231,5 +231,27 @@
     "view": "Zobacz",
     "edit": "Edytuj",
     "noPatients": "Brak pacjentów"
+  },
+  "doctorDocumentation": {
+    "title": "Dokumentacja medyczna",
+    "documentList": "Lista dokumentów",
+    "filter": "Filtruj",
+    "date": "Data",
+    "patient": "Pacjent",
+    "type": "Typ",
+    "actions": "Akcje",
+    "preview": "Podgląd",
+    "addDocument": "Dodaj dokument",
+    "selectPatient": "Wybierz pacjenta",
+    "documentType": "Typ dokumentu",
+    "selectDocumentType": "Wybierz typ dokumentu",
+    "documentContent": "Treść dokumentu",
+    "enterDocumentContent": "Wpisz treść dokumentu...",
+    "saveDocument": "Zapisz dokument",
+    "typeWynik": "Wynik",
+    "typeRecepta": "Recepta",
+    "typeOpis": "Opis",
+    "typeSkierowanie": "Skierowanie",
+    "noDocuments": "Brak dokumentów"
   }
 }

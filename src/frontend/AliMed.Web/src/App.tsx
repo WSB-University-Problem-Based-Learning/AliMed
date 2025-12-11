@@ -9,6 +9,7 @@ import DashboardPage from './pages/DashboardPage';
 import DoctorDashboardPage from './pages/DoctorDashboardPage';
 import WizytyLekarzPage from './pages/WizytyLekarzPage';
 import PacjenciLekarzPage from './pages/PacjenciLekarzPage';
+import DokumentacjaLekarzPage from './pages/DokumentacjaLekarzPage';
 import PacjenciPage from './pages/PacjenciPage';
 import MojeWizytyPage from './pages/MojeWizytyPage';
 import UmowWizytePage from './pages/UmowWizytePage';
@@ -67,6 +68,11 @@ function App() {
             <Route path="/pacjenci-lekarza" element={
               <ProtectedRoute>
                 <PacjenciLekarzPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/dokumentacja-lekarza" element={
+              <ProtectedRoute>
+                <DokumentacjaLekarzPage />
               </ProtectedRoute>
             } />
             

@@ -105,7 +105,8 @@ const DoctorDashboardPage: React.FC = () => {
       title: t('doctorDashboard.documentation'), 
       value: statystyki.dokumentacja,
       color: 'bg-purple-100 text-purple-600',
-      borderColor: 'border-purple-500'
+      borderColor: 'border-purple-500',
+      onClick: () => navigate('/dokumentacja-lekarza')
     },
     { 
       id: 'moje-dane',

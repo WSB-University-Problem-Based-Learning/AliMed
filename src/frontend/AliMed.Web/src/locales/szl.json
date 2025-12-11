@@ -231,5 +231,27 @@
     "view": "Podziywej",
     "edit": "Poedytuj",
     "noPatients": "Niy ma pacjyntów"
+  },
+  "doctorDocumentation": {
+    "title": "Dokumyntacyjo medyczno",
+    "documentList": "Lista dokumyntów",
+    "filter": "Filtruj",
+    "date": "Data",
+    "patient": "Pacjynt",
+    "type": "Typ",
+    "actions": "Akcyje",
+    "preview": "Podglond",
+    "addDocument": "Przidej dokumynt",
+    "selectPatient": "Ôbier pacjynta",
+    "documentType": "Typ dokumyntu",
+    "selectDocumentType": "Ôbier typ dokumyntu",
+    "documentContent": "Trzyśc dokumyntu",
+    "enterDocumentContent": "Wpisz trzyśc dokumyntu...",
+    "saveDocument": "Spamiyntej dokumynt",
+    "typeWynik": "Wynik",
+    "typeRecepta": "Recepta",
+    "typeOpis": "Opis",
+    "typeSkierowanie": "Skiyrowanie",
+    "noDocuments": "Niy ma dokumyntów"
   }
 }
