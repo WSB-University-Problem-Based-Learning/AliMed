@@ -30,7 +30,6 @@ const MojeDanePage: React.FC = () => {
     telefon: '',
     ulica: '',
     numerDomu: '',
-    numerMieszkania: '',
     kodPocztowy: '',
     miasto: '',
   });
@@ -55,7 +54,6 @@ const MojeDanePage: React.FC = () => {
             adresZamieszkania: {
               ulica: 'Przykładowa',
               numerDomu: '10',
-              numerMieszkania: '5',
               kodPocztowy: '00-001',
               miasto: 'Warszawa',
             },
@@ -68,7 +66,6 @@ const MojeDanePage: React.FC = () => {
             telefon: '',
             ulica: mockPacjent.adresZamieszkania?.ulica || '',
             numerDomu: mockPacjent.adresZamieszkania?.numerDomu || '',
-            numerMieszkania: mockPacjent.adresZamieszkania?.numerMieszkania || '',
             kodPocztowy: mockPacjent.adresZamieszkania?.kodPocztowy || '',
             miasto: mockPacjent.adresZamieszkania?.miasto || '',
           });
@@ -86,7 +83,6 @@ const MojeDanePage: React.FC = () => {
             telefon: '',
             ulica: '',
             numerDomu: '',
-            numerMieszkania: '',
             kodPocztowy: '',
             miasto: '',
           });
@@ -141,7 +137,6 @@ const MojeDanePage: React.FC = () => {
         telefon: '',
         ulica: pacjent.adresZamieszkania?.ulica || '',
         numerDomu: pacjent.adresZamieszkania?.numerDomu || '',
-        numerMieszkania: pacjent.adresZamieszkania?.numerMieszkania || '',
         kodPocztowy: pacjent.adresZamieszkania?.kodPocztowy || '',
         miasto: pacjent.adresZamieszkania?.miasto || '',
       });
@@ -359,20 +354,6 @@ const MojeDanePage: React.FC = () => {
                   type="text"
                   name="numerDomu"
                   value={formData.numerDomu}
-                  onChange={handleInputChange}
-                  disabled={!isEditing}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-alimed-blue focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t('myData.apartmentNumber')}
-                </label>
-                <input
-                  type="text"
-                  name="numerMieszkania"
-                  value={formData.numerMieszkania}
                   onChange={handleInputChange}
                   disabled={!isEditing}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-alimed-blue focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
