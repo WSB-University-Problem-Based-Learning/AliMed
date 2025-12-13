@@ -188,4 +188,45 @@ export const apiService = {
     if (!response.ok) throw new Error('Failed to refresh token');
     return response.json();
   },
+
+  // Logout - revoke refresh token on backend
+  async logout(): Promise<void> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/logout`, {
+        method: 'POST',
+        headers: getHeaders(true),
+        credentials: 'include', // Send HttpOnly cookie to revoke it
+      });
+      if (!response.ok) {
+        console.error('Failed to logout on backend');
+      }
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
+  },
+
+  // Get current user's patient profile
+  async getMojProfil(): Promise<Pacjent> {
+    const response = await fetch(`${API_BASE_URL}/api/pacjenci/moj-profil`, {
+      headers: getHeaders(true),
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to fetch patient profile');
+    return response.json();
+  },
+
+  // Update current user's patient profile
+  async updateMojProfil(data: import('../types/api').UpdatePacjentProfileRequest): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE_URL}/api/pacjenci/moj-profil`, {
+      method: 'PUT',
+      headers: getHeaders(true),
+      credentials: 'include',
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Failed to update profile');
+    }
+    return response.json();
+  },
 };

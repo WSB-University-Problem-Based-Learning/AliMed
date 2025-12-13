@@ -59,7 +59,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     localStorage.removeItem('alimed_demo_mode');
   };
 
-  const logout = () => {
+  const logout = async () => {
+    // Call backend to revoke refresh token (if not in demo mode)
+    if (!isDemoMode) {
+      try {
+        // Dynamically import to avoid circular dependencies
+        const { apiService } = await import('../services/api');
+        await apiService.logout();
+      } catch (error) {
+        console.error('Error during backend logout:', error);
+      }
+    }
+    
+    // Clear local state
     setToken(null);
     setRefreshToken(null);
     setUserState(null);

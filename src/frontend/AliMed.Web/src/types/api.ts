@@ -11,9 +11,9 @@ export interface Pacjent {
 export interface Adres {
   ulica?: string;
   numerDomu?: string;
-  numerMieszkania?: string;
   kodPocztowy?: string;
   miasto?: string;
+  kraj?: string;
 }
 
 export interface Lekarz {
@@ -111,4 +111,16 @@ export interface WizytaCreateRequest {
   lekarzId?: number;
   placowkaId?: number;
   diagnoza?: string;
+}
+
+export interface UpdatePacjentProfileRequest {
+  imie: string;
+  nazwisko: string;
+  pesel: string;
+  dataUrodzenia: string;
+  ulica: string;
+  numerDomu: string;
+  kodPocztowy: string;
+  miasto: string;
+  kraj: string;
 }
