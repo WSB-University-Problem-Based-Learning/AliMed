@@ -30,7 +30,7 @@ const GitHubCallbackPage = () => {
 
       try {
         const response = await apiService.loginWithGithub(code);
-        login(response.token, response.refreshToken);
+        login(response.token, response.refreshToken, response.user);
         navigate('/dashboard');
       } catch (err) {
         console.error('GitHub auth error:', err);

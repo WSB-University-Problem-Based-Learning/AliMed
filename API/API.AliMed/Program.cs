@@ -1,33 +1,62 @@
 using API.AliMed.Data;
-using Microsoft.AspNetCore.Identity;
+using API.AliMed.Endpoints;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// services 
-builder.Services.AddOpenApi();
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+});
 
-// db conn MySql z Pomelo
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy => policy
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials()
+        .WithOrigins("http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:5174", "http://127.0.0.1:5174"));
+});
+
 var mysqlConn = builder.Configuration.GetConnectionString("MySqlConnection");
+var useInMemory = builder.Configuration.GetValue("UseInMemoryDatabase", false);
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySql(mysqlConn, ServerVersion.AutoDetect(mysqlConn)));
-
-// ef identity service
-//builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddEntityFrameworkStores<AppDbContext>();
-
+{
+    if (useInMemory || string.IsNullOrWhiteSpace(mysqlConn))
+    {
+        options.UseInMemoryDatabase("AliMedDemoDb");
+    }
+    else
+    {
+        options.UseMySql(mysqlConn, ServerVersion.AutoDetect(mysqlConn));
+    }
+});
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+using (var scope = app.Services.CreateScope())
 {
-    app.MapOpenApi();
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await DataSeeder.SeedAsync(db);
 }
 
-app.UseHttpsRedirection();
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
-app.UseAuthorization();
-app.UseAuthentication();
+app.UseCors();
+AuthEndpoints.MapAuthEndpoints(app);
+PacjenciEndpoints.MapPacjenciEndpoints(app);
+LekarzeEndpoints.MapLekarzeEndpoints(app);
+WizytyEndpoints.MapWizytyEndpoints(app);
+DokumentyEndpoints.MapDokumentyEndpoints(app);
 
-app.Run();
+app.MapGet("/health", () => Results.Ok(new { status = "ok", timestamp = DateTime.UtcNow }));
+
+await app.RunAsync();

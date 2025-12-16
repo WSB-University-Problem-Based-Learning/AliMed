@@ -7,7 +7,7 @@ interface AuthContextType {
   refreshToken: string | null;
   isAuthenticated: boolean;
   isDemoMode: boolean;
-  login: (token: string, refreshToken: string) => void;
+  login: (token: string, refreshToken: string, user?: User) => void;
   logout: () => void;
   setUser: (user: User) => void;
   enableDemoMode: () => void;
@@ -48,7 +48,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [refreshToken, setRefreshToken] = useState<string | null>(storedToken ? 'stored-in-cookie' : null);
   const [isDemoMode, setIsDemoMode] = useState(storedDemoMode);
 
-  const login = (newToken: string, newRefreshToken: string) => {
+  const login = (newToken: string, newRefreshToken: string, newUser?: User) => {
     setToken(newToken);
     // RefreshToken is stored as HttpOnly cookie by backend, don't store it in localStorage
     setRefreshToken(newRefreshToken || 'stored-in-cookie');
@@ -57,6 +57,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     // Remove refresh token from localStorage as it's now handled via HttpOnly cookie
     localStorage.removeItem('alimed_refresh_token');
     localStorage.removeItem('alimed_demo_mode');
+
+    if (newUser) {
+      setUserState(newUser);
+      localStorage.setItem('alimed_user', JSON.stringify(newUser));
+    }
   };
 
   const logout = () => {

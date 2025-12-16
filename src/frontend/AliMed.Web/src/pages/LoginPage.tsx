@@ -27,7 +27,7 @@ const LoginPage: React.FC = () => {
     try {
       setLoading(true);
       const response = await apiService.loginLocal({ email, password });
-      login(response.token, response.refreshToken);
+      login(response.token, response.refreshToken, response.user);
       navigate('/dashboard');
     } catch (err) {
       console.error('Login error:', err);

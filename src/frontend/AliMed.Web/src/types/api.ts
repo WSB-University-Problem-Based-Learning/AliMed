@@ -65,6 +65,7 @@ export const UserRoleEnum = {
 export interface AuthResponse {
   token: string;
   refreshToken: string;
+  user: User;
 }
 
 export interface ZaleceniaDokument {

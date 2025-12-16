@@ -66,9 +66,16 @@ const DokumentyPage: React.FC = () => {
   const filterDokumenty = (docs: Dokument[]) => {
     let filtered = docs;
 
-    // Filter by type
+    // Filter by type (tolerate singular/plural)
     if (filterType !== 'all') {
-      filtered = filtered.filter(d => d.typDokumentu?.toLowerCase() === filterType);
+      filtered = filtered.filter(d => {
+        const type = d.typDokumentu?.toLowerCase();
+        if (!type) return false;
+        if (filterType === 'wyniki') return type === 'wyniki' || type === 'wynik';
+        if (filterType === 'recepty') return type === 'recepty' || type === 'recepta';
+        if (filterType === 'skierowania') return type === 'skierowania' || type === 'skierowanie';
+        return type === filterType;
+      });
     }
 
     // Filter by search query

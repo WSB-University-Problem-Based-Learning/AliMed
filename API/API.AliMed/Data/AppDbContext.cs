@@ -12,6 +12,8 @@ namespace API.AliMed.Data
         public DbSet<Lekarz> Lekarze { get; set; }
         public DbSet<Pacjent> Pacjenci { get; set; }
         public DbSet<Wizyta> Wizyty { get; set; }
+        public DbSet<Dokument> Dokumenty { get; set; }
+        public DbSet<UserAccount> Uzytkownicy { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -56,6 +58,34 @@ namespace API.AliMed.Data
                 .WithMany(p => p.Wizyty)
                 .HasForeignKey(w => w.PlacowkaId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // dokument -> pacjent (opcjonalne)
+            modelBuilder.Entity<Dokument>()
+                .HasOne(d => d.Pacjent)
+                .WithMany()
+                .HasForeignKey(d => d.PacjentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // dokument -> wizyta (opcjonalne)
+            modelBuilder.Entity<Dokument>()
+                .HasOne(d => d.Wizyta)
+                .WithMany()
+                .HasForeignKey(d => d.WizytaId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // user -> pacjent (opcjonalne)
+            modelBuilder.Entity<UserAccount>()
+                .HasOne(u => u.Pacjent)
+                .WithOne()
+                .HasForeignKey<UserAccount>(u => u.PacjentId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // user -> lekarz (opcjonalne)
+            modelBuilder.Entity<UserAccount>()
+                .HasOne(u => u.Lekarz)
+                .WithOne()
+                .HasForeignKey<UserAccount>(u => u.LekarzId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             base.OnModelCreating(modelBuilder);
         }

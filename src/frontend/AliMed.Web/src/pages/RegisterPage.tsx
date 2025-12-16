@@ -71,7 +71,7 @@ const RegisterPage: React.FC = () => {
     try {
       setLoading(true);
       const response = await apiService.register(formData);
-      login(response.token, response.refreshToken);
+      login(response.token, response.refreshToken, response.user);
       navigate('/dashboard');
     } catch (err) {
       console.error('Registration error:', err);

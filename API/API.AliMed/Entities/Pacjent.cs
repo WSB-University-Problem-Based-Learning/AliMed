@@ -8,6 +8,9 @@
         public string? Nazwisko  { get; set; }
         public string? Pesel { get; set; } // unique
 
+        // powiazanie z kontem uzytkownika (opcjonalne)
+        public string? UserId { get; set; }
+
         // OwnEntity zamiast dodatkowej tabeli bedzie prefix AdresZamieszkania w nazwie kolumny w Pacjent
         public Adres? AdresZamieszkania { get; set; }
 

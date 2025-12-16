@@ -35,10 +35,10 @@ export const apiService = {
     });
     if (!response.ok) throw new Error('Failed to authenticate with GitHub');
     const data = await response.json();
-    // Backend returns only 'token', but refresh token is in HttpOnly cookie
     return {
       token: data.token,
-      refreshToken: '', // Refresh token is handled via HttpOnly cookie
+      refreshToken: data.refreshToken ?? '',
+      user: data.user,
     };
   },
 
@@ -57,7 +57,8 @@ export const apiService = {
     const data = await response.json();
     return {
       token: data.token,
-      refreshToken: '',
+      refreshToken: data.refreshToken ?? '',
+      user: data.user,
     };
   },
 
@@ -76,7 +77,8 @@ export const apiService = {
     const result = await response.json();
     return {
       token: result.token,
-      refreshToken: '',
+      refreshToken: result.refreshToken ?? '',
+      user: result.user,
     };
   },
 
