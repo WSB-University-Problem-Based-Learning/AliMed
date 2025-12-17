@@ -4,3 +4,12 @@ GET {{API.Alimed_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###
+
+GET {{API.Alimed_HostAddress}}/api/admin/users/
+Accept: application/json
+
+###
+
+
+GET {{API.Alimed_HostAddress}}/api/admin/users/a0000000-0000-0000-0000-000000000001/role
+Accept: application/json

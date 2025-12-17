@@ -1,5 +1,3 @@
-
-
 using API.Alimed.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -7,8 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Alimed.Controllers.Admin;
 
-
-[Authorize]
+//[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class AdminController : ControllerBase
@@ -38,14 +35,41 @@ public class AdminController : ControllerBase
         return Ok(usersList);
     }
 
-
-    [HttpPut]
-    [Route("user-role")]
-    [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> UpdateUserRole()
+    [HttpGet]
+    [Route("users/{userId}/role")]
+    // [Authorize(Roles = "Admin")]
+    public async Task <IActionResult> GetUserRole(string userId)
     {
-        return Ok("Here admin user role method");
+        var userRole = await _db.Users
+            .Where(u => u.UserId.ToString() == userId)
+            .Select(u => u.Role)
+            .FirstOrDefaultAsync();
+
+        if (userRole == null)
+            return NotFound();
+
+        return Ok(userRole);
     }
+
+
+
+    //[HttpPut]
+    //[Route("user-role/{id}")]
+    //[Authorize(Roles = "Admin")]
+    //public async Task<IResult> UpdateUserRole(int id)
+    //{
+    //    var userId = await _db.Users
+    //        .Where(u => u.UserId == userId)
+
+    //    if (userId == null)
+    //        return Results.BadRequest("User not found - UpdateUserRole");
+        
+    //    var userRole = await _db.Users.
+    //    if(user)
+
+
+    //    //return Ok("Here admin user role method");
+    //}
 
 
 
