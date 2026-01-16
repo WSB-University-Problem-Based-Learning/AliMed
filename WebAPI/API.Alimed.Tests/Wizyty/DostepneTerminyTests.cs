@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using API.Alimed.Tests.Infrastructure;
 using Xunit;
 
 public class DostepneTerminyTests

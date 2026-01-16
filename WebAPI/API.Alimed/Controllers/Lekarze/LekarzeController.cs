@@ -52,26 +52,48 @@ namespace API.Alimed.Controllers.Lekarze
         }
 
 
+        // [HttpGet]
+        // [Authorize(Roles = "User")]
+        // public async Task<IResult> GetLekarze([FromQuery] int placowkaId)
+        // {
+        //     var lekarze = await _db.Lekarze
+        //         .AsNoTracking()
+        //         .Where(l => l.PlacowkaId == placowkaId)
+        //         .Select(l => new
+        //         {
+        //             l.LekarzId,
+        //             l.Imie,
+        //             l.Nazwisko,
+        //             l.Specjalizacja
+        //         })
+        //         .ToListAsync();
+
+        // return Results.Ok(lekarze);
+        // }
+
         [HttpGet]
-        [Authorize(Roles = "User")]
-        public async Task<IResult> GetLekarze([FromQuery] int placowkaId)
+        [Authorize(Roles = "User, Admin")]
+        public async Task<IResult> GetLekarze([FromQuery] int? placowkaId)
         {
-            var lekarze = await _db.Lekarze
-                .AsNoTracking()
-                .Where(l => l.PlacowkaId == placowkaId)
+            var q = _db.Lekarze.AsNoTracking().AsQueryable();
+
+            if (placowkaId.HasValue)
+                q = q.Where(l => l.PlacowkaId == placowkaId.Value);
+
+            var lekarze = await q
+                .OrderBy(l => l.Nazwisko)
                 .Select(l => new
                 {
                     l.LekarzId,
                     l.Imie,
                     l.Nazwisko,
-                    l.Specjalizacja
+                    l.Specjalizacja,
+                    l.PlacowkaId
                 })
                 .ToListAsync();
 
-        return Results.Ok(lekarze);
+            return Results.Ok(lekarze);
         }
-
-
 
 
 

@@ -76,14 +76,13 @@ namespace API.Alimed.Controllers.Pacjenci
         /// PUT Requests
         ////////////////////////////////////////////////////////////////////////////////////////////////////////
         [HttpPut("moj-profil")]
-        [Authorize]
         [Authorize(Roles = "User, Admin")]
         public async Task<IActionResult> UpdateMyProfile([FromBody] UpdatePacjentProfileDto dto)
         {
 
 
             //
-            var userIdStr = User.FindFirst("nameid")?.Value;
+            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             //
 
 

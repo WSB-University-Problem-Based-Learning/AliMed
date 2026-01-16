@@ -8,10 +8,10 @@ namespace API.Alimed.Dtos
         public DateTime DataWizyty { get; set; }
 
         [Required]
-        public int? LekarzId { get; set; }
+        public int LekarzId { get; set; }
         
         [Required]
-        public int? PlacowkaId { get; set; }
+        public int PlacowkaId { get; set; }
 
         public string? Diagnoza { get; set; } // opcjonalnie
     }

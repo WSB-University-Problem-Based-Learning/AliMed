@@ -509,14 +509,14 @@ namespace API.Alimed.Data
             );
 
 
-            modelBuilder.Entity<GodzinyPracyLekarza>().HasData(
-                // Lekarz 1 – Placówka 1
-                new { Id = 1, LekarzId = 1, PlacowkaId = 1, DzienTygodnia = DayOfWeek.Monday,    GodzinaOd = new TimeSpan(8,0,0), GodzinaDo = new TimeSpan(16,0,0), CzasWizytyMinuty = 30 },
-                new { Id = 2, LekarzId = 1, PlacowkaId = 1, DzienTygodnia = DayOfWeek.Tuesday,   GodzinaOd = new TimeSpan(8,0,0), GodzinaDo = new TimeSpan(16,0,0), CzasWizytyMinuty = 30 },
-                new { Id = 3, LekarzId = 1, PlacowkaId = 1, DzienTygodnia = DayOfWeek.Wednesday, GodzinaOd = new TimeSpan(8,0,0), GodzinaDo = new TimeSpan(16,0,0), CzasWizytyMinuty = 30 },
-                new { Id = 4, LekarzId = 1, PlacowkaId = 1, DzienTygodnia = DayOfWeek.Thursday,  GodzinaOd = new TimeSpan(8,0,0), GodzinaDo = new TimeSpan(16,0,0), CzasWizytyMinuty = 30 },
-                new { Id = 5, LekarzId = 1, PlacowkaId = 1, DzienTygodnia = DayOfWeek.Friday,    GodzinaOd = new TimeSpan(8,0,0), GodzinaDo = new TimeSpan(16,0,0), CzasWizytyMinuty = 30 }
-            );
+            // modelBuilder.Entity<GodzinyPracyLekarza>().HasData(
+            //     // Lekarz 1 – Placówka 1
+            //     new { Id = 1, LekarzId = 1, PlacowkaId = 1, DzienTygodnia = DayOfWeek.Monday,    GodzinaOd = new TimeSpan(8,0,0), GodzinaDo = new TimeSpan(16,0,0), CzasWizytyMinuty = 30 },
+            //     new { Id = 2, LekarzId = 1, PlacowkaId = 1, DzienTygodnia = DayOfWeek.Tuesday,   GodzinaOd = new TimeSpan(8,0,0), GodzinaDo = new TimeSpan(16,0,0), CzasWizytyMinuty = 30 },
+            //     new { Id = 3, LekarzId = 1, PlacowkaId = 1, DzienTygodnia = DayOfWeek.Wednesday, GodzinaOd = new TimeSpan(8,0,0), GodzinaDo = new TimeSpan(16,0,0), CzasWizytyMinuty = 30 },
+            //     new { Id = 4, LekarzId = 1, PlacowkaId = 1, DzienTygodnia = DayOfWeek.Thursday,  GodzinaOd = new TimeSpan(8,0,0), GodzinaDo = new TimeSpan(16,0,0), CzasWizytyMinuty = 30 },
+            //     new { Id = 5, LekarzId = 1, PlacowkaId = 1, DzienTygodnia = DayOfWeek.Friday,    GodzinaOd = new TimeSpan(8,0,0), GodzinaDo = new TimeSpan(16,0,0), CzasWizytyMinuty = 30 }
+            // );
 
 
 
