@@ -1,8 +1,10 @@
+
 using API.Alimed.Data;
 using API.Alimed.Extensions;
 using API.Alimed.Interfaces;
 using API.Alimed.Services;
 using Microsoft.EntityFrameworkCore;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +26,11 @@ builder.Services.AddHttpClient(); // http
 // builder.Services.AddOpenApi();
 
 
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+
 // cors policy for dev testing 
 builder.Services.AddCors(options =>
 {
@@ -39,13 +46,22 @@ builder.Services.AddCors(options =>
 });
 
 
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseCors("AllowReactApp");
-    app.MapOpenApi();
+    // app.MapOpenApi();
+
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "AliMed API v1");
+        c.RoutePrefix = "swagger";
+    });
 }
 
 
