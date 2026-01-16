@@ -27,6 +27,7 @@
 
   <ItemGroup>
     <Folder Include="Controllers\Admin\" />
+    <Folder Include="Controllers\Placowki\" />
   </ItemGroup>
 
 </Project>

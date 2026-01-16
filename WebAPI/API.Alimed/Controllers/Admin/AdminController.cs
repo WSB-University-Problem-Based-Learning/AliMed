@@ -45,9 +45,6 @@ public class AdminController : ControllerBase
             .Select(u => u.Role)
             .FirstOrDefaultAsync();
 
-        if (userRole == null)
-            return NotFound();
-
         return Ok(userRole);
     }
 

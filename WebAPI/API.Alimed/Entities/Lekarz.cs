@@ -8,6 +8,10 @@
         public string? Nazwisko { get; set; }
         public string? Specjalizacja { get; set; }
 
+        // 🔐 powiązanie z kontem
+        public Guid? UserId { get; set; }
+        public User? User { get; set; }
+
         // foreign key do placowki
         public int? PlacowkaId { get; set; }
         // prop nawigacyjne do relacji 1:N

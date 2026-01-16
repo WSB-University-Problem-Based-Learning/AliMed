@@ -14,6 +14,7 @@ namespace API.Alimed.Data
         public DbSet<Wizyta> Wizyty { get; set; }
         public DbSet<RefreshToken> RefreshToken { get; set; } // ICollection<RefreshToken> w User
         public DbSet<User> Users { get; set; }
+        public DbSet<GodzinyPracyLekarza> GodzinyPracyLekarzy { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -70,7 +71,15 @@ namespace API.Alimed.Data
                 .HasOne(l => l.Placowka)
                 .WithMany(p => p.Lekarze)
                 .HasForeignKey(l => l.PlacowkaId)
-                .IsRequired(false);
+                .OnDelete(DeleteBehavior.Restrict);
+
+
+            modelBuilder.Entity<Lekarz>()
+                .HasOne(l => l.User)
+                .WithOne()
+                .HasForeignKey<Lekarz>(l => l.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+            
 
             // 1:N Pacjent -> Wizyty
             modelBuilder.Entity<Wizyta>()
@@ -96,6 +105,29 @@ namespace API.Alimed.Data
                     .HasForeignKey(w => w.PlacowkaId)
                     //.OnDelete(DeleteBehavior.Restrict)
                     .IsRequired(false);
+
+            // ------------------ indeksy ------------------
+            // wazne
+            // unikalna wizyta dla danego lekarza w danym terminie w danej placówce
+            modelBuilder.Entity<Wizyta>()
+                .HasIndex(w => new { w.LekarzId, w.PlacowkaId, w.DataWizyty })
+                .IsUnique();
+
+
+
+
+            modelBuilder.Entity<GodzinyPracyLekarza>()
+                .HasOne(g => g.Lekarz)
+                .WithMany()
+                .HasForeignKey(g => g.LekarzId);
+
+            modelBuilder.Entity<GodzinyPracyLekarza>()
+                .HasOne(g => g.Placowka)
+                .WithMany()
+                .HasForeignKey(g => g.PlacowkaId);
+
+
+
 
 
             // ------------------ SEEDING DANYCH (HasData) ------------------
@@ -402,43 +434,131 @@ namespace API.Alimed.Data
 
 
             // WIZYTY (Łącznie 25 rekordów)
+            // modelBuilder.Entity<Wizyta>().HasData(
+            //     // === PACJENT 1 (Alicja Bąk) - Wizyty w różnych placówkach ===
+            //     new { WizytaId = 1, DataWizyty = new DateTime(2025, 1, 15, 10, 0, 0), Diagnoza = "Grypa sezonowa", CzyOdbyta = true, PacjentId = 1, LekarzId = 1, PlacowkaId = 1 }, // Lekarz 1, Placówka 1
+            //     new { WizytaId = 2, DataWizyty = new DateTime(2025, 2, 20, 11, 30, 0), Diagnoza = "Kontrola ciśnienia", CzyOdbyta = true, PacjentId = 1, LekarzId = 7, PlacowkaId = 3 }, // Lekarz 7, Placówka 3
+            //     new { WizytaId = 3, DataWizyty = new DateTime(2025, 3, 5, 14, 0, 0), Diagnoza = "Badanie okresowe", CzyOdbyta = true, PacjentId = 1, LekarzId = 15, PlacowkaId = 4 }, // Lekarz 15, Placówka 4
+            //     new { WizytaId = 4, DataWizyty = new DateTime(2025, 4, 1, 9, 0, 0), Diagnoza = "Wizyta u kardiologa", CzyOdbyta = true, PacjentId = 1, LekarzId = 37, PlacowkaId = 5 }, // Lekarz 37, Placówka 5
+            //     new { WizytaId = 5, DataWizyty = new DateTime(2025, 5, 10, 15, 30, 0), Diagnoza = "Badanie krwi (planowana)", CzyOdbyta = false, PacjentId = 1, LekarzId = 4, PlacowkaId = 2 }, // Lekarz 4, Placówka 2
+
+            //     // === PACJENT 2 (Robert Cygan) ===
+            //     new { WizytaId = 6, DataWizyty = new DateTime(2025, 1, 25, 8, 30, 0), Diagnoza = "Ból pleców", CzyOdbyta = true, PacjentId = 2, LekarzId = 5, PlacowkaId = 2 }, // Lekarz 5, Placówka 2
+            //     new { WizytaId = 7, DataWizyty = new DateTime(2025, 2, 1, 16, 0, 0), Diagnoza = "Skręcenie kostki", CzyOdbyta = true, PacjentId = 2, LekarzId = 21, PlacowkaId = 4 }, // Lekarz 21, Placówka 4
+            //     new { WizytaId = 8, DataWizyty = new DateTime(2025, 3, 15, 12, 0, 0), Diagnoza = "Kontrola po urazie", CzyOdbyta = true, PacjentId = 2, LekarzId = 39, PlacowkaId = 5 }, // Lekarz 39, Placówka 5
+            //     new { WizytaId = 9, DataWizyty = new DateTime(2025, 4, 10, 10, 0, 0), Diagnoza = "Wizyta u dermatologa", CzyOdbyta = true, PacjentId = 2, LekarzId = 20, PlacowkaId = 4 }, // Lekarz 20, Placówka 4
+            //     new { WizytaId = 10, DataWizyty = new DateTime(2025, 5, 25, 11, 0, 0), Diagnoza = "Wizyta kontrolna (planowana)", CzyOdbyta = false, PacjentId = 2, LekarzId = 1, PlacowkaId = 1 }, // Lekarz 1, Placówka 1
+
+            //     // === PACJENT 3 (Karolina Duda) ===
+            //     new { WizytaId = 11, DataWizyty = new DateTime(2025, 1, 5, 13, 0, 0), Diagnoza = "Wizyta u endokrynologa", CzyOdbyta = true, PacjentId = 3, LekarzId = 8, PlacowkaId = 3 }, // Lekarz 8, Placówka 3
+            //     new { WizytaId = 12, DataWizyty = new DateTime(2025, 2, 28, 9, 30, 0), Diagnoza = "Problemy ze snem", CzyOdbyta = true, PacjentId = 3, LekarzId = 30, PlacowkaId = 4 }, // Lekarz 30, Placówka 4
+            //     new { WizytaId = 13, DataWizyty = new DateTime(2025, 3, 22, 17, 0, 0), Diagnoza = "Badania hormonalne", CzyOdbyta = true, PacjentId = 3, LekarzId = 42, PlacowkaId = 5 }, // Lekarz 42, Placówka 5
+            //     new { WizytaId = 14, DataWizyty = new DateTime(2025, 4, 18, 11, 0, 0), Diagnoza = "Konsultacja psychiatryczna", CzyOdbyta = true, PacjentId = 3, LekarzId = 48, PlacowkaId = 5 }, // Lekarz 48, Placówka 5
+            //     new { WizytaId = 15, DataWizyty = new DateTime(2025, 5, 1, 13, 0, 0), Diagnoza = "Konsultacja ginekologiczna (planowana)", CzyOdbyta = false, PacjentId = 3, LekarzId = 6, PlacowkaId = 2 }, // Lekarz 6, Placówka 2
+
+            //     // === PACJENT 4 (Maksymilian Falkowski) ===
+            //     new { WizytaId = 16, DataWizyty = new DateTime(2025, 1, 1, 10, 0, 0), Diagnoza = "Ból głowy", CzyOdbyta = true, PacjentId = 4, LekarzId = 23, PlacowkaId = 4 }, // Lekarz 23, Placówka 4
+            //     new { WizytaId = 17, DataWizyty = new DateTime(2025, 2, 14, 14, 30, 0), Diagnoza = "Kontrola okulistyczna", CzyOdbyta = true, PacjentId = 4, LekarzId = 10, PlacowkaId = 3 }, // Lekarz 10, Placówka 3
+            //     new { WizytaId = 18, DataWizyty = new DateTime(2025, 3, 30, 8, 0, 0), Diagnoza = "Wizyta u pulmonologa", CzyOdbyta = true, PacjentId = 4, LekarzId = 27, PlacowkaId = 4 }, // Lekarz 27, Placówka 4
+            //     new { WizytaId = 19, DataWizyty = new DateTime(2025, 4, 25, 12, 0, 0), Diagnoza = "Zapalenie spojówek", CzyOdbyta = true, PacjentId = 4, LekarzId = 44, PlacowkaId = 5 }, // Lekarz 44, Placówka 5
+            //     new { WizytaId = 20, DataWizyty = new DateTime(2025, 5, 8, 14, 0, 0), Diagnoza = "Szczepienie (planowane)", CzyOdbyta = false, PacjentId = 4, LekarzId = 2, PlacowkaId = 1 }, // Lekarz 2, Placówka 1
+
+            //     // === PACJENT 5 (Zofia Górecka) ===
+            //     new { WizytaId = 21, DataWizyty = new DateTime(2025, 1, 10, 11, 0, 0), Diagnoza = "Ból stawów", CzyOdbyta = true, PacjentId = 5, LekarzId = 12, PlacowkaId = 3 }, // Lekarz 12, Placówka 3
+            //     new { WizytaId = 22, DataWizyty = new DateTime(2025, 2, 5, 13, 30, 0), Diagnoza = "Zalecenia reumatologiczne", CzyOdbyta = true, PacjentId = 5, LekarzId = 28, PlacowkaId = 4 }, // Lekarz 28, Placówka 4
+            //     new { WizytaId = 23, DataWizyty = new DateTime(2025, 3, 1, 10, 0, 0), Diagnoza = "Kontrola geriatryczna", CzyOdbyta = true, PacjentId = 5, LekarzId = 31, PlacowkaId = 4 }, // Lekarz 31, Placówka 4
+            //     new { WizytaId = 24, DataWizyty = new DateTime(2025, 4, 14, 9, 30, 0), Diagnoza = "Konsultacja onkologiczna", CzyOdbyta = true, PacjentId = 5, LekarzId = 50, PlacowkaId = 5 }, // Lekarz 50, Placówka 5
+            //     new { WizytaId = 25, DataWizyty = new DateTime(2025, 5, 20, 16, 0, 0), Diagnoza = "Kontrola (planowana)", CzyOdbyta = false, PacjentId = 5, LekarzId = 3, PlacowkaId = 1 }  // Lekarz 3, Placówka 1
+            // );
+
             modelBuilder.Entity<Wizyta>().HasData(
-                // === PACJENT 1 (Alicja Bąk) - Wizyty w różnych placówkach ===
-                new { WizytaId = 1, DataWizyty = new DateTime(2025, 1, 15, 10, 0, 0), Diagnoza = "Grypa sezonowa", CzyOdbyta = true, PacjentId = 1, LekarzId = 1, PlacowkaId = 1 }, // Lekarz 1, Placówka 1
-                new { WizytaId = 2, DataWizyty = new DateTime(2025, 2, 20, 11, 30, 0), Diagnoza = "Kontrola ciśnienia", CzyOdbyta = true, PacjentId = 1, LekarzId = 7, PlacowkaId = 3 }, // Lekarz 7, Placówka 3
-                new { WizytaId = 3, DataWizyty = new DateTime(2025, 3, 5, 14, 0, 0), Diagnoza = "Badanie okresowe", CzyOdbyta = true, PacjentId = 1, LekarzId = 15, PlacowkaId = 4 }, // Lekarz 15, Placówka 4
-                new { WizytaId = 4, DataWizyty = new DateTime(2025, 4, 1, 9, 0, 0), Diagnoza = "Wizyta u kardiologa", CzyOdbyta = true, PacjentId = 1, LekarzId = 37, PlacowkaId = 5 }, // Lekarz 37, Placówka 5
-                new { WizytaId = 5, DataWizyty = new DateTime(2025, 5, 10, 15, 30, 0), Diagnoza = "Badanie krwi (planowana)", CzyOdbyta = false, PacjentId = 1, LekarzId = 4, PlacowkaId = 2 }, // Lekarz 4, Placówka 2
+                // === PACJENT 1 (Alicja Bąk) ===
+                new { WizytaId = 1, DataWizyty = new DateTime(2025, 1, 15, 10, 0, 0), Diagnoza = "Grypa sezonowa", Status = StatusWizyty.Odbyta, PacjentId = 1, LekarzId = 1, PlacowkaId = 1 },
+                new { WizytaId = 2, DataWizyty = new DateTime(2025, 2, 20, 11, 30, 0), Diagnoza = "Kontrola ciśnienia", Status = StatusWizyty.Odbyta, PacjentId = 1, LekarzId = 7, PlacowkaId = 3 },
+                new { WizytaId = 3, DataWizyty = new DateTime(2025, 3, 5, 14, 0, 0), Diagnoza = "Badanie okresowe", Status = StatusWizyty.Odbyta, PacjentId = 1, LekarzId = 15, PlacowkaId = 4 },
+                new { WizytaId = 4, DataWizyty = new DateTime(2025, 4, 1, 9, 0, 0), Diagnoza = "Wizyta u kardiologa", Status = StatusWizyty.Odbyta, PacjentId = 1, LekarzId = 37, PlacowkaId = 5 },
+                new { WizytaId = 5, DataWizyty = new DateTime(2025, 5, 10, 15, 30, 0), Diagnoza = "Badanie krwi (planowana)", Status = StatusWizyty.Zaplanowana, PacjentId = 1, LekarzId = 4, PlacowkaId = 2 },
 
                 // === PACJENT 2 (Robert Cygan) ===
-                new { WizytaId = 6, DataWizyty = new DateTime(2025, 1, 25, 8, 30, 0), Diagnoza = "Ból pleców", CzyOdbyta = true, PacjentId = 2, LekarzId = 5, PlacowkaId = 2 }, // Lekarz 5, Placówka 2
-                new { WizytaId = 7, DataWizyty = new DateTime(2025, 2, 1, 16, 0, 0), Diagnoza = "Skręcenie kostki", CzyOdbyta = true, PacjentId = 2, LekarzId = 21, PlacowkaId = 4 }, // Lekarz 21, Placówka 4
-                new { WizytaId = 8, DataWizyty = new DateTime(2025, 3, 15, 12, 0, 0), Diagnoza = "Kontrola po urazie", CzyOdbyta = true, PacjentId = 2, LekarzId = 39, PlacowkaId = 5 }, // Lekarz 39, Placówka 5
-                new { WizytaId = 9, DataWizyty = new DateTime(2025, 4, 10, 10, 0, 0), Diagnoza = "Wizyta u dermatologa", CzyOdbyta = true, PacjentId = 2, LekarzId = 20, PlacowkaId = 4 }, // Lekarz 20, Placówka 4
-                new { WizytaId = 10, DataWizyty = new DateTime(2025, 5, 25, 11, 0, 0), Diagnoza = "Wizyta kontrolna (planowana)", CzyOdbyta = false, PacjentId = 2, LekarzId = 1, PlacowkaId = 1 }, // Lekarz 1, Placówka 1
+                new { WizytaId = 6, DataWizyty = new DateTime(2025, 1, 25, 8, 30, 0), Diagnoza = "Ból pleców", Status = StatusWizyty.Odbyta, PacjentId = 2, LekarzId = 5, PlacowkaId = 2 },
+                new { WizytaId = 7, DataWizyty = new DateTime(2025, 2, 1, 16, 0, 0), Diagnoza = "Skręcenie kostki", Status = StatusWizyty.Odbyta, PacjentId = 2, LekarzId = 21, PlacowkaId = 4 },
+                new { WizytaId = 8, DataWizyty = new DateTime(2025, 3, 15, 12, 0, 0), Diagnoza = "Kontrola po urazie", Status = StatusWizyty.Odbyta, PacjentId = 2, LekarzId = 39, PlacowkaId = 5 },
+                new { WizytaId = 9, DataWizyty = new DateTime(2025, 4, 10, 10, 0, 0), Diagnoza = "Wizyta u dermatologa", Status = StatusWizyty.Odbyta, PacjentId = 2, LekarzId = 20, PlacowkaId = 4 },
+                new { WizytaId = 10, DataWizyty = new DateTime(2025, 5, 25, 11, 0, 0), Diagnoza = "Wizyta kontrolna (planowana)", Status = StatusWizyty.Zaplanowana, PacjentId = 2, LekarzId = 1, PlacowkaId = 1 },
 
                 // === PACJENT 3 (Karolina Duda) ===
-                new { WizytaId = 11, DataWizyty = new DateTime(2025, 1, 5, 13, 0, 0), Diagnoza = "Wizyta u endokrynologa", CzyOdbyta = true, PacjentId = 3, LekarzId = 8, PlacowkaId = 3 }, // Lekarz 8, Placówka 3
-                new { WizytaId = 12, DataWizyty = new DateTime(2025, 2, 28, 9, 30, 0), Diagnoza = "Problemy ze snem", CzyOdbyta = true, PacjentId = 3, LekarzId = 30, PlacowkaId = 4 }, // Lekarz 30, Placówka 4
-                new { WizytaId = 13, DataWizyty = new DateTime(2025, 3, 22, 17, 0, 0), Diagnoza = "Badania hormonalne", CzyOdbyta = true, PacjentId = 3, LekarzId = 42, PlacowkaId = 5 }, // Lekarz 42, Placówka 5
-                new { WizytaId = 14, DataWizyty = new DateTime(2025, 4, 18, 11, 0, 0), Diagnoza = "Konsultacja psychiatryczna", CzyOdbyta = true, PacjentId = 3, LekarzId = 48, PlacowkaId = 5 }, // Lekarz 48, Placówka 5
-                new { WizytaId = 15, DataWizyty = new DateTime(2025, 5, 1, 13, 0, 0), Diagnoza = "Konsultacja ginekologiczna (planowana)", CzyOdbyta = false, PacjentId = 3, LekarzId = 6, PlacowkaId = 2 }, // Lekarz 6, Placówka 2
+                new { WizytaId = 11, DataWizyty = new DateTime(2025, 1, 5, 13, 0, 0), Diagnoza = "Wizyta u endokrynologa", Status = StatusWizyty.Odbyta, PacjentId = 3, LekarzId = 8, PlacowkaId = 3 },
+                new { WizytaId = 12, DataWizyty = new DateTime(2025, 2, 28, 9, 30, 0), Diagnoza = "Problemy ze snem", Status = StatusWizyty.Odbyta, PacjentId = 3, LekarzId = 30, PlacowkaId = 4 },
+                new { WizytaId = 13, DataWizyty = new DateTime(2025, 3, 22, 17, 0, 0), Diagnoza = "Badania hormonalne", Status = StatusWizyty.Odbyta, PacjentId = 3, LekarzId = 42, PlacowkaId = 5 },
+                new { WizytaId = 14, DataWizyty = new DateTime(2025, 4, 18, 11, 0, 0), Diagnoza = "Konsultacja psychiatryczna", Status = StatusWizyty.Odbyta, PacjentId = 3, LekarzId = 48, PlacowkaId = 5 },
+                new { WizytaId = 15, DataWizyty = new DateTime(2025, 5, 1, 13, 0, 0), Diagnoza = "Konsultacja ginekologiczna (planowana)", Status = StatusWizyty.Zaplanowana, PacjentId = 3, LekarzId = 6, PlacowkaId = 2 },
 
                 // === PACJENT 4 (Maksymilian Falkowski) ===
-                new { WizytaId = 16, DataWizyty = new DateTime(2025, 1, 1, 10, 0, 0), Diagnoza = "Ból głowy", CzyOdbyta = true, PacjentId = 4, LekarzId = 23, PlacowkaId = 4 }, // Lekarz 23, Placówka 4
-                new { WizytaId = 17, DataWizyty = new DateTime(2025, 2, 14, 14, 30, 0), Diagnoza = "Kontrola okulistyczna", CzyOdbyta = true, PacjentId = 4, LekarzId = 10, PlacowkaId = 3 }, // Lekarz 10, Placówka 3
-                new { WizytaId = 18, DataWizyty = new DateTime(2025, 3, 30, 8, 0, 0), Diagnoza = "Wizyta u pulmonologa", CzyOdbyta = true, PacjentId = 4, LekarzId = 27, PlacowkaId = 4 }, // Lekarz 27, Placówka 4
-                new { WizytaId = 19, DataWizyty = new DateTime(2025, 4, 25, 12, 0, 0), Diagnoza = "Zapalenie spojówek", CzyOdbyta = true, PacjentId = 4, LekarzId = 44, PlacowkaId = 5 }, // Lekarz 44, Placówka 5
-                new { WizytaId = 20, DataWizyty = new DateTime(2025, 5, 8, 14, 0, 0), Diagnoza = "Szczepienie (planowane)", CzyOdbyta = false, PacjentId = 4, LekarzId = 2, PlacowkaId = 1 }, // Lekarz 2, Placówka 1
+                new { WizytaId = 16, DataWizyty = new DateTime(2025, 1, 1, 10, 0, 0), Diagnoza = "Ból głowy", Status = StatusWizyty.Odbyta, PacjentId = 4, LekarzId = 23, PlacowkaId = 4 },
+                new { WizytaId = 17, DataWizyty = new DateTime(2025, 2, 14, 14, 30, 0), Diagnoza = "Kontrola okulistyczna", Status = StatusWizyty.Odbyta, PacjentId = 4, LekarzId = 10, PlacowkaId = 3 },
+                new { WizytaId = 18, DataWizyty = new DateTime(2025, 3, 30, 8, 0, 0), Diagnoza = "Wizyta u pulmonologa", Status = StatusWizyty.Odbyta, PacjentId = 4, LekarzId = 27, PlacowkaId = 4 },
+                new { WizytaId = 19, DataWizyty = new DateTime(2025, 4, 25, 12, 0, 0), Diagnoza = "Zapalenie spojówek", Status = StatusWizyty.Odbyta, PacjentId = 4, LekarzId = 44, PlacowkaId = 5 },
+                new { WizytaId = 20, DataWizyty = new DateTime(2025, 5, 8, 14, 0, 0), Diagnoza = "Szczepienie (planowane)", Status = StatusWizyty.Zaplanowana, PacjentId = 4, LekarzId = 2, PlacowkaId = 1 },
 
                 // === PACJENT 5 (Zofia Górecka) ===
-                new { WizytaId = 21, DataWizyty = new DateTime(2025, 1, 10, 11, 0, 0), Diagnoza = "Ból stawów", CzyOdbyta = true, PacjentId = 5, LekarzId = 12, PlacowkaId = 3 }, // Lekarz 12, Placówka 3
-                new { WizytaId = 22, DataWizyty = new DateTime(2025, 2, 5, 13, 30, 0), Diagnoza = "Zalecenia reumatologiczne", CzyOdbyta = true, PacjentId = 5, LekarzId = 28, PlacowkaId = 4 }, // Lekarz 28, Placówka 4
-                new { WizytaId = 23, DataWizyty = new DateTime(2025, 3, 1, 10, 0, 0), Diagnoza = "Kontrola geriatryczna", CzyOdbyta = true, PacjentId = 5, LekarzId = 31, PlacowkaId = 4 }, // Lekarz 31, Placówka 4
-                new { WizytaId = 24, DataWizyty = new DateTime(2025, 4, 14, 9, 30, 0), Diagnoza = "Konsultacja onkologiczna", CzyOdbyta = true, PacjentId = 5, LekarzId = 50, PlacowkaId = 5 }, // Lekarz 50, Placówka 5
-                new { WizytaId = 25, DataWizyty = new DateTime(2025, 5, 20, 16, 0, 0), Diagnoza = "Kontrola (planowana)", CzyOdbyta = false, PacjentId = 5, LekarzId = 3, PlacowkaId = 1 }  // Lekarz 3, Placówka 1
+                new { WizytaId = 21, DataWizyty = new DateTime(2025, 1, 10, 11, 0, 0), Diagnoza = "Ból stawów", Status = StatusWizyty.Odbyta, PacjentId = 5, LekarzId = 12, PlacowkaId = 3 },
+                new { WizytaId = 22, DataWizyty = new DateTime(2025, 2, 5, 13, 30, 0), Diagnoza = "Zalecenia reumatologiczne", Status = StatusWizyty.Odbyta, PacjentId = 5, LekarzId = 28, PlacowkaId = 4 },
+                new { WizytaId = 23, DataWizyty = new DateTime(2025, 3, 1, 10, 0, 0), Diagnoza = "Kontrola geriatryczna", Status = StatusWizyty.Odbyta, PacjentId = 5, LekarzId = 31, PlacowkaId = 4 },
+                new { WizytaId = 24, DataWizyty = new DateTime(2025, 4, 14, 9, 30, 0), Diagnoza = "Konsultacja onkologiczna", Status = StatusWizyty.Odbyta, PacjentId = 5, LekarzId = 50, PlacowkaId = 5 },
+                new { WizytaId = 25, DataWizyty = new DateTime(2025, 5, 20, 16, 0, 0), Diagnoza = "Kontrola (planowana)", Status = StatusWizyty.Zaplanowana, PacjentId = 5, LekarzId = 3, PlacowkaId = 1 }
             );
 
+
+            modelBuilder.Entity<GodzinyPracyLekarza>().HasData(
+                // Lekarz 1 – Placówka 1
+                new { Id = 1, LekarzId = 1, PlacowkaId = 1, DzienTygodnia = DayOfWeek.Monday,    GodzinaOd = new TimeSpan(8,0,0), GodzinaDo = new TimeSpan(16,0,0), CzasWizytyMinuty = 30 },
+                new { Id = 2, LekarzId = 1, PlacowkaId = 1, DzienTygodnia = DayOfWeek.Tuesday,   GodzinaOd = new TimeSpan(8,0,0), GodzinaDo = new TimeSpan(16,0,0), CzasWizytyMinuty = 30 },
+                new { Id = 3, LekarzId = 1, PlacowkaId = 1, DzienTygodnia = DayOfWeek.Wednesday, GodzinaOd = new TimeSpan(8,0,0), GodzinaDo = new TimeSpan(16,0,0), CzasWizytyMinuty = 30 },
+                new { Id = 4, LekarzId = 1, PlacowkaId = 1, DzienTygodnia = DayOfWeek.Thursday,  GodzinaOd = new TimeSpan(8,0,0), GodzinaDo = new TimeSpan(16,0,0), CzasWizytyMinuty = 30 },
+                new { Id = 5, LekarzId = 1, PlacowkaId = 1, DzienTygodnia = DayOfWeek.Friday,    GodzinaOd = new TimeSpan(8,0,0), GodzinaDo = new TimeSpan(16,0,0), CzasWizytyMinuty = 30 }
+            );
+
+
+
+            // ===================== ===================== =====================
+            //              GODZINY PRACY LEKARZY
+            // ===================== ===================== =====================
+            var godzinyPracy = new List<object>();
+                int id = 1;
+
+                foreach (var lekarzId in Enumerable.Range(1, 50))
+                {
+                    // Placówka lekarza wynika z ID (zgodnie z Twoim seedem)
+                    int placowkaId =
+                        lekarzId <= 3 ? 1 :
+                        lekarzId <= 6 ? 2 :
+                        lekarzId <= 14 ? 3 :
+                        lekarzId <= 32 ? 4 : 5;
+
+                    foreach (var day in new[]
+                    {
+                        DayOfWeek.Monday,
+                        DayOfWeek.Tuesday,
+                        DayOfWeek.Wednesday,
+                        DayOfWeek.Thursday,
+                        DayOfWeek.Friday
+                    })
+                    {
+                        godzinyPracy.Add(new
+                        {
+                            Id = id++,
+                            LekarzId = lekarzId,
+                            PlacowkaId = placowkaId,
+                            DzienTygodnia = day,
+                            GodzinaOd = new TimeSpan(8, 0, 0),
+                            GodzinaDo = new TimeSpan(16, 0, 0),
+                            CzasWizytyMinuty = 30
+                        });
+                    }
+                }
+
+
+            modelBuilder.Entity<GodzinyPracyLekarza>().HasData(godzinyPracy);
 
             base.OnModelCreating(modelBuilder);
         }

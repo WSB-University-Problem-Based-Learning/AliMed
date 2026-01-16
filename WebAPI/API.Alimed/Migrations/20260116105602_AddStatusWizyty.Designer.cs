@@ -4,6 +4,7 @@ using API.Alimed.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Alimed.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260116105602_AddStatusWizyty")]
+    partial class AddStatusWizyty
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,93 +24,6 @@ namespace API.Alimed.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
-
-            modelBuilder.Entity("API.Alimed.Entities.GodzinyPracyLekarza", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CzasWizytyMinuty")
-                        .HasColumnType("int");
-
-                    b.Property<int>("DzienTygodnia")
-                        .HasColumnType("int");
-
-                    b.Property<TimeSpan>("GodzinaDo")
-                        .HasColumnType("time(6)");
-
-                    b.Property<TimeSpan>("GodzinaOd")
-                        .HasColumnType("time(6)");
-
-                    b.Property<int>("LekarzId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PlacowkaId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LekarzId");
-
-                    b.HasIndex("PlacowkaId");
-
-                    b.ToTable("GodzinyPracyLekarzy");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CzasWizytyMinuty = 30,
-                            DzienTygodnia = 1,
-                            GodzinaDo = new TimeSpan(0, 16, 0, 0, 0),
-                            GodzinaOd = new TimeSpan(0, 8, 0, 0, 0),
-                            LekarzId = 1,
-                            PlacowkaId = 1
-                        },
-                        new
-                        {
-                            Id = 2,
-                            CzasWizytyMinuty = 30,
-                            DzienTygodnia = 2,
-                            GodzinaDo = new TimeSpan(0, 16, 0, 0, 0),
-                            GodzinaOd = new TimeSpan(0, 8, 0, 0, 0),
-                            LekarzId = 1,
-                            PlacowkaId = 1
-                        },
-                        new
-                        {
-                            Id = 3,
-                            CzasWizytyMinuty = 30,
-                            DzienTygodnia = 3,
-                            GodzinaDo = new TimeSpan(0, 16, 0, 0, 0),
-                            GodzinaOd = new TimeSpan(0, 8, 0, 0, 0),
-                            LekarzId = 1,
-                            PlacowkaId = 1
-                        },
-                        new
-                        {
-                            Id = 4,
-                            CzasWizytyMinuty = 30,
-                            DzienTygodnia = 4,
-                            GodzinaDo = new TimeSpan(0, 16, 0, 0, 0),
-                            GodzinaOd = new TimeSpan(0, 8, 0, 0, 0),
-                            LekarzId = 1,
-                            PlacowkaId = 1
-                        },
-                        new
-                        {
-                            Id = 5,
-                            CzasWizytyMinuty = 30,
-                            DzienTygodnia = 5,
-                            GodzinaDo = new TimeSpan(0, 16, 0, 0, 0),
-                            GodzinaOd = new TimeSpan(0, 8, 0, 0, 0),
-                            LekarzId = 1,
-                            PlacowkaId = 1
-                        });
-                });
 
             modelBuilder.Entity("API.Alimed.Entities.Lekarz", b =>
                 {
@@ -129,15 +45,9 @@ namespace API.Alimed.Migrations
                     b.Property<string>("Specjalizacja")
                         .HasColumnType("longtext");
 
-                    b.Property<Guid?>("UserId")
-                        .HasColumnType("char(36)");
-
                     b.HasKey("LekarzId");
 
                     b.HasIndex("PlacowkaId");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
 
                     b.ToTable("Lekarze");
 
@@ -1076,40 +986,13 @@ namespace API.Alimed.Migrations
                         });
                 });
 
-            modelBuilder.Entity("API.Alimed.Entities.GodzinyPracyLekarza", b =>
-                {
-                    b.HasOne("API.Alimed.Entities.Lekarz", "Lekarz")
-                        .WithMany()
-                        .HasForeignKey("LekarzId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("API.Alimed.Entities.Placowka", "Placowka")
-                        .WithMany()
-                        .HasForeignKey("PlacowkaId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Lekarz");
-
-                    b.Navigation("Placowka");
-                });
-
             modelBuilder.Entity("API.Alimed.Entities.Lekarz", b =>
                 {
                     b.HasOne("API.Alimed.Entities.Placowka", "Placowka")
                         .WithMany("Lekarze")
-                        .HasForeignKey("PlacowkaId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("API.Alimed.Entities.User", "User")
-                        .WithOne()
-                        .HasForeignKey("API.Alimed.Entities.Lekarz", "UserId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("PlacowkaId");
 
                     b.Navigation("Placowka");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("API.Alimed.Entities.Pacjent", b =>

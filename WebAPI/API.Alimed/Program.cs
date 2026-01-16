@@ -32,7 +32,7 @@ builder.Services.AddCors(options =>
         {
             policy.WithOrigins("http://localhost:5173") // przepusc frontend z local dev
                 //policy.AllowAnyOrigin()                  // przepusc all origins - dla test w Docker
-                      .AllowAnyHeader()                     // przepusc all nag³ówki (w tym Content-Type i Authorization)
+                      .AllowAnyHeader()                     // przepusc all nagï¿½ï¿½wki (w tym Content-Type i Authorization)
                       .AllowAnyMethod()                   // dozwolone all requesty
                       .AllowCredentials(); // <- KLUCZOWE
         });
@@ -44,6 +44,7 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    app.UseCors("AllowReactApp");
     app.MapOpenApi();
 }
 
@@ -55,6 +56,8 @@ app.UseCors("AllowReactApp");
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+Console.WriteLine($"ENV: {app.Environment.EnvironmentName}");
 
 app.MapControllers();
 app.Run();

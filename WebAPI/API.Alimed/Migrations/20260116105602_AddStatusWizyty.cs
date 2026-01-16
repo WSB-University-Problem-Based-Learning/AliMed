@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace API.Alimed.Migrations
 {
     /// <inheritdoc />
-    public partial class SeedUpdateWithRegisterLogin : Migration
+    public partial class AddStatusWizyty : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -165,7 +165,7 @@ namespace API.Alimed.Migrations
                     DataWizyty = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     Diagnoza = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    CzyOdbyta = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
                     PacjentId = table.Column<int>(type: "int", nullable: true),
                     LekarzId = table.Column<int>(type: "int", nullable: true),
                     PlacowkaId = table.Column<int>(type: "int", nullable: true)
@@ -287,34 +287,34 @@ namespace API.Alimed.Migrations
 
             migrationBuilder.InsertData(
                 table: "Wizyty",
-                columns: new[] { "WizytaId", "CzyOdbyta", "DataWizyty", "Diagnoza", "LekarzId", "PacjentId", "PlacowkaId" },
+                columns: new[] { "WizytaId", "DataWizyty", "Diagnoza", "LekarzId", "PacjentId", "PlacowkaId", "Status" },
                 values: new object[,]
                 {
-                    { 1, true, new DateTime(2025, 1, 15, 10, 0, 0, 0, DateTimeKind.Unspecified), "Grypa sezonowa", 1, 1, 1 },
-                    { 2, true, new DateTime(2025, 2, 20, 11, 30, 0, 0, DateTimeKind.Unspecified), "Kontrola ciśnienia", 7, 1, 3 },
-                    { 3, true, new DateTime(2025, 3, 5, 14, 0, 0, 0, DateTimeKind.Unspecified), "Badanie okresowe", 15, 1, 4 },
-                    { 4, true, new DateTime(2025, 4, 1, 9, 0, 0, 0, DateTimeKind.Unspecified), "Wizyta u kardiologa", 37, 1, 5 },
-                    { 5, false, new DateTime(2025, 5, 10, 15, 30, 0, 0, DateTimeKind.Unspecified), "Badanie krwi (planowana)", 4, 1, 2 },
-                    { 6, true, new DateTime(2025, 1, 25, 8, 30, 0, 0, DateTimeKind.Unspecified), "Ból pleców", 5, 2, 2 },
-                    { 7, true, new DateTime(2025, 2, 1, 16, 0, 0, 0, DateTimeKind.Unspecified), "Skręcenie kostki", 21, 2, 4 },
-                    { 8, true, new DateTime(2025, 3, 15, 12, 0, 0, 0, DateTimeKind.Unspecified), "Kontrola po urazie", 39, 2, 5 },
-                    { 9, true, new DateTime(2025, 4, 10, 10, 0, 0, 0, DateTimeKind.Unspecified), "Wizyta u dermatologa", 20, 2, 4 },
-                    { 10, false, new DateTime(2025, 5, 25, 11, 0, 0, 0, DateTimeKind.Unspecified), "Wizyta kontrolna (planowana)", 1, 2, 1 },
-                    { 11, true, new DateTime(2025, 1, 5, 13, 0, 0, 0, DateTimeKind.Unspecified), "Wizyta u endokrynologa", 8, 3, 3 },
-                    { 12, true, new DateTime(2025, 2, 28, 9, 30, 0, 0, DateTimeKind.Unspecified), "Problemy ze snem", 30, 3, 4 },
-                    { 13, true, new DateTime(2025, 3, 22, 17, 0, 0, 0, DateTimeKind.Unspecified), "Badania hormonalne", 42, 3, 5 },
-                    { 14, true, new DateTime(2025, 4, 18, 11, 0, 0, 0, DateTimeKind.Unspecified), "Konsultacja psychiatryczna", 48, 3, 5 },
-                    { 15, false, new DateTime(2025, 5, 1, 13, 0, 0, 0, DateTimeKind.Unspecified), "Konsultacja ginekologiczna (planowana)", 6, 3, 2 },
-                    { 16, true, new DateTime(2025, 1, 1, 10, 0, 0, 0, DateTimeKind.Unspecified), "Ból głowy", 23, 4, 4 },
-                    { 17, true, new DateTime(2025, 2, 14, 14, 30, 0, 0, DateTimeKind.Unspecified), "Kontrola okulistyczna", 10, 4, 3 },
-                    { 18, true, new DateTime(2025, 3, 30, 8, 0, 0, 0, DateTimeKind.Unspecified), "Wizyta u pulmonologa", 27, 4, 4 },
-                    { 19, true, new DateTime(2025, 4, 25, 12, 0, 0, 0, DateTimeKind.Unspecified), "Zapalenie spojówek", 44, 4, 5 },
-                    { 20, false, new DateTime(2025, 5, 8, 14, 0, 0, 0, DateTimeKind.Unspecified), "Szczepienie (planowane)", 2, 4, 1 },
-                    { 21, true, new DateTime(2025, 1, 10, 11, 0, 0, 0, DateTimeKind.Unspecified), "Ból stawów", 12, 5, 3 },
-                    { 22, true, new DateTime(2025, 2, 5, 13, 30, 0, 0, DateTimeKind.Unspecified), "Zalecenia reumatologiczne", 28, 5, 4 },
-                    { 23, true, new DateTime(2025, 3, 1, 10, 0, 0, 0, DateTimeKind.Unspecified), "Kontrola geriatryczna", 31, 5, 4 },
-                    { 24, true, new DateTime(2025, 4, 14, 9, 30, 0, 0, DateTimeKind.Unspecified), "Konsultacja onkologiczna", 50, 5, 5 },
-                    { 25, false, new DateTime(2025, 5, 20, 16, 0, 0, 0, DateTimeKind.Unspecified), "Kontrola (planowana)", 3, 5, 1 }
+                    { 1, new DateTime(2025, 1, 15, 10, 0, 0, 0, DateTimeKind.Unspecified), "Grypa sezonowa", 1, 1, 1, 1 },
+                    { 2, new DateTime(2025, 2, 20, 11, 30, 0, 0, DateTimeKind.Unspecified), "Kontrola ciśnienia", 7, 1, 3, 1 },
+                    { 3, new DateTime(2025, 3, 5, 14, 0, 0, 0, DateTimeKind.Unspecified), "Badanie okresowe", 15, 1, 4, 1 },
+                    { 4, new DateTime(2025, 4, 1, 9, 0, 0, 0, DateTimeKind.Unspecified), "Wizyta u kardiologa", 37, 1, 5, 1 },
+                    { 5, new DateTime(2025, 5, 10, 15, 30, 0, 0, DateTimeKind.Unspecified), "Badanie krwi (planowana)", 4, 1, 2, 0 },
+                    { 6, new DateTime(2025, 1, 25, 8, 30, 0, 0, DateTimeKind.Unspecified), "Ból pleców", 5, 2, 2, 1 },
+                    { 7, new DateTime(2025, 2, 1, 16, 0, 0, 0, DateTimeKind.Unspecified), "Skręcenie kostki", 21, 2, 4, 1 },
+                    { 8, new DateTime(2025, 3, 15, 12, 0, 0, 0, DateTimeKind.Unspecified), "Kontrola po urazie", 39, 2, 5, 1 },
+                    { 9, new DateTime(2025, 4, 10, 10, 0, 0, 0, DateTimeKind.Unspecified), "Wizyta u dermatologa", 20, 2, 4, 1 },
+                    { 10, new DateTime(2025, 5, 25, 11, 0, 0, 0, DateTimeKind.Unspecified), "Wizyta kontrolna (planowana)", 1, 2, 1, 0 },
+                    { 11, new DateTime(2025, 1, 5, 13, 0, 0, 0, DateTimeKind.Unspecified), "Wizyta u endokrynologa", 8, 3, 3, 1 },
+                    { 12, new DateTime(2025, 2, 28, 9, 30, 0, 0, DateTimeKind.Unspecified), "Problemy ze snem", 30, 3, 4, 1 },
+                    { 13, new DateTime(2025, 3, 22, 17, 0, 0, 0, DateTimeKind.Unspecified), "Badania hormonalne", 42, 3, 5, 1 },
+                    { 14, new DateTime(2025, 4, 18, 11, 0, 0, 0, DateTimeKind.Unspecified), "Konsultacja psychiatryczna", 48, 3, 5, 1 },
+                    { 15, new DateTime(2025, 5, 1, 13, 0, 0, 0, DateTimeKind.Unspecified), "Konsultacja ginekologiczna (planowana)", 6, 3, 2, 0 },
+                    { 16, new DateTime(2025, 1, 1, 10, 0, 0, 0, DateTimeKind.Unspecified), "Ból głowy", 23, 4, 4, 1 },
+                    { 17, new DateTime(2025, 2, 14, 14, 30, 0, 0, DateTimeKind.Unspecified), "Kontrola okulistyczna", 10, 4, 3, 1 },
+                    { 18, new DateTime(2025, 3, 30, 8, 0, 0, 0, DateTimeKind.Unspecified), "Wizyta u pulmonologa", 27, 4, 4, 1 },
+                    { 19, new DateTime(2025, 4, 25, 12, 0, 0, 0, DateTimeKind.Unspecified), "Zapalenie spojówek", 44, 4, 5, 1 },
+                    { 20, new DateTime(2025, 5, 8, 14, 0, 0, 0, DateTimeKind.Unspecified), "Szczepienie (planowane)", 2, 4, 1, 0 },
+                    { 21, new DateTime(2025, 1, 10, 11, 0, 0, 0, DateTimeKind.Unspecified), "Ból stawów", 12, 5, 3, 1 },
+                    { 22, new DateTime(2025, 2, 5, 13, 30, 0, 0, DateTimeKind.Unspecified), "Zalecenia reumatologiczne", 28, 5, 4, 1 },
+                    { 23, new DateTime(2025, 3, 1, 10, 0, 0, 0, DateTimeKind.Unspecified), "Kontrola geriatryczna", 31, 5, 4, 1 },
+                    { 24, new DateTime(2025, 4, 14, 9, 30, 0, 0, DateTimeKind.Unspecified), "Konsultacja onkologiczna", 50, 5, 5, 1 },
+                    { 25, new DateTime(2025, 5, 20, 16, 0, 0, 0, DateTimeKind.Unspecified), "Kontrola (planowana)", 3, 5, 1, 0 }
                 });
 
             migrationBuilder.CreateIndex(
@@ -346,9 +346,10 @@ namespace API.Alimed.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Wizyty_LekarzId",
+                name: "IX_Wizyty_LekarzId_PlacowkaId_DataWizyty",
                 table: "Wizyty",
-                column: "LekarzId");
+                columns: new[] { "LekarzId", "PlacowkaId", "DataWizyty" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Wizyty_PacjentId",

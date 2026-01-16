@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Alimed.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251211124329_SeedUpdateWithRegisterLogin")]
-    partial class SeedUpdateWithRegisterLogin
+    [Migration("20260116112143_AddGodzinyPracyLekarza")]
+    partial class AddGodzinyPracyLekarza
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,93 @@ namespace API.Alimed.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
+
+            modelBuilder.Entity("API.Alimed.Entities.GodzinyPracyLekarza", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CzasWizytyMinuty")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DzienTygodnia")
+                        .HasColumnType("int");
+
+                    b.Property<TimeSpan>("GodzinaDo")
+                        .HasColumnType("time(6)");
+
+                    b.Property<TimeSpan>("GodzinaOd")
+                        .HasColumnType("time(6)");
+
+                    b.Property<int>("LekarzId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PlacowkaId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LekarzId");
+
+                    b.HasIndex("PlacowkaId");
+
+                    b.ToTable("GodzinyPracyLekarzy");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            CzasWizytyMinuty = 30,
+                            DzienTygodnia = 1,
+                            GodzinaDo = new TimeSpan(0, 16, 0, 0, 0),
+                            GodzinaOd = new TimeSpan(0, 8, 0, 0, 0),
+                            LekarzId = 1,
+                            PlacowkaId = 1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            CzasWizytyMinuty = 30,
+                            DzienTygodnia = 2,
+                            GodzinaDo = new TimeSpan(0, 16, 0, 0, 0),
+                            GodzinaOd = new TimeSpan(0, 8, 0, 0, 0),
+                            LekarzId = 1,
+                            PlacowkaId = 1
+                        },
+                        new
+                        {
+                            Id = 3,
+                            CzasWizytyMinuty = 30,
+                            DzienTygodnia = 3,
+                            GodzinaDo = new TimeSpan(0, 16, 0, 0, 0),
+                            GodzinaOd = new TimeSpan(0, 8, 0, 0, 0),
+                            LekarzId = 1,
+                            PlacowkaId = 1
+                        },
+                        new
+                        {
+                            Id = 4,
+                            CzasWizytyMinuty = 30,
+                            DzienTygodnia = 4,
+                            GodzinaDo = new TimeSpan(0, 16, 0, 0, 0),
+                            GodzinaOd = new TimeSpan(0, 8, 0, 0, 0),
+                            LekarzId = 1,
+                            PlacowkaId = 1
+                        },
+                        new
+                        {
+                            Id = 5,
+                            CzasWizytyMinuty = 30,
+                            DzienTygodnia = 5,
+                            GodzinaDo = new TimeSpan(0, 16, 0, 0, 0),
+                            GodzinaOd = new TimeSpan(0, 8, 0, 0, 0),
+                            LekarzId = 1,
+                            PlacowkaId = 1
+                        });
+                });
 
             modelBuilder.Entity("API.Alimed.Entities.Lekarz", b =>
                 {
@@ -45,9 +132,15 @@ namespace API.Alimed.Migrations
                     b.Property<string>("Specjalizacja")
                         .HasColumnType("longtext");
 
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("char(36)");
+
                     b.HasKey("LekarzId");
 
                     b.HasIndex("PlacowkaId");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("Lekarze");
 
@@ -704,9 +797,6 @@ namespace API.Alimed.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("WizytaId"));
 
-                    b.Property<bool>("CzyOdbyta")
-                        .HasColumnType("tinyint(1)");
-
                     b.Property<DateTime>("DataWizyty")
                         .HasColumnType("datetime(6)");
 
@@ -722,13 +812,17 @@ namespace API.Alimed.Migrations
                     b.Property<int?>("PlacowkaId")
                         .HasColumnType("int");
 
-                    b.HasKey("WizytaId");
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
-                    b.HasIndex("LekarzId");
+                    b.HasKey("WizytaId");
 
                     b.HasIndex("PacjentId");
 
                     b.HasIndex("PlacowkaId");
+
+                    b.HasIndex("LekarzId", "PlacowkaId", "DataWizyty")
+                        .IsUnique();
 
                     b.ToTable("Wizyty");
 
@@ -736,262 +830,289 @@ namespace API.Alimed.Migrations
                         new
                         {
                             WizytaId = 1,
-                            CzyOdbyta = true,
                             DataWizyty = new DateTime(2025, 1, 15, 10, 0, 0, 0, DateTimeKind.Unspecified),
                             Diagnoza = "Grypa sezonowa",
                             LekarzId = 1,
                             PacjentId = 1,
-                            PlacowkaId = 1
+                            PlacowkaId = 1,
+                            Status = 1
                         },
                         new
                         {
                             WizytaId = 2,
-                            CzyOdbyta = true,
                             DataWizyty = new DateTime(2025, 2, 20, 11, 30, 0, 0, DateTimeKind.Unspecified),
                             Diagnoza = "Kontrola ciśnienia",
                             LekarzId = 7,
                             PacjentId = 1,
-                            PlacowkaId = 3
+                            PlacowkaId = 3,
+                            Status = 1
                         },
                         new
                         {
                             WizytaId = 3,
-                            CzyOdbyta = true,
                             DataWizyty = new DateTime(2025, 3, 5, 14, 0, 0, 0, DateTimeKind.Unspecified),
                             Diagnoza = "Badanie okresowe",
                             LekarzId = 15,
                             PacjentId = 1,
-                            PlacowkaId = 4
+                            PlacowkaId = 4,
+                            Status = 1
                         },
                         new
                         {
                             WizytaId = 4,
-                            CzyOdbyta = true,
                             DataWizyty = new DateTime(2025, 4, 1, 9, 0, 0, 0, DateTimeKind.Unspecified),
                             Diagnoza = "Wizyta u kardiologa",
                             LekarzId = 37,
                             PacjentId = 1,
-                            PlacowkaId = 5
+                            PlacowkaId = 5,
+                            Status = 1
                         },
                         new
                         {
                             WizytaId = 5,
-                            CzyOdbyta = false,
                             DataWizyty = new DateTime(2025, 5, 10, 15, 30, 0, 0, DateTimeKind.Unspecified),
                             Diagnoza = "Badanie krwi (planowana)",
                             LekarzId = 4,
                             PacjentId = 1,
-                            PlacowkaId = 2
+                            PlacowkaId = 2,
+                            Status = 0
                         },
                         new
                         {
                             WizytaId = 6,
-                            CzyOdbyta = true,
                             DataWizyty = new DateTime(2025, 1, 25, 8, 30, 0, 0, DateTimeKind.Unspecified),
                             Diagnoza = "Ból pleców",
                             LekarzId = 5,
                             PacjentId = 2,
-                            PlacowkaId = 2
+                            PlacowkaId = 2,
+                            Status = 1
                         },
                         new
                         {
                             WizytaId = 7,
-                            CzyOdbyta = true,
                             DataWizyty = new DateTime(2025, 2, 1, 16, 0, 0, 0, DateTimeKind.Unspecified),
                             Diagnoza = "Skręcenie kostki",
                             LekarzId = 21,
                             PacjentId = 2,
-                            PlacowkaId = 4
+                            PlacowkaId = 4,
+                            Status = 1
                         },
                         new
                         {
                             WizytaId = 8,
-                            CzyOdbyta = true,
                             DataWizyty = new DateTime(2025, 3, 15, 12, 0, 0, 0, DateTimeKind.Unspecified),
                             Diagnoza = "Kontrola po urazie",
                             LekarzId = 39,
                             PacjentId = 2,
-                            PlacowkaId = 5
+                            PlacowkaId = 5,
+                            Status = 1
                         },
                         new
                         {
                             WizytaId = 9,
-                            CzyOdbyta = true,
                             DataWizyty = new DateTime(2025, 4, 10, 10, 0, 0, 0, DateTimeKind.Unspecified),
                             Diagnoza = "Wizyta u dermatologa",
                             LekarzId = 20,
                             PacjentId = 2,
-                            PlacowkaId = 4
+                            PlacowkaId = 4,
+                            Status = 1
                         },
                         new
                         {
                             WizytaId = 10,
-                            CzyOdbyta = false,
                             DataWizyty = new DateTime(2025, 5, 25, 11, 0, 0, 0, DateTimeKind.Unspecified),
                             Diagnoza = "Wizyta kontrolna (planowana)",
                             LekarzId = 1,
                             PacjentId = 2,
-                            PlacowkaId = 1
+                            PlacowkaId = 1,
+                            Status = 0
                         },
                         new
                         {
                             WizytaId = 11,
-                            CzyOdbyta = true,
                             DataWizyty = new DateTime(2025, 1, 5, 13, 0, 0, 0, DateTimeKind.Unspecified),
                             Diagnoza = "Wizyta u endokrynologa",
                             LekarzId = 8,
                             PacjentId = 3,
-                            PlacowkaId = 3
+                            PlacowkaId = 3,
+                            Status = 1
                         },
                         new
                         {
                             WizytaId = 12,
-                            CzyOdbyta = true,
                             DataWizyty = new DateTime(2025, 2, 28, 9, 30, 0, 0, DateTimeKind.Unspecified),
                             Diagnoza = "Problemy ze snem",
                             LekarzId = 30,
                             PacjentId = 3,
-                            PlacowkaId = 4
+                            PlacowkaId = 4,
+                            Status = 1
                         },
                         new
                         {
                             WizytaId = 13,
-                            CzyOdbyta = true,
                             DataWizyty = new DateTime(2025, 3, 22, 17, 0, 0, 0, DateTimeKind.Unspecified),
                             Diagnoza = "Badania hormonalne",
                             LekarzId = 42,
                             PacjentId = 3,
-                            PlacowkaId = 5
+                            PlacowkaId = 5,
+                            Status = 1
                         },
                         new
                         {
                             WizytaId = 14,
-                            CzyOdbyta = true,
                             DataWizyty = new DateTime(2025, 4, 18, 11, 0, 0, 0, DateTimeKind.Unspecified),
                             Diagnoza = "Konsultacja psychiatryczna",
                             LekarzId = 48,
                             PacjentId = 3,
-                            PlacowkaId = 5
+                            PlacowkaId = 5,
+                            Status = 1
                         },
                         new
                         {
                             WizytaId = 15,
-                            CzyOdbyta = false,
                             DataWizyty = new DateTime(2025, 5, 1, 13, 0, 0, 0, DateTimeKind.Unspecified),
                             Diagnoza = "Konsultacja ginekologiczna (planowana)",
                             LekarzId = 6,
                             PacjentId = 3,
-                            PlacowkaId = 2
+                            PlacowkaId = 2,
+                            Status = 0
                         },
                         new
                         {
                             WizytaId = 16,
-                            CzyOdbyta = true,
                             DataWizyty = new DateTime(2025, 1, 1, 10, 0, 0, 0, DateTimeKind.Unspecified),
                             Diagnoza = "Ból głowy",
                             LekarzId = 23,
                             PacjentId = 4,
-                            PlacowkaId = 4
+                            PlacowkaId = 4,
+                            Status = 1
                         },
                         new
                         {
                             WizytaId = 17,
-                            CzyOdbyta = true,
                             DataWizyty = new DateTime(2025, 2, 14, 14, 30, 0, 0, DateTimeKind.Unspecified),
                             Diagnoza = "Kontrola okulistyczna",
                             LekarzId = 10,
                             PacjentId = 4,
-                            PlacowkaId = 3
+                            PlacowkaId = 3,
+                            Status = 1
                         },
                         new
                         {
                             WizytaId = 18,
-                            CzyOdbyta = true,
                             DataWizyty = new DateTime(2025, 3, 30, 8, 0, 0, 0, DateTimeKind.Unspecified),
                             Diagnoza = "Wizyta u pulmonologa",
                             LekarzId = 27,
                             PacjentId = 4,
-                            PlacowkaId = 4
+                            PlacowkaId = 4,
+                            Status = 1
                         },
                         new
                         {
                             WizytaId = 19,
-                            CzyOdbyta = true,
                             DataWizyty = new DateTime(2025, 4, 25, 12, 0, 0, 0, DateTimeKind.Unspecified),
                             Diagnoza = "Zapalenie spojówek",
                             LekarzId = 44,
                             PacjentId = 4,
-                            PlacowkaId = 5
+                            PlacowkaId = 5,
+                            Status = 1
                         },
                         new
                         {
                             WizytaId = 20,
-                            CzyOdbyta = false,
                             DataWizyty = new DateTime(2025, 5, 8, 14, 0, 0, 0, DateTimeKind.Unspecified),
                             Diagnoza = "Szczepienie (planowane)",
                             LekarzId = 2,
                             PacjentId = 4,
-                            PlacowkaId = 1
+                            PlacowkaId = 1,
+                            Status = 0
                         },
                         new
                         {
                             WizytaId = 21,
-                            CzyOdbyta = true,
                             DataWizyty = new DateTime(2025, 1, 10, 11, 0, 0, 0, DateTimeKind.Unspecified),
                             Diagnoza = "Ból stawów",
                             LekarzId = 12,
                             PacjentId = 5,
-                            PlacowkaId = 3
+                            PlacowkaId = 3,
+                            Status = 1
                         },
                         new
                         {
                             WizytaId = 22,
-                            CzyOdbyta = true,
                             DataWizyty = new DateTime(2025, 2, 5, 13, 30, 0, 0, DateTimeKind.Unspecified),
                             Diagnoza = "Zalecenia reumatologiczne",
                             LekarzId = 28,
                             PacjentId = 5,
-                            PlacowkaId = 4
+                            PlacowkaId = 4,
+                            Status = 1
                         },
                         new
                         {
                             WizytaId = 23,
-                            CzyOdbyta = true,
                             DataWizyty = new DateTime(2025, 3, 1, 10, 0, 0, 0, DateTimeKind.Unspecified),
                             Diagnoza = "Kontrola geriatryczna",
                             LekarzId = 31,
                             PacjentId = 5,
-                            PlacowkaId = 4
+                            PlacowkaId = 4,
+                            Status = 1
                         },
                         new
                         {
                             WizytaId = 24,
-                            CzyOdbyta = true,
                             DataWizyty = new DateTime(2025, 4, 14, 9, 30, 0, 0, DateTimeKind.Unspecified),
                             Diagnoza = "Konsultacja onkologiczna",
                             LekarzId = 50,
                             PacjentId = 5,
-                            PlacowkaId = 5
+                            PlacowkaId = 5,
+                            Status = 1
                         },
                         new
                         {
                             WizytaId = 25,
-                            CzyOdbyta = false,
                             DataWizyty = new DateTime(2025, 5, 20, 16, 0, 0, 0, DateTimeKind.Unspecified),
                             Diagnoza = "Kontrola (planowana)",
                             LekarzId = 3,
                             PacjentId = 5,
-                            PlacowkaId = 1
+                            PlacowkaId = 1,
+                            Status = 0
                         });
+                });
+
+            modelBuilder.Entity("API.Alimed.Entities.GodzinyPracyLekarza", b =>
+                {
+                    b.HasOne("API.Alimed.Entities.Lekarz", "Lekarz")
+                        .WithMany()
+                        .HasForeignKey("LekarzId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("API.Alimed.Entities.Placowka", "Placowka")
+                        .WithMany()
+                        .HasForeignKey("PlacowkaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Lekarz");
+
+                    b.Navigation("Placowka");
                 });
 
             modelBuilder.Entity("API.Alimed.Entities.Lekarz", b =>
                 {
                     b.HasOne("API.Alimed.Entities.Placowka", "Placowka")
                         .WithMany("Lekarze")
-                        .HasForeignKey("PlacowkaId");
+                        .HasForeignKey("PlacowkaId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("API.Alimed.Entities.User", "User")
+                        .WithOne()
+                        .HasForeignKey("API.Alimed.Entities.Lekarz", "UserId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Placowka");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("API.Alimed.Entities.Pacjent", b =>
