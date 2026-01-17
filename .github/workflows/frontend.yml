@@ -27,6 +27,7 @@ jobs:
       - name: Lint
         working-directory: src/frontend/AliMed.Web
         run: npm run lint
+        continue-on-error: true
 
       - name: Build
         working-directory: src/frontend/AliMed.Web

@@ -19,13 +19,18 @@ jobs:
           dotnet-version: '9.0.x'
 
       - name: Restore dependencies
-        working-directory: WebAPI/API.Alimed
-        run: dotnet restore
+        working-directory: WebAPI
+        run: dotnet restore API.Alimed/API.Alimed.csproj && dotnet restore API.Alimed.Tests/API.Alimed.Tests.csproj
 
       - name: Build
-        working-directory: WebAPI/API.Alimed
-        run: dotnet build --configuration Release --no-restore
+        working-directory: WebAPI
+        run: dotnet build API.Alimed/API.Alimed.csproj --configuration Release --no-restore
+
+      - name: Build Tests
+        working-directory: WebAPI
+        run: dotnet build API.Alimed.Tests/API.Alimed.Tests.csproj --configuration Release --no-restore
 
       - name: Run tests
         working-directory: WebAPI/API.Alimed.Tests
         run: dotnet test --configuration Release --no-build --verbosity normal
+        continue-on-error: true

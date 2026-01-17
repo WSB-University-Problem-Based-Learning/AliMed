@@ -1,4 +1,10 @@
-# 🚀 Quick Deployment to 130.162.222.70
+# 🚀 Quick Deployment to alimed.com.pl
+
+## Production Server
+
+- **Domain**: https://alimed.com.pl
+- **IP**: 130.162.222.70
+- **SSH**: `ssh -i ~/.ssh/alimed.key ubuntu@130.162.222.70`
 
 ## Option 1: Automated (Windows)
 
@@ -13,10 +19,10 @@ Then SSH to the server and run the backend/frontend deployment.
 
 ```powershell
 # Upload files
-scp -i ~/.ssh/alimed.key -r deploy ubuntu@130.162.222.70:~/
+scp -i ~/.ssh/alimed.key -r deploy ubuntu@alimed.com.pl:~/
 
 # SSH to server
-ssh -i ~/.ssh/alimed.key ubuntu@130.162.222.70
+ssh -i ~/.ssh/alimed.key ubuntu@alimed.com.pl
 
 # On server, run:
 cd ~/deploy
@@ -56,9 +62,9 @@ Before deploying, you need to set up GitHub OAuth:
 
 ## Access Application
 
-- **Frontend**: http://130.162.222.70
-- **API**: http://130.162.222.70/api/
-- **Swagger**: http://130.162.222.70:5056/swagger
+- **Frontend**: https://alimed.com.pl
+- **API**: https://alimed.com.pl/api/
+- **Swagger**: http://localhost:5056/swagger (server only)
 
 ## Test Users
 

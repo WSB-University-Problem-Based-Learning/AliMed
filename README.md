@@ -276,9 +276,9 @@ AliMed/
 
 Aplikacja jest wdrożona na serwerze produkcyjnym:
 
-- **Frontend**: http://130.162.222.70
-- **API**: http://130.162.222.70/api/
-- **Swagger**: http://130.162.222.70:5056/swagger
+- **Domain**: https://alimed.com.pl
+- **Frontend**: https://alimed.com.pl
+- **API**: https://alimed.com.pl/api/
 
 Szczegóły wdrożenia i instrukcje znajdują się w [deploy/DEPLOYMENT.md](deploy/DEPLOYMENT.md).
 
