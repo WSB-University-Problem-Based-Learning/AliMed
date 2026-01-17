@@ -28,6 +28,12 @@ yarn-error.log*
 .env*.local
 .env
 
+# .NET appsettings with sensitive data
+**/appsettings.Development.json
+**/appsettings.Production.json
+**/appsettings.*.json
+!**/appsettings.json
+
 # vercel
 .vercel
 
