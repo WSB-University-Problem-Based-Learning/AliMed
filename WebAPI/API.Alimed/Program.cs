@@ -31,29 +31,32 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 
-// cors policy for dev testing 
+var corsOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
+if (builder.Environment.IsDevelopment() && (corsOrigins == null || corsOrigins.Length == 0))
+{
+    corsOrigins = new[] { "http://localhost:5173" };
+}
+if (!builder.Environment.IsDevelopment() && (corsOrigins == null || corsOrigins.Length == 0))
+{
+    throw new InvalidOperationException("CORS origins are not configured for production.");
+}
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowReactApp",
-        policy =>
-        {
-            policy.WithOrigins("http://localhost:5173") // przepusc frontend z local dev
-                //policy.AllowAnyOrigin()                  // przepusc all origins - dla test w Docker
-                      .AllowAnyHeader()                     // przepusc all nag��wki (w tym Content-Type i Authorization)
-                      .AllowAnyMethod()                   // dozwolone all requesty
-                      .AllowCredentials(); // <- KLUCZOWE
-        });
+    options.AddPolicy("AllowReactApp", policy =>
+    {
+        policy.WithOrigins(corsOrigins)
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
 });
-
-
-
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseCors("AllowReactApp");
     // app.MapOpenApi();
 
     app.UseSwagger();
@@ -66,7 +69,7 @@ if (app.Environment.IsDevelopment())
 
 
 // app.UseHttpsRedirection();
-// CORS musi byc przed UseAuthentication bo sra bledami
+// CORS musi byc przed UseAuthentication
 app.UseCors("AllowReactApp");
 
 
@@ -77,3 +80,4 @@ Console.WriteLine($"ENV: {app.Environment.EnvironmentName}");
 
 app.MapControllers();
 app.Run();
+

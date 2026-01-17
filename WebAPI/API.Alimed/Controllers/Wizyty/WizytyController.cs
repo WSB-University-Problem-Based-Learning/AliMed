@@ -308,7 +308,7 @@ namespace API.Alimed.Controllers.Wizyty
 
 
 
-        [HttpPut("wizyty/{id}/odbyta")]
+        [HttpPut("{id}/odbyta")]
         [Authorize(Roles = "Lekarz")]
         public async Task<IResult> OznaczJakoOdbyta(
             int id,
@@ -340,7 +340,7 @@ namespace API.Alimed.Controllers.Wizyty
         }
 
 
-        [HttpPut("wizyty/{id}/nieobecnosc")]
+        [HttpPut("{id}/nieobecnosc")]
         [Authorize(Roles = "Lekarz")]
         public async Task<IResult> OznaczNieobecnosc(int id)
         {
