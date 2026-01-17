@@ -1,33 +1,39 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 import { config } from '../config/env';
+import { apiService } from '../services/api';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { login } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    // Mock auth - w przyszłości podpiąć pod backend
-    if (email && password) {
-      // Zapisz mock token
-      localStorage.setItem('alimed_token', 'mock_jwt_token');
-      localStorage.setItem('alimed_user', JSON.stringify({
-        id: 1,
-        imie: 'Anna',
-        nazwisko: 'Kowalska',
-        email: email
-      }));
-      navigate('/dashboard');
-    } else {
+    if (!email || !password) {
       setError(t('login.fillAllFields'));
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await apiService.loginLocal({ email, password });
+      login(response.token, response.refreshToken);
+      navigate('/dashboard');
+    } catch (err) {
+      console.error('Login error:', err);
+      setError(err instanceof Error ? err.message : t('login.authFailed'));
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -102,14 +108,18 @@ const LoginPage: React.FC = () => {
 
           <button
             type="submit"
-            className="w-full bg-alimed-light-blue hover:bg-alimed-blue text-white font-medium py-3 px-4 rounded-lg transition-colors"
+            disabled={loading}
+            className="w-full bg-alimed-light-blue hover:bg-alimed-blue text-white font-medium py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {t('login.submit')}
+            {loading ? t('common.loading') : t('login.submit')}
           </button>
         </form>
 
-        <div className="mt-6 text-center">
-          <a href="#" className="text-alimed-blue hover:underline text-sm">
+        <div className="mt-6 text-center space-y-2">
+          <Link to="/register" className="text-alimed-blue hover:underline text-sm block">
+            {t('login.noAccount')}
+          </Link>
+          <a href="#" className="text-alimed-blue hover:underline text-sm block">
             {t('login.forgotPassword')}
           </a>
         </div>

@@ -115,15 +115,160 @@ flowchart TD
 
 **Kluczowe komponenty:**
 
-  * **Backend:** NestJS lub .NET WebApi
-  * **Frontend:** React i NestJS
+  * **Backend:** .NET 9.0 Web API z Entity Framework Core
+  * **Frontend:** React 19 + Vite + TypeScript + TailwindCSS
   * **Hosting:** Alibaba Cloud ECS (Elastic Compute Service)
-  * **Baza danych:** AsparaDB for MySQL (przechowywanie danych o pacjentach, wizytach, zaleceniach)
+  * **Baza danych:** ApsaraDB for MySQL (przechowywanie danych o pacjentach, wizytach, zaleceniach)
   * **Przechowywanie plików:** Alibaba Cloud OSS (Object Storage Service) (przechowywanie dokumentów)
+  * **Autentykacja:** JWT + GitHub OAuth
 
 -----
 
-## 🚧 Aktualne zadania (To-Do)
+## � Szybki start
+> 📘 **Szczegółowy przewodnik:** Sprawdź [QUICKSTART.md](QUICKSTART.md) dla pełnych instrukcji uruchomienia projektu!
+### Wymagania wstępne
+
+- **Node.js** 20+ i npm
+- **.NET 9.0 SDK**
+- **MySQL 8.0+** lub Docker
+- **Git**
+
+### Uruchomienie lokalne
+
+#### 1. Backend (.NET Web API)
+
+```bash
+# Przejdź do katalogu backendu
+cd WebAPI/API.Alimed
+
+# Przywróć zależności
+dotnet restore
+
+# Skonfiguruj connection string (utwórz appsettings.Development.json)
+# Skopiuj appsettings.json i zmień Pwd na swoje hasło MySQL
+
+# Uruchom migracje (jeśli są dostępne)
+dotnet ef database update
+
+# Uruchom API
+dotnet run
+# API będzie dostępne na: http://localhost:5056
+# Swagger: http://localhost:5056/swagger
+```
+
+#### 2. Frontend (React + Vite)
+
+```bash
+# Przejdź do katalogu frontendu
+cd src/frontend/AliMed.Web
+
+# Zainstaluj zależności
+npm install
+
+# Utwórz plik .env (skopiuj z .env.example i uzupełnij)
+cp .env.example .env
+
+# Uruchom dev server
+npm run dev
+# Frontend będzie dostępny na: http://localhost:5173
+```
+
+### 🔑 Konfiguracja zmiennych środowiskowych
+
+**Backend:** Utwórz `WebAPI/API.Alimed/appsettings.Development.json`:
+```json
+{
+  "ConnectionStrings": {
+    "MySqlConnection": "Server=localhost;Port=3306;Database=alimed;Uid=root;Pwd=TwojeHaslo"
+  },
+  "JwtSettings": {
+    "SecretKey": "TwojSuperTajnyKluczJWT",
+    "Issuer": "AliMed",
+    "Audience": "AliMed-Users"
+  }
+}
+```
+
+**Frontend:** Utwórz `src/frontend/AliMed.Web/.env`:
+```env
+VITE_API_BASE_URL=http://localhost:5056
+VITE_GITHUB_CLIENT_ID=twoj_github_client_id
+VITE_GITHUB_REDIRECT_URI=http://localhost:5173/auth/github/callback
+```
+
+-----
+
+## 🧪 Testowanie
+
+```bash
+# Backend - uruchom testy jednostkowe
+cd WebAPI/API.Alimed.Tests
+dotnet test
+
+# Frontend - uruchom linter
+cd src/frontend/AliMed.Web
+npm run lint
+```
+
+-----
+
+## 📁 Struktura projektu
+
+```
+AliMed/
+├── WebAPI/                      # Backend .NET 9.0
+│   ├── API.Alimed/              # Główna aplikacja API
+│   │   ├── Controllers/         # Kontrolery REST API
+│   │   ├── Data/                # DbContext i konfiguracja EF Core
+│   │   ├── DTOs/                # Data Transfer Objects
+│   │   ├── Entities/            # Modele bazy danych
+│   │   ├── Services/            # Logika biznesowa
+│   │   └── Extensions/          # Rozszerzenia i helpery
+│   └── API.Alimed.Tests/        # Testy jednostkowe i integracyjne
+├── src/frontend/AliMed.Web/     # Frontend React + TypeScript
+│   ├── src/
+│   │   ├── components/          # Komponenty React
+│   │   ├── pages/               # Strony aplikacji
+│   │   ├── services/            # API client
+│   │   ├── context/             # Context API (Auth, Language)
+│   │   ├── locales/             # Tłumaczenia i18n
+│   │   └── types/               # Definicje TypeScript
+│   └── public/                  # Assety statyczne
+├── doc/                         # Dokumentacja projektu
+├── res/                         # Zasoby (logo, grafiki)
+└── test/                        # Dodatkowe testy
+```
+
+-----
+
+## 🚧 Status projektu
+
+### ✅ Ukończone
+
+- ✅ System autentykacji JWT + GitHub OAuth
+- ✅ Endpointy CRUD dla Pacjentów, Lekarzy, Wizyt
+- ✅ Panel pacjenta z zarządzaniem wizytami
+- ✅ Panel lekarza z listą pacjentów i wizyt
+- ✅ Internacjonalizacja (PL/EN)
+- ✅ Responsywny design z TailwindCSS
+- ✅ Testy jednostkowe backendu
+
+### 🔄 W trakcie
+
+- 🔄 Integracja z Alibaba Cloud ECS
+- 🔄 Konfiguracja ApsaraDB for MySQL w chmurze
+- 🔄 Setup CI/CD pipeline
+
+### 📋 Planowane
+
+- 📋 Przechowywanie dokumentów medycznych w OSS
+- 📋 System powiadomień email/SMS
+- 📋 Kalendarz dostępności lekarzy
+- 📋 Historia zmian w dokumentacji medycznej
+
+-----
+
+## �🚧 Aktualne zadania (To-Do)
 
 ### Implementacja tabeli "Lekarze" w ApsaraDB for MySQL
 

@@ -14,12 +14,17 @@ import LanguageSwitcher from '../components/LanguageSwitcher';
 
 const LandingPage: React.FC = () => {
   const { t } = useTranslation();
-  const { enableDemoMode } = useAuth();
+  const { enableDemoMode, enableDemoModeAsDoctor } = useAuth();
   const navigate = useNavigate();
 
   const handleDemoClick = () => {
     enableDemoMode();
     navigate('/dashboard');
+  };
+
+  const handleDemoDoctorClick = () => {
+    enableDemoModeAsDoctor();
+    navigate('/panel-lekarza');
   };
 
   return (
@@ -182,6 +187,16 @@ const LandingPage: React.FC = () => {
             >
               <PlayCircleIcon className="w-6 h-6 group-hover:animate-pulse" />
               <span>{t('landing.tryDemo')}</span>
+              <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </button>
+            <button
+              onClick={handleDemoDoctorClick}
+              className="group inline-flex items-center gap-3 bg-amber-500 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 ml-4"
+            >
+              <CalendarIcon className="w-6 h-6 group-hover:animate-pulse" />
+              <span>{t('doctorDashboard.tryDemoDoctor')}</span>
               <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>

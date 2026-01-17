@@ -1,0 +1,47 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches:
+      - main
+      - feature/frontend
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: src/frontend/AliMed.Web/package-lock.json
+      
+      - name: Install dependencies
+        working-directory: src/frontend/AliMed.Web
+        run: npm ci
+      
+      - name: Build application
+        working-directory: src/frontend/AliMed.Web
+        run: npm run build
+      
+      - name: Deploy to Server
+        uses: easingthemes/ssh-deploy@v5.1.0
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_USER: ${{ secrets.REMOTE_USER }}
+          SOURCE: "src/frontend/AliMed.Web/dist/"
+          TARGET: ${{ secrets.REMOTE_TARGET }}
+          EXCLUDE: "/node_modules/"
+          SCRIPT_BEFORE: |
+            whoami
+            ls -al
+          SCRIPT_AFTER: |
+            echo "Deployment completed successfully"
+            ls -al ${{ secrets.REMOTE_TARGET }}

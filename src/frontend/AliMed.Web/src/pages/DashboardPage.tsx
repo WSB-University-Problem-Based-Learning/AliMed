@@ -61,10 +61,34 @@ const DashboardPage: React.FC = () => {
   }
 
   const quickActions = [
-    { icon: CalendarDaysIcon, title: t('dashboard.myVisits'), subtitle: t('dashboard.myVisitsDesc'), color: 'bg-emerald-100 text-emerald-600' },
-    { icon: PlusCircleIcon, title: t('dashboard.bookVisit'), subtitle: t('dashboard.bookVisitDesc'), color: 'bg-purple-100 text-purple-600' },
-    { icon: DocumentTextIcon, title: t('dashboard.documents'), subtitle: t('dashboard.documentsDesc'), color: 'bg-amber-100 text-amber-600' },
-    { icon: UserCircleIcon, title: t('dashboard.myData'), subtitle: t('dashboard.myDataDesc'), color: 'bg-rose-100 text-rose-600' },
+    { 
+      icon: CalendarDaysIcon, 
+      title: t('dashboard.myVisits'), 
+      subtitle: t('dashboard.myVisitsDesc'), 
+      color: 'bg-emerald-100 text-emerald-600',
+      onClick: () => navigate('/moje-wizyty')
+    },
+    { 
+      icon: PlusCircleIcon, 
+      title: t('dashboard.bookVisit'), 
+      subtitle: t('dashboard.bookVisitDesc'), 
+      color: 'bg-purple-100 text-purple-600',
+      onClick: () => navigate('/umow-wizyte')
+    },
+    { 
+      icon: DocumentTextIcon, 
+      title: t('dashboard.documents'), 
+      subtitle: t('dashboard.documentsDesc'), 
+      color: 'bg-amber-100 text-amber-600',
+      onClick: () => navigate('/dokumenty')
+    },
+    { 
+      icon: UserCircleIcon, 
+      title: t('dashboard.myData'), 
+      subtitle: t('dashboard.myDataDesc'), 
+      color: 'bg-rose-100 text-rose-600',
+      onClick: () => navigate('/moje-dane')
+    },
   ];
 
   const getStatusText = (status: string) => {
@@ -127,6 +151,7 @@ const DashboardPage: React.FC = () => {
           {quickActions.map((action, index) => (
             <button
               key={index}
+              onClick={action.onClick}
               className="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition text-left"
             >
               <div className={`w-12 h-12 rounded-full ${action.color} flex items-center justify-center mb-4`}>

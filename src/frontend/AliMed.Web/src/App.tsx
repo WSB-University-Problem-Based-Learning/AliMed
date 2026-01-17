@@ -4,9 +4,19 @@ import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 import GitHubCallbackPage from './pages/GitHubCallbackPage';
 import DashboardPage from './pages/DashboardPage';
+import DoctorDashboardPage from './pages/DoctorDashboardPage';
+import WizytyLekarzPage from './pages/WizytyLekarzPage';
+import PacjenciLekarzPage from './pages/PacjenciLekarzPage';
+import DokumentacjaLekarzPage from './pages/DokumentacjaLekarzPage';
+import MojeDaneLekarzPage from './pages/MojeDaneLekarzPage';
 import PacjenciPage from './pages/PacjenciPage';
+import MojeWizytyPage from './pages/MojeWizytyPage';
+import UmowWizytePage from './pages/UmowWizytePage';
+import DokumentyPage from './pages/DokumentyPage';
+import MojeDanePage from './pages/MojeDanePage';
 import Layout from './components/Layout';
 
 // Placeholder components for doctors and visits pages
@@ -39,6 +49,7 @@ function App() {
             {/* Public routes */}
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
             <Route path="/auth/github/callback" element={<GitHubCallbackPage />} />
             
             {/* Protected routes */}
@@ -47,12 +58,65 @@ function App() {
                 <DashboardPage />
               </ProtectedRoute>
             } />
+            <Route path="/panel-lekarza" element={
+              <ProtectedRoute>
+                <DoctorDashboardPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/wizyty-lekarza" element={
+              <ProtectedRoute>
+                <WizytyLekarzPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/pacjenci-lekarza" element={
+              <ProtectedRoute>
+                <PacjenciLekarzPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/dokumentacja-lekarza" element={
+              <ProtectedRoute>
+                <DokumentacjaLekarzPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/moje-dane-lekarza" element={
+              <ProtectedRoute>
+                <MojeDaneLekarzPage />
+              </ProtectedRoute>
+            } />
             
             {/* Admin/Staff routes */}
             <Route path="/pacjenci" element={
               <ProtectedRoute>
                 <Layout>
                   <PacjenciPage />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/moje-wizyty" element={
+              <ProtectedRoute>
+                <Layout>
+                  <MojeWizytyPage />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/umow-wizyte" element={
+              <ProtectedRoute>
+                <Layout>
+                  <UmowWizytePage />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/dokumenty" element={
+              <ProtectedRoute>
+                <Layout>
+                  <DokumentyPage />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/moje-dane" element={
+              <ProtectedRoute>
+                <Layout>
+                  <MojeDanePage />
                 </Layout>
               </ProtectedRoute>
             } />

@@ -11,9 +11,9 @@ export interface Pacjent {
 export interface Adres {
   ulica?: string;
   numerDomu?: string;
-  numerMieszkania?: string;
   kodPocztowy?: string;
   miasto?: string;
+  kraj?: string;
 }
 
 export interface Lekarz {
@@ -72,4 +72,64 @@ export interface ZaleceniaDokument {
   nazwaPliku: string;
   zawartoscPliku: Uint8Array;
   dataUtworzenia: string;
+}
+
+export interface Dokument {
+  dokumentId: number;
+  nazwaPliku?: string;
+  typDokumentu?: string;
+  opis?: string;
+  dataUtworzenia: string;
+  rozmiarPliku?: number;
+  wizytaId?: number;
+  pacjentId?: number;
+}
+
+// Request DTOs matching backend
+export interface RegisterRequest {
+  email: string;
+  username: string;
+  password: string;
+  firstName?: string;
+  lastName?: string;
+  pesel?: string;
+  dataUrodzenia?: string;
+  ulica?: string;
+  numerDomu?: string;
+  kodPocztowy?: string;
+  miasto?: string;
+  kraj?: string;
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface WizytaCreateRequest {
+  dataWizyty: string;
+  lekarzId?: number;
+  placowkaId?: number;
+  diagnoza?: string;
+}
+
+export interface UpdatePacjentProfileRequest {
+  imie: string;
+  nazwisko: string;
+  pesel: string;
+  dataUrodzenia: string;
+  ulica: string;
+  numerDomu: string;
+  kodPocztowy: string;
+  miasto: string;
+  kraj: string;
+}
+
+// Wizyty: dostępne terminy odpowiedź
+export interface DostepneTerminyResponse {
+  lekarzId: number;
+  placowkaId: number;
+  from: string; // ISO date (yyyy-mm-dd)
+  to: string;   // ISO date (yyyy-mm-dd)
+  available: string[]; // ISO datetimes (e.g., 2026-01-22T09:30:00)
 }

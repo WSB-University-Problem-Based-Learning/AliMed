@@ -60,7 +60,6 @@ const PacjenciPage: React.FC = () => {
                   <p className="font-medium">{t('patients.address')}:</p>
                   <p>
                     {pacjent.adresZamieszkania.ulica} {pacjent.adresZamieszkania.numerDomu}
-                    {pacjent.adresZamieszkania.numerMieszkania && `/${pacjent.adresZamieszkania.numerMieszkania}`}
                   </p>
                   <p>
                     {pacjent.adresZamieszkania.kodPocztowy} {pacjent.adresZamieszkania.miasto}

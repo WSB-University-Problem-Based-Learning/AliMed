@@ -11,17 +11,17 @@ interface AuthContextType {
   logout: () => void;
   setUser: (user: User) => void;
   enableDemoMode: () => void;
+  enableDemoModeAsDoctor: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const readStoredAuth = () => {
   if (typeof window === 'undefined') {
-    return { storedToken: null, storedRefreshToken: null, storedUser: null, storedDemoMode: false };
+    return { storedToken: null, storedUser: null, storedDemoMode: false };
   }
 
   const storedToken = localStorage.getItem('alimed_token');
-  const storedRefreshToken = localStorage.getItem('alimed_refresh_token');
   const storedDemoMode = localStorage.getItem('alimed_demo_mode') === 'true';
 
   let storedUser: User | null = null;
@@ -35,27 +35,43 @@ const readStoredAuth = () => {
     }
   }
 
-  return { storedToken, storedRefreshToken, storedUser, storedDemoMode };
+  // RefreshToken is stored as HttpOnly cookie by backend, not in localStorage
+  return { storedToken, storedUser, storedDemoMode };
 };
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const { storedToken, storedRefreshToken, storedUser, storedDemoMode } = readStoredAuth();
+  const { storedToken, storedUser, storedDemoMode } = readStoredAuth();
 
   const [user, setUserState] = useState<User | null>(storedUser);
   const [token, setToken] = useState<string | null>(storedToken);
-  const [refreshToken, setRefreshToken] = useState<string | null>(storedRefreshToken);
+  // RefreshToken is in HttpOnly cookie, managed by backend
+  const [refreshToken, setRefreshToken] = useState<string | null>(storedToken ? 'stored-in-cookie' : null);
   const [isDemoMode, setIsDemoMode] = useState(storedDemoMode);
 
   const login = (newToken: string, newRefreshToken: string) => {
     setToken(newToken);
-    setRefreshToken(newRefreshToken);
+    // RefreshToken is stored as HttpOnly cookie by backend, don't store it in localStorage
+    setRefreshToken(newRefreshToken || 'stored-in-cookie');
     setIsDemoMode(false);
     localStorage.setItem('alimed_token', newToken);
-    localStorage.setItem('alimed_refresh_token', newRefreshToken);
+    // Remove refresh token from localStorage as it's now handled via HttpOnly cookie
+    localStorage.removeItem('alimed_refresh_token');
     localStorage.removeItem('alimed_demo_mode');
   };
 
-  const logout = () => {
+  const logout = async () => {
+    // Call backend to revoke refresh token (if not in demo mode)
+    if (!isDemoMode) {
+      try {
+        // Dynamically import to avoid circular dependencies
+        const { apiService } = await import('../services/api');
+        await apiService.logout();
+      } catch (error) {
+        console.error('Error during backend logout:', error);
+      }
+    }
+    
+    // Clear local state
     setToken(null);
     setRefreshToken(null);
     setUserState(null);
@@ -90,6 +106,25 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     localStorage.setItem('alimed_user', JSON.stringify(demoUser));
   };
 
+  const enableDemoModeAsDoctor = () => {
+    const demoDoctor: User = {
+      userId: 'demo-doctor',
+      email: 'dr.nowak@alimed.pl',
+      firstName: 'Jan',
+      lastName: 'Nowak',
+      role: 1, // UserRole.Lekarz = 1 (Doctor)
+    };
+    
+    setUserState(demoDoctor);
+    setToken('demo-token-doctor');
+    setRefreshToken('demo-refresh-token-doctor');
+    setIsDemoMode(true);
+    localStorage.setItem('alimed_token', 'demo-token-doctor');
+    localStorage.setItem('alimed_refresh_token', 'demo-refresh-token-doctor');
+    localStorage.setItem('alimed_demo_mode', 'true');
+    localStorage.setItem('alimed_user', JSON.stringify(demoDoctor));
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -102,6 +137,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         logout,
         setUser,
         enableDemoMode,
+        enableDemoModeAsDoctor,
       }}
     >
       {children}

@@ -1,0 +1,6 @@
+@API.AliMed_HostAddress = http://localhost:5045
+
+GET {{API.AliMed_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

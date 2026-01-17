@@ -44,10 +44,22 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 {t('nav.doctors')}
               </Link>
               <Link 
+                to="/moje-wizyty" 
+                className={`transition ${isActive('/moje-wizyty') ? 'text-alimed-blue font-medium' : 'text-gray-700 hover:text-alimed-blue'}`}
+              >
+                {t('nav.myVisits')}
+              </Link>
+              <Link 
                 to="/wizyty" 
                 className={`transition ${isActive('/wizyty') ? 'text-alimed-blue font-medium' : 'text-gray-700 hover:text-alimed-blue'}`}
               >
                 {t('nav.visits')}
+              </Link>
+              <Link 
+                to="/dokumenty" 
+                className={`transition ${isActive('/dokumenty') ? 'text-alimed-blue font-medium' : 'text-gray-700 hover:text-alimed-blue'}`}
+              >
+                {t('nav.documents')}
               </Link>
               <LanguageSwitcher />
               <Link 
