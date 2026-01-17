@@ -124,3 +124,12 @@ export interface UpdatePacjentProfileRequest {
   miasto: string;
   kraj: string;
 }
+
+// Wizyty: dostępne terminy odpowiedź
+export interface DostepneTerminyResponse {
+  lekarzId: number;
+  placowkaId: number;
+  from: string; // ISO date (yyyy-mm-dd)
+  to: string;   // ISO date (yyyy-mm-dd)
+  available: string[]; // ISO datetimes (e.g., 2026-01-22T09:30:00)
+}

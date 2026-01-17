@@ -1,4 +1,4 @@
-import type { Pacjent, Lekarz, Wizyta, AuthResponse, Dokument, RegisterRequest, LoginRequest, WizytaCreateRequest } from '../types/api';
+import type { Pacjent, Lekarz, Wizyta, AuthResponse, Dokument, RegisterRequest, LoginRequest, WizytaCreateRequest, DostepneTerminyResponse } from '../types/api';
 import { config } from '../config/env';
 
 const API_BASE_URL = config.apiBaseUrl;
@@ -147,6 +147,30 @@ export const apiService = {
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(errorText || 'Failed to create wizyta');
+    }
+    return response.json();
+  },
+
+  // Wizyty - dostępne terminy (sloty)
+  async getDostepneTerminy(
+    lekarzId: number,
+    placowkaId: number,
+    from: string,
+    to: string,
+  ): Promise<DostepneTerminyResponse> {
+    const qs = new URLSearchParams({
+      lekarzId: String(lekarzId),
+      placowkaId: String(placowkaId),
+      from,
+      to,
+    }).toString();
+    const response = await fetch(`${API_BASE_URL}/api/wizyty/dostepne-terminy?${qs}`, {
+      headers: getHeaders(true),
+      credentials: 'include',
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Failed to fetch available slots');
     }
     return response.json();
   },
