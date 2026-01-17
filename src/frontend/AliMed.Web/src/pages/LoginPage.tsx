@@ -1,16 +1,15 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from '../context/LanguageContext';
-import { useAuth } from '../context/AuthContext';
 import { config } from '../config/env';
-import { apiService } from '../services/api';
 import LanguageSwitcher from '../components/LanguageSwitcher';
+import { useAuth } from '../context/AuthContext';
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { login } = useAuth();
@@ -24,16 +23,28 @@ const LoginPage: React.FC = () => {
       return;
     }
 
+    setIsLoading(true);
     try {
-      setLoading(true);
-      const response = await apiService.loginLocal({ email, password });
-      login(response.token, response.refreshToken);
+      const response = await fetch(`${config.apiUrl}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.message || 'Nieprawidłowy email lub hasło');
+      }
+
+      const data = await response.json();
+      login(data.token, data.refreshToken || '');
       navigate('/dashboard');
     } catch (err) {
-      console.error('Login error:', err);
-      setError(err instanceof Error ? err.message : t('login.authFailed'));
+      setError(err instanceof Error ? err.message : 'Błąd logowania');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -108,20 +119,23 @@ const LoginPage: React.FC = () => {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={isLoading}
             className="w-full bg-alimed-light-blue hover:bg-alimed-blue text-white font-medium py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? t('common.loading') : t('login.submit')}
+            {isLoading ? 'Logowanie...' : t('login.submit')}
           </button>
         </form>
 
         <div className="mt-6 text-center space-y-2">
-          <Link to="/register" className="text-alimed-blue hover:underline text-sm block">
-            {t('login.noAccount')}
-          </Link>
           <a href="#" className="text-alimed-blue hover:underline text-sm block">
             {t('login.forgotPassword')}
           </a>
+          <p className="text-sm text-gray-600">
+            Nie masz konta?{' '}
+            <Link to="/register" className="text-alimed-blue hover:underline font-medium">
+              Zarejestruj się
+            </Link>
+          </p>
         </div>
       </div>
     </div>

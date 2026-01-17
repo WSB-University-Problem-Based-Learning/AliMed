@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { apiService } from '../services/api';
@@ -10,9 +10,14 @@ const GitHubCallbackPage = () => {
   const { login } = useAuth();
   const { t } = useTranslation();
   const [error, setError] = useState<string | null>(null);
+  const hasCalledRef = useRef(false);
 
   useEffect(() => {
     const handleCallback = async () => {
+      // Prevent double execution (React StrictMode)
+      if (hasCalledRef.current) return;
+      hasCalledRef.current = true;
+
       const code = searchParams.get('code');
       const errorParam = searchParams.get('error');
 
@@ -30,8 +35,17 @@ const GitHubCallbackPage = () => {
 
       try {
         const response = await apiService.loginWithGithub(code);
-        login(response.token, response.refreshToken);
-        navigate('/dashboard');
+        console.log('GitHub login response:', response);
+        
+        if (response.token) {
+          login(response.token, response.refreshToken || '');
+          // Small delay to ensure state is updated before navigation
+          setTimeout(() => {
+            navigate('/dashboard', { replace: true });
+          }, 100);
+        } else {
+          throw new Error('No token in response');
+        }
       } catch (err) {
         console.error('GitHub auth error:', err);
         setError(t('login.authFailed'));

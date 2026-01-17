@@ -62,9 +62,7 @@ namespace API.Alimed.Controllers
                     client_secret = _githubClientSecret,
                     code = payload.Code,
                     // adres z github redirectUrl [na frontend]
-                    // npm run dev na: http://localhost:5173/auth/github/callback
-                    // TODO - zmienic na ip/domene produkcji
-                    redirect_uri = "http://localhost:5173/auth/github/callback"
+                    redirect_uri = "https://alimed.com.pl/auth/github/callback"
                 };
 
                 var tokenResponse = await httpClient.PostAsJsonAsync(tokenRequestUrl, tokenRequestBody);
@@ -154,13 +152,13 @@ namespace API.Alimed.Controllers
                     new CookieOptions
                     {
                         HttpOnly = true,
-                        Secure = false, // Ustaw na true w środowisku produkcyjnym
+                        Secure = true, // HTTPS w produkcji
                         Expires = DateTimeOffset.UtcNow.AddDays(7),
-                        SameSite = SameSiteMode.Strict
+                        SameSite = SameSiteMode.None // Dla cross-origin
                     }
                 );
 
-                return Ok(new {token = jwtToken});
+                return Ok(new {token = jwtToken, refreshToken = refreshToken});
 
 
             }
@@ -261,11 +259,11 @@ namespace API.Alimed.Controllers
             {
                 HttpOnly = true,
                 Secure = true,
-                SameSite = SameSiteMode.Strict,
+                SameSite = SameSiteMode.None,
                 Expires = DateTime.UtcNow.AddDays(7)
             });
 
-            return Ok(new { token = jwtToken });
+            return Ok(new { token = jwtToken, refreshToken = refreshToken });
         }
 
 
@@ -293,11 +291,11 @@ namespace API.Alimed.Controllers
             {
                 HttpOnly = true,
                 Secure = true,
-                SameSite = SameSiteMode.Strict,
+                SameSite = SameSiteMode.None,
                 Expires = DateTime.UtcNow.AddDays(7)
             });
 
-            return Ok(new { token = jwtToken });
+            return Ok(new { token = jwtToken, refreshToken = refreshToken });
         }
 
 
