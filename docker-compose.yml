@@ -1,0 +1,69 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: alimed-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: alimed_root_password
+      MYSQL_DATABASE: alimed
+      MYSQL_USER: alimed_user
+      MYSQL_PASSWORD: alimed_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - alimed-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # .NET Backend API
+  backend:
+    build:
+      context: ./WebAPI/API.Alimed
+      dockerfile: Dockerfile
+    container_name: alimed-backend
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5056
+      - ConnectionStrings__MySqlConnection=Server=mysql;Port=3306;Database=alimed;Uid=alimed_user;Pwd=alimed_password
+    ports:
+      - "5056:5056"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - alimed-network
+
+  # React Frontend (opcjonalnie - dev server)
+  # frontend:
+  #   build:
+  #     context: ./src/frontend/AliMed.Web
+  #     dockerfile: Dockerfile.dev
+  #   container_name: alimed-frontend
+  #   restart: unless-stopped
+  #   environment:
+  #     - VITE_API_BASE_URL=http://localhost:5056
+  #   ports:
+  #     - "5173:5173"
+  #   volumes:
+  #     - ./src/frontend/AliMed.Web:/app
+  #     - /app/node_modules
+  #   networks:
+  #     - alimed-network
+  #   depends_on:
+  #     - backend
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  alimed-network:
+    driver: bridge
