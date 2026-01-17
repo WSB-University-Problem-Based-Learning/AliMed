@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { CalendarIcon, UserIcon, ClockIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from '../context/LanguageContext';
 import { apiService } from '../services/api';
-import type { Lekarz } from '../types/api';
-import type { WizytaCreateRequest } from '../types/api';
+import type { Lekarz, WizytaCreateRequest, DostepneTerminyResponse } from '../types/api';
 
 const UmowWizytePage: React.FC = () => {
   const { t } = useTranslation();
@@ -21,6 +20,8 @@ const UmowWizytePage: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
   const [selectedSpecjalizacja, setSelectedSpecjalizacja] = useState('all');
+  const [availableSlots, setAvailableSlots] = useState<string[]>([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
 
   useEffect(() => {
     loadLekarze();
@@ -53,6 +54,36 @@ const UmowWizytePage: React.FC = () => {
     }
     return lekarze.filter(l => l.specjalizacja === selectedSpecjalizacja);
   };
+
+  // Fetch available slots whenever lekarz + date range are selected
+  useEffect(() => {
+    const fetchSlots = async () => {
+      if (!selectedLekarz || !selectedDate) {
+        setAvailableSlots([]);
+        return;
+      }
+      try {
+        setLoadingSlots(true);
+        setError(null);
+        // For now, use same day range (from=selectedDate, to=selectedDate)
+        const resp: DostepneTerminyResponse = await apiService.getDostepneTerminy(
+          selectedLekarz,
+          // Placówka nie jest jeszcze wybierana w UI; użyj 1 lub lekarz.placowkaId jeśli dostępne
+          1,
+          selectedDate,
+          selectedDate,
+        );
+        setAvailableSlots(resp.available.map(dt => dt.replace('Z', '')));
+      } catch (err) {
+        console.error('Error loading slots:', err);
+        setError(t('bookVisit.errorLoadingSlots'));
+        setAvailableSlots([]);
+      } finally {
+        setLoadingSlots(false);
+      }
+    };
+    fetchSlots();
+  }, [selectedLekarz, selectedDate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,17 +124,11 @@ const UmowWizytePage: React.FC = () => {
     }
   };
 
-  // Generate time slots (e.g., 8:00 - 18:00 in 30-minute intervals)
-  const generateTimeSlots = (): string[] => {
-    const slots: string[] = [];
-    for (let hour = 8; hour < 18; hour++) {
-      slots.push(`${hour.toString().padStart(2, '0')}:00`);
-      slots.push(`${hour.toString().padStart(2, '0')}:30`);
-    }
-    return slots;
-  };
-
-  const timeSlots = generateTimeSlots();
+  // Format slots for display (HH:mm)
+  const formattedSlots = availableSlots
+    .filter(dt => dt.startsWith(selectedDate))
+    .map(dt => dt.split('T')[1]?.substring(0,5))
+    .filter(Boolean) as string[];
   const filteredLekarze = getFilteredLekarze();
   const specjalizacje = getUniqueSpecjalizacje();
 
@@ -225,24 +250,30 @@ const UmowWizytePage: React.FC = () => {
             />
           </div>
 
-          {/* Time selection */}
+          {/* Time selection - from available slots */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               <ClockIcon className="w-5 h-5 inline mr-1" />
               {t('bookVisit.selectTime')}
             </label>
-            <select
-              value={selectedTime}
-              onChange={(e) => setSelectedTime(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-alimed-blue focus:border-transparent"
-            >
-              <option value="">{t('bookVisit.chooseTime')}</option>
-              {timeSlots.map((time) => (
-                <option key={time} value={time}>
-                  {time}
-                </option>
-              ))}
-            </select>
+            {loadingSlots ? (
+              <div className="text-gray-600">{t('common.loading')}</div>
+            ) : (
+              <select
+                value={selectedTime}
+                onChange={(e) => setSelectedTime(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-alimed-blue focus:border-transparent"
+                disabled={!selectedLekarz || !selectedDate || formattedSlots.length === 0}
+              >
+                <option value="">{t('bookVisit.chooseTime')}</option>
+                {formattedSlots.map((time) => (
+                  <option key={time} value={time}>{time}</option>
+                ))}
+              </select>
+            )}
+            {selectedLekarz && selectedDate && !loadingSlots && formattedSlots.length === 0 && (
+              <p className="text-sm text-gray-500 mt-2">{t('bookVisit.noSlotsForDay')}</p>
+            )}
           </div>
 
           {/* Submit button */}
