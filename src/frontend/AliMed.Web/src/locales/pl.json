@@ -1,0 +1,110 @@
+{
+  "common": {
+    "appName": "AliMed",
+    "loading": "Ładowanie...",
+    "error": "Błąd",
+    "save": "Zapisz",
+    "cancel": "Anuluj",
+    "delete": "Usuń",
+    "edit": "Edytuj",
+    "details": "Szczegóły",
+    "actions": "Akcje",
+    "yes": "Tak",
+    "no": "Nie",
+    "search": "Szukaj",
+    "noData": "Brak danych",
+    "allRightsReserved": "Wszystkie prawa zastrzeżone",
+    "teamWSB": "Zespół nr 3 WSB"
+  },
+  "nav": {
+    "home": "Strona główna",
+    "functionality": "Funkcjonalność",
+    "patients": "Pacjenci",
+    "doctors": "Lekarze",
+    "visits": "Wizyty",
+    "login": "Zaloguj się",
+    "logout": "Wyloguj się",
+    "myAccount": "Moje konto"
+  },
+  "landing": {
+    "heroTitle": "AliMed – Internetowa",
+    "heroTitleHighlight": "Rejestracja Pacjentów",
+    "heroDescription": "Zarządzaj wizytami i dokumentacją medyczną. Prosty i bezpieczny system dla pacjentów i personelu medycznego.",
+    "register": "Zarejestruj się",
+    "forPatient": "Dla pacjenta",
+    "forStaff": "Dla personelu",
+    "visitRegistration": "Rejestracja wizyt",
+    "visitRegistrationDesc": "Umów wizytę online w dowolnym czasie",
+    "medicalHistory": "Historia medyczna",
+    "medicalHistoryDesc": "Przeglądaj swoją dokumentację medyczną",
+    "dataManagement": "Zarządzanie danymi",
+    "dataManagementDesc": "Aktualizuj swoje dane osobowe",
+    "patientList": "Lista pacjentów",
+    "patientListDesc": "Przeglądaj i zarządzaj bazą pacjentów",
+    "visitSchedule": "Terminy wizyt",
+    "visitScheduleDesc": "Aktualizuj i zarządzaj terminarzem",
+    "confirmations": "Potwierdzenia",
+    "confirmationsDesc": "Potwierdzaj rezerwacje pacjentów",
+    "tryDemo": "Wypróbuj DEMO",
+    "demoDescription": "Zapoznaj się z systemem bez konieczności rejestracji",
+    "demoMode": "Tryb demonstracyjny"
+  },
+  "login": {
+    "title": "Zaloguj się do AliMed",
+    "email": "Adres e-mail",
+    "password": "Hasło",
+    "submit": "zaloguj się",
+    "forgotPassword": "Zapomniałeś hasła?",
+    "fillAllFields": "Proszę wypełnić wszystkie pola",
+    "githubLogin": "Zaloguj się przez GitHub",
+    "orLoginWith": "lub zaloguj się emailem",
+    "authenticating": "Uwierzytelnianie...",
+    "githubAuthError": "Błąd autoryzacji GitHub",
+    "noAuthCode": "Brak kodu autoryzacji",
+    "authFailed": "Nie udało się uwierzytelnić",
+    "error": "Błąd",
+    "redirecting": "Przekierowywanie..."
+  },
+  "dashboard": {
+    "welcome": "Witaj",
+    "myVisits": "Moje wizyty",
+    "myVisitsDesc": "Zobacz historię wizyt",
+    "bookVisit": "Umów wizytę",
+    "bookVisitDesc": "Zarezerwuj termin",
+    "documents": "Dokumenty",
+    "documentsDesc": "Wyniki i recepty",
+    "myData": "Moje dane",
+    "myDataDesc": "Edytuj profil",
+    "upcomingVisits": "Nadchodzące wizyty",
+    "dateTime": "Data i godzina",
+    "doctor": "Lekarz",
+    "specialization": "Specjalizacja",
+    "status": "Status",
+    "confirmed": "Potwierdzona",
+    "pending": "Oczekująca",
+    "noUpcomingVisits": "Brak nadchodzących wizyt",
+    "demoNotice": "🎭 Jesteś w trybie demonstracyjnym. Dane są przykładowe i nie będą zapisane."
+  },
+  "patients": {
+    "title": "Lista Pacjentów",
+    "pesel": "PESEL",
+    "birthDate": "Data urodzenia",
+    "address": "Adres",
+    "noPatients": "Brak pacjentów w bazie danych"
+  },
+  "doctors": {
+    "title": "Lekarze",
+    "underConstruction": "Strona w budowie - czekamy na endpoint API"
+  },
+  "visits": {
+    "title": "Wizyty",
+    "underConstruction": "Strona w budowie - czekamy na endpoint API"
+  },
+  "error": {
+    "somethingWentWrong": "Coś poszło nie tak",
+    "unexpectedError": "Przepraszamy, wystąpił nieoczekiwany błąd podczas ładowania aplikacji.",
+    "technicalDetails": "Szczegóły techniczne",
+    "backToHome": "Powrót do strony głównej",
+    "errorOccurred": "Wystąpił błąd"
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "common": {
+    "appName": "AliMed",
+    "loading": "Laduja...",
+    "error": "Feler",
+    "save": "Spamiyntej",
+    "cancel": "Pociep",
+    "delete": "Wyciep",
+    "edit": "Poedytuj",
+    "details": "Szczyguły",
+    "actions": "Akcyje",
+    "yes": "Ja",
+    "no": "Niy",
+    "search": "Szukej",
+    "noData": "Niy ma danych",
+    "allRightsReserved": "Wszyjske prawa zastrzyżone",
+    "teamWSB": "Ekipa nr 3 WSB"
+  },
+  "nav": {
+    "home": "Głōwno strōna",
+    "functionality": "Funkcyje",
+    "patients": "Pacjynty",
+    "doctors": "Dochtory",
+    "visits": "Wizyty",
+    "login": "Wlyź",
+    "logout": "Wylyź",
+    "myAccount": "Mōj konto"
+  },
+  "landing": {
+    "heroTitle": "AliMed – Internetowo",
+    "heroTitleHighlight": "Rejestracyjo Pacjyntōw",
+    "heroDescription": "Zawiaduj wizytami i dokumyntacyjōm medycznom. Prosty i bezpieczny systym dlo pacjyntōw i perschnelu medycznego.",
+    "register": "Zarejestruj sie",
+    "forPatient": "Dlo pacjynta",
+    "forStaff": "Dlo perschnelu",
+    "visitRegistration": "Rejestracyjo wizyt",
+    "visitRegistrationDesc": "Umōw sie na wizyta online kedy chcesz",
+    "medicalHistory": "Historyjo medyczno",
+    "medicalHistoryDesc": "Poglynd na swoja dokumyntacyjo medyczno",
+    "dataManagement": "Zawiadowanie danymi",
+    "dataManagementDesc": "Zaktualizuj swoje dane perschnalne",
+    "patientList": "Lista pacjyntōw",
+    "patientListDesc": "Poglynd i zawiadowanie bazōm pacjyntōw",
+    "visitSchedule": "Terminy wizyt",
+    "visitScheduleDesc": "Zaktualizuj i zawiaduj terminorzym",
+    "confirmations": "Potwierdzynie",
+    "confirmationsDesc": "Potwierdź rezerwacyje pacjyntōw",
+    "tryDemo": "Sprōbuj DEMO",
+    "demoDescription": "Poznŏj systym bez registracyje",
+    "demoMode": "Tryb demōnstracyjny"
+  },
+  "login": {
+    "title": "Wlyź do AliMed",
+    "email": "Adresa e-mail",
+    "password": "Hasło",
+    "submit": "wlyź",
+    "forgotPassword": "Zapōmniołeś hasła?",
+    "fillAllFields": "Proszym wyfołnić wszyjske pola",
+    "githubLogin": "Wlyź bez GitHub",
+    "orLoginWith": "abo wlyź emailym",
+    "authenticating": "Uwierzytelnianie...",
+    "githubAuthError": "Feler autorizacyje GitHub",
+    "noAuthCode": "Niy ma kodu autorizacyje",
+    "authFailed": "Niy podarziło sie uwierzytelnić",
+    "error": "Feler",
+    "redirecting": "Przekierowanie..."
+  },
+  "dashboard": {
+    "welcome": "Witej",
+    "myVisits": "Moje wizyty",
+    "myVisitsDesc": "Podziywej sie na historyjo wizyt",
+    "bookVisit": "Umōw wizyta",
+    "bookVisitDesc": "Zarezerwuj termin",
+    "documents": "Dokumynty",
+    "documentsDesc": "Wyniki i recepty",
+    "myData": "Moje dane",
+    "myDataDesc": "Poedytuj profil",
+    "upcomingVisits": "Nadchodzōnce wizyty",
+    "dateTime": "Data i godzina",
+    "doctor": "Dochtōr",
+    "specialization": "Specjalizacyjo",
+    "status": "Status",
+    "confirmed": "Potwierdzynō",
+    "pending": "Czeko",
+    "noUpcomingVisits": "Niy ma nadchodzōncych wizyt",
+    "demoNotice": "🎭 Jeżeś w trybie demōnstracyjnym. Dane sōm přikładowe i niy bydōm spamiyntane."
+  },
+  "patients": {
+    "title": "Lista Pacjyntōw",
+    "pesel": "PESEL",
+    "birthDate": "Data urodzynio",
+    "address": "Adresa",
+    "noPatients": "Niy ma pacjyntōw w bazie danych"
+  },
+  "doctors": {
+    "title": "Dochtory",
+    "underConstruction": "Strōna w budowie - czekōmy na endpoint API"
+  },
+  "visits": {
+    "title": "Wizyty",
+    "underConstruction": "Strōna w budowie - czekōmy na endpoint API"
+  },
+  "error": {
+    "somethingWentWrong": "Cosik poszło niy tak",
+    "unexpectedError": "Przeprosōmy, zdarził sie niyspodziywany feler przi ladowaniu aplikacyje.",
+    "technicalDetails": "Techniczne szczyguły",
+    "backToHome": "Nazod na głōwno strōna",
+    "errorOccurred": "Zdarził sie feler"
+  }
+}
