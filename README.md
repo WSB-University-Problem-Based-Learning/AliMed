@@ -127,14 +127,21 @@ flowchart TD
 
 ### Implementacja tabeli "Lekarze" w ApsaraDB for MySQL
 
-Obecnym priorytetem jest zaprojektowanie i wdrożenie nowej tabeli w bazie danych, która będzie przechowywać szczegółowe informacje o lekarzach przyjmujących w placówce.
+## 🚀 Production Deployment
 
-**Planowana struktura tabeli:**
+Aplikacja jest wdrożona na serwerze produkcyjnym:
 
-| Nazwa kolumny | Typ danych | Opis |
-| :--- | :--- | :--- |
-| `imie` | `string` | Imię lekarza. |
-| `nazwisko` | `string` | Nazwisko lekarza. |
-| `adres_gabinetu` | `string` | Lokalizacja świadczenia usług. |
-| `numer_PWZ lub PESEL` | `string/varchar` | Do wewnętrznej identyfikacji lekarza w systemie (z uwzględnieniem RODO). |
-| `opis_specjalizacji` | `text` | Opis specjalizacji lub głównych obszarów praktyki (np. "Kardiolog, leczenie nadciśnienia", "Ortopeda, specjalista urazów sportowych"). |
+- **Frontend**: http://130.162.222.70
+- **API**: http://130.162.222.70/api/
+- **Swagger**: http://130.162.222.70:5056/swagger
+
+Szczegóły wdrożenia i instrukcje znajdują się w [deploy/DEPLOYMENT.md](deploy/DEPLOYMENT.md).
+
+### Quick Deploy
+
+```powershell
+cd deploy
+.\deploy-windows.ps1
+```
+
+Więcej informacji: [deploy/README.md](deploy/README.md)
