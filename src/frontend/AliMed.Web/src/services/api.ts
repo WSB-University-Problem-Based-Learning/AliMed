@@ -9,8 +9,8 @@ const getAuthToken = (): string | null => {
 };
 
 // Helper function to create headers with auth
-const getHeaders = (includeAuth = false): HeadersInit => {
-  const headers: HeadersInit = {
+const getHeaders = (includeAuth = false): Record<string, string> => {
+  const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   };
   

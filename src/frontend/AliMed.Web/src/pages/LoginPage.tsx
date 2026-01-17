@@ -25,7 +25,7 @@ const LoginPage: React.FC = () => {
 
     setIsLoading(true);
     try {
-      const response = await fetch(`${config.apiUrl}/auth/login`, {
+      const response = await fetch(`${config.apiBaseUrl}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
