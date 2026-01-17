@@ -1,0 +1,11 @@
+﻿namespace API.Alimed.Entities
+{
+    public class Adres
+    {
+        public string? Ulica { get; set; }
+        public string? NumerDomu { get; set; }
+        public string? KodPocztowy { get; set; }
+        public string? Miasto { get; set; }
+        public string Kraj { get; set; } // default val
+    }
+}
