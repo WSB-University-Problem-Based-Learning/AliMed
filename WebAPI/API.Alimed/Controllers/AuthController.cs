@@ -22,8 +22,8 @@ namespace API.Alimed.Controllers
         private readonly IPasswordService _passwordService;
         private readonly AppDbContext _db;
 
-        private const string? GITHUB_CLIENT_ID = "Ov23liVc5BhNQu3ak43m";
-        private const string? GITHUB_CLIENT_SECRET = "ce76eb423af872d4e710cdce762f55a7e6677714";
+        private readonly string? _githubClientId;
+        private readonly string? _githubClientSecret;
 
         public AuthController(IHttpClientFactory httpClientFactory, IJwtService jwtService, IUserService userService, IConfiguration configuration, AppDbContext db, IPasswordService passwordService)
         {
@@ -34,10 +34,9 @@ namespace API.Alimed.Controllers
             _db = db;
             _passwordService = passwordService;
 
-            // github secrets
-            // TODO - ustawic w env variable
-            //GITHUB_CLIENT_ID = _configuration["github:GITHUB_CLIENT_ID"];
-            //GITHUB_CLIENT_SECRET = _configuration["github:GITHUB_CLIENT_SECRET"];
+            // GitHub secrets from configuration or environment
+            _githubClientId = _configuration["GitHub:ClientId"] ?? Environment.GetEnvironmentVariable("GITHUB_CLIENT_ID");
+            _githubClientSecret = _configuration["GitHub:ClientSecret"] ?? Environment.GetEnvironmentVariable("GITHUB_CLIENT_SECRET");
         }
 
 
@@ -52,10 +51,15 @@ namespace API.Alimed.Controllers
 
                 // auth kod na token github
                 var tokenRequestUrl = "https://github.com/login/oauth/access_token";
+                if (string.IsNullOrWhiteSpace(_githubClientId) || string.IsNullOrWhiteSpace(_githubClientSecret))
+                {
+                    return StatusCode(500, "GitHub OAuth not configured: missing ClientId/ClientSecret");
+                }
+
                 var tokenRequestBody = new
                 {
-                    client_id = GITHUB_CLIENT_ID,
-                    client_secret = GITHUB_CLIENT_SECRET,
+                    client_id = _githubClientId,
+                    client_secret = _githubClientSecret,
                     code = payload.Code,
                     // adres z github redirectUrl [na frontend]
                     // npm run dev na: http://localhost:5173/auth/github/callback
