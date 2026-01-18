@@ -97,7 +97,7 @@ git pull origin feature/frontend
    - [ ] Dodać więcej testów jednostkowych
    - [ ] Stworzyć migracje EF Core
    - [ ] Dodać seed data dla demo
-   - [ ] Skonfigurować Alibaba Cloud deployment
+   - [x] Skonfigurować Oracle Cloud Infrastructure deployment
 
 3. **CI/CD:**
    - [ ] Dodać job dla buildu .NET w GitHub Actions

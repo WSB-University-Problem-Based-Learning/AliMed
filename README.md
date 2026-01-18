@@ -70,9 +70,9 @@ Dbaj o kontrast z tekstem, szczególnie na jasno-niebieskich tłach, aby zachowa
 
 ## 🎯 Opis projektu
 
-Zespół realizuje projekt polegający na stworzeniu internetowego systemu rejestracji pacjentów z wykorzystaniem wyłącznie darmowych usług i narzędzi dostępnych w ekosystemie **Alibaba Cloud**.
+Zespół realizuje projekt polegający na stworzeniu internetowego systemu rejestracji pacjentów z wykorzystaniem wyłącznie darmowych usług i narzędzi chmurowych.
 
-System został wdrożony w środowisku testowym **Alibaba Cloud Free Tier**.
+System został wdrożony w środowisku produkcyjnym **Oracle Cloud Infrastructure (OCI) Always Free Tier**.
 
 ### Główne funkcjonalności
 
@@ -83,7 +83,7 @@ System został wdrożony w środowisku testowym **Alibaba Cloud Free Tier**.
 
 ## 🛠️ Architektura i Stos technologiczny
 
-Poniższy diagram przedstawia architekturę systemu opartą o usługi Alibaba Cloud.
+Poniższy diagram przedstawia architekturę systemu opartą o usługi Oracle Cloud Infrastructure.
 
 ```mermaid
 flowchart TD
@@ -95,32 +95,33 @@ flowchart TD
 
     subgraph AliMedApp["Aplikacja AliMed"]
         direction LR
-        Frontend["Frontend (React / NestJS)"]
-        Backend["Backend (NestJS / .NET WebApi)"]
+        Frontend["Frontend (React + Vite)"]
+        Backend["Backend (.NET 9 Web API)"]
     end
 
-    subgraph AlibabaCloud [Alibaba Cloud Free Tier]
+    subgraph OracleCloud [Oracle Cloud Infrastructure Always Free]
         direction LR
-        ECS["ECS (Elastic Compute Service)"]
-        DB[("ApsaraDB (MySQL)")]
-        OSS[("OSS (Object Storage)")]
+        VM["VM.Standard.E2.1.Micro"]
+        DB[("MySQL 8.0")]
+        BlockStorage[("Block Volume Storage")]
     end
 
     User --> Frontend
     Frontend --> Backend
-    Backend -- Hostowany na --> ECS
-    ECS -- Zapisuje/Odczytuje dane --> DB
-    ECS -- Zapisuje/Odczytuje pliki --> OSS
+    Backend -- Hostowany na --> VM
+    VM -- Zapisuje/Odczytuje dane --> DB
+    VM -- Zapisuje/Odczytuje pliki --> BlockStorage
 ```
 
 **Kluczowe komponenty:**
 
   * **Backend:** .NET 9.0 Web API z Entity Framework Core
   * **Frontend:** React 19 + Vite + TypeScript + TailwindCSS
-  * **Hosting:** Alibaba Cloud ECS (Elastic Compute Service)
-  * **Baza danych:** ApsaraDB for MySQL (przechowywanie danych o pacjentach, wizytach, zaleceniach)
-  * **Przechowywanie plików:** Alibaba Cloud OSS (Object Storage Service) (przechowywanie dokumentów)
+  * **Hosting:** Oracle Cloud Infrastructure VM (Ubuntu 24.04 LTS, 2 vCPU, 1GB RAM)
+  * **Baza danych:** MySQL 8.0 (przechowywanie danych o pacjentach, wizytach, zaleceniach)
+  * **Przechowywanie plików:** Block Volume Storage (45GB SSD)
   * **Autentykacja:** JWT + GitHub OAuth
+  * **Domena:** alimed.com.pl (HTTPS via nginx)
 
 -----
 
@@ -255,22 +256,22 @@ AliMed/
 
 ### 🔄 W trakcie
 
-- 🔄 Integracja z Alibaba Cloud ECS
-- 🔄 Konfiguracja ApsaraDB for MySQL w chmurze
+- 🔄 Rozbudowa panelu lekarza
+- 🔄 System dokumentów medycznych
 - 🔄 Setup CI/CD pipeline
 
 ### 📋 Planowane
 
-- 📋 Przechowywanie dokumentów medycznych w OSS
+- 📋 Przechowywanie dokumentów medycznych w Object Storage
 - 📋 System powiadomień email/SMS
 - 📋 Kalendarz dostępności lekarzy
 - 📋 Historia zmian w dokumentacji medycznej
 
 -----
 
-## �🚧 Aktualne zadania (To-Do)
+## 🚧 Aktualne zadania (To-Do)
 
-### Implementacja tabeli "Lekarze" w ApsaraDB for MySQL
+### Rozbudowa funkcjonalności systemu
 
 ## 🚀 Production Deployment
 

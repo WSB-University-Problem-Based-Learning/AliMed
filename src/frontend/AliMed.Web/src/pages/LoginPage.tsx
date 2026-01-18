@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useTranslation } from '../context/LanguageContext';
 import { config } from '../config/env';
 import LanguageSwitcher from '../components/LanguageSwitcher';
@@ -10,7 +10,6 @@ const LoginPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
   const { t } = useTranslation();
   const { login } = useAuth();
 
@@ -40,7 +39,8 @@ const LoginPage: React.FC = () => {
 
       const data = await response.json();
       login(data.token, data.refreshToken || '');
-      navigate('/dashboard');
+      // Use window.location to force full page reload and proper auth state read
+      window.location.href = '/dashboard';
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Błąd logowania');
     } finally {

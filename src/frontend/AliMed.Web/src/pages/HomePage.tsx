@@ -34,9 +34,9 @@ const HomePage: React.FC = () => {
 
         <Card title="Technologia">
           <ul className="space-y-2 text-gray-700">
-            <li>✓ Alibaba Cloud ECS</li>
-            <li>✓ ApsaraDB for MySQL</li>
-            <li>✓ Object Storage Service</li>
+            <li>✓ Oracle Cloud Infrastructure</li>
+            <li>✓ MySQL 8.0</li>
+            <li>✓ Ubuntu 24.04 LTS</li>
             <li>✓ React + TypeScript</li>
           </ul>
         </Card>

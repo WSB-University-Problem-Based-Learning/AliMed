@@ -13,7 +13,25 @@ const MojeDanePage: React.FC = () => {
   const [user] = useState<User | null>(() => {
     if (authUser) return authUser;
     const userData = localStorage.getItem('alimed_user');
-    return userData ? JSON.parse(userData) : null;
+    if (userData) return JSON.parse(userData);
+    
+    // Fallback: decode JWT to get user info
+    const token = localStorage.getItem('alimed_token');
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        return {
+          userId: payload.nameid || 'unknown',
+          email: payload.email || '',
+          firstName: payload.unique_name || payload.github_login || 'User',
+          lastName: '',
+          role: 0,
+        };
+      } catch {
+        return null;
+      }
+    }
+    return null;
   });
 
   const [pacjent, setPacjent] = useState<Pacjent | null>(null);

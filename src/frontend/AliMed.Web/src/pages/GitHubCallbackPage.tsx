@@ -1,12 +1,11 @@
 import { useEffect, useState, useRef } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { apiService } from '../services/api';
 import { useTranslation } from '../context/LanguageContext';
 
 const GitHubCallbackPage = () => {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
   const { login } = useAuth();
   const { t } = useTranslation();
   const [error, setError] = useState<string | null>(null);
@@ -23,13 +22,13 @@ const GitHubCallbackPage = () => {
 
       if (errorParam) {
         setError(t('login.githubAuthError'));
-        setTimeout(() => navigate('/login'), 3000);
+        setTimeout(() => { window.location.href = '/login'; }, 3000);
         return;
       }
 
       if (!code) {
         setError(t('login.noAuthCode'));
-        setTimeout(() => navigate('/login'), 3000);
+        setTimeout(() => { window.location.href = '/login'; }, 3000);
         return;
       }
 
@@ -39,22 +38,20 @@ const GitHubCallbackPage = () => {
         
         if (response.token) {
           login(response.token, response.refreshToken || '');
-          // Small delay to ensure state is updated before navigation
-          setTimeout(() => {
-            navigate('/dashboard', { replace: true });
-          }, 100);
+          // Use window.location to force full page reload and proper auth state read
+          window.location.href = '/dashboard';
         } else {
           throw new Error('No token in response');
         }
       } catch (err) {
         console.error('GitHub auth error:', err);
         setError(t('login.authFailed'));
-        setTimeout(() => navigate('/login'), 3000);
+        setTimeout(() => { window.location.href = '/login'; }, 3000);
       }
     };
 
     handleCallback();
-  }, [searchParams, navigate, login, t]);
+  }, [searchParams, login, t]);
 
   return (
     <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4">

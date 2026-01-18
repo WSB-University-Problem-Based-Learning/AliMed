@@ -95,7 +95,7 @@ chore(deps): upgrade React to v19
 - `.env` dla zmiennych lokalnych (jest w .gitignore)
 - `appsettings.Development.json` dla .NET (jest w .gitignore)
 - Placeholderów w plikach `.example`
-- Azure Key Vault / Alibaba Cloud Secrets Manager dla produkcji
+- Oracle Cloud Vault / Azure Key Vault dla produkcji
 
 ## 🏗️ Struktura projektu
 
