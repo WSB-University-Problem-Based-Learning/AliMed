@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CalendarIcon, UserIcon, ClockIcon, CheckCircleIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
+import { CalendarIcon, UserIcon, ClockIcon, CheckCircleIcon, ChevronLeftIcon, ChevronRightIcon, BuildingOffice2Icon } from '@heroicons/react/24/outline';
 import { useTranslation } from '../context/LanguageContext';
 import { apiService } from '../services/api';
-import type { Lekarz, WizytaCreateRequest, DostepneTerminyResponse } from '../types/api';
+import type { Lekarz, Placowka, WizytaCreateRequest, DostepneTerminyResponse } from '../types/api';
 
 const DOCTORS_PER_PAGE = 8;
 
@@ -12,6 +12,7 @@ const UmowWizytePage: React.FC = () => {
   const navigate = useNavigate();
 
   const [lekarze, setLekarze] = useState<Lekarz[]>([]);
+  const [placowki, setPlacowki] = useState<Placowka[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -19,6 +20,7 @@ const UmowWizytePage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
 
   // Form state
+  const [selectedPlacowka, setSelectedPlacowka] = useState<number | null>(null);
   const [selectedLekarz, setSelectedLekarz] = useState<number | null>(null);
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
@@ -27,17 +29,21 @@ const UmowWizytePage: React.FC = () => {
   const [loadingSlots, setLoadingSlots] = useState(false);
 
   useEffect(() => {
-    loadLekarze();
+    loadData();
   }, []);
 
-  const loadLekarze = async () => {
+  const loadData = async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await apiService.getLekarze();
-      setLekarze(data);
+      const [lekarzeData, placowkiData] = await Promise.all([
+        apiService.getLekarze(),
+        apiService.getPlacowki().catch(() => []) // Fallback to empty if API doesn't exist yet
+      ]);
+      setLekarze(lekarzeData);
+      setPlacowki(placowkiData);
     } catch (err) {
-      console.error('Error loading doctors:', err);
+      console.error('Error loading data:', err);
       setError(t('bookVisit.errorLoadingDoctors'));
     } finally {
       setLoading(false);
@@ -45,17 +51,29 @@ const UmowWizytePage: React.FC = () => {
   };
 
   const getUniqueSpecjalizacje = (): string[] => {
-    const specjalizacje = lekarze
+    const filteredByPlacowka = selectedPlacowka
+      ? lekarze.filter(l => l.placowkaId === selectedPlacowka)
+      : lekarze;
+    const specjalizacje = filteredByPlacowka
       .map(l => l.specjalizacja)
       .filter((s): s is string => !!s);
     return Array.from(new Set(specjalizacje));
   };
 
   const getFilteredLekarze = (): Lekarz[] => {
-    if (selectedSpecjalizacja === 'all') {
-      return lekarze;
+    let filtered = lekarze;
+    
+    // Filter by facility first
+    if (selectedPlacowka) {
+      filtered = filtered.filter(l => l.placowkaId === selectedPlacowka);
     }
-    return lekarze.filter(l => l.specjalizacja === selectedSpecjalizacja);
+    
+    // Then filter by specialization
+    if (selectedSpecjalizacja !== 'all') {
+      filtered = filtered.filter(l => l.specjalizacja === selectedSpecjalizacja);
+    }
+    
+    return filtered;
   };
 
   // Pagination for doctors
@@ -69,23 +87,27 @@ const UmowWizytePage: React.FC = () => {
   // Reset page when filter changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedSpecjalizacja]);
+  }, [selectedSpecjalizacja, selectedPlacowka]);
 
-  // Fetch available slots whenever lekarz + date range are selected
+  // Fetch available slots whenever lekarz + placówka + date range are selected
   useEffect(() => {
     const fetchSlots = async () => {
       if (!selectedLekarz || !selectedDate) {
         setAvailableSlots([]);
         return;
       }
+      
+      // Get the placówka for the selected doctor
+      const lekarz = lekarze.find(l => l.lekarzId === selectedLekarz);
+      const placowkaId = selectedPlacowka || lekarz?.placowkaId || 1;
+      
       try {
         setLoadingSlots(true);
         setError(null);
         // For now, use same day range (from=selectedDate, to=selectedDate)
         const resp: DostepneTerminyResponse = await apiService.getDostepneTerminy(
           selectedLekarz,
-          // Placówka nie jest jeszcze wybierana w UI; użyj 1 lub lekarz.placowkaId jeśli dostępne
-          1,
+          placowkaId,
           selectedDate,
           selectedDate,
         );
@@ -99,7 +121,7 @@ const UmowWizytePage: React.FC = () => {
       }
     };
     fetchSlots();
-  }, [selectedLekarz, selectedDate]);
+  }, [selectedLekarz, selectedDate, selectedPlacowka, lekarze, t]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,6 +133,10 @@ const UmowWizytePage: React.FC = () => {
 
     // Combine date and time into ISO format
     const dateTime = new Date(`${selectedDate}T${selectedTime}`).toISOString();
+    
+    // Get the placówka for the selected doctor
+    const lekarz = lekarze.find(l => l.lekarzId === selectedLekarz);
+    const placowkaId = selectedPlacowka || lekarz?.placowkaId;
 
     try {
       setSubmitting(true);
@@ -120,7 +146,7 @@ const UmowWizytePage: React.FC = () => {
       const wizytaData: WizytaCreateRequest = {
         dataWizyty: dateTime,
         lekarzId: selectedLekarz,
-        // placowkaId is optional, can be added later when placowki selection is implemented
+        placowkaId: placowkaId,
         diagnoza: undefined,
       };
 
@@ -195,6 +221,33 @@ const UmowWizytePage: React.FC = () => {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm p-6 space-y-6">
+          {/* Facility selection */}
+          {placowki.length > 0 && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <BuildingOffice2Icon className="w-5 h-5 inline mr-1" />
+                {t('bookVisit.selectFacility')}
+              </label>
+              <select
+                value={selectedPlacowka || ''}
+                onChange={(e) => {
+                  const value = e.target.value ? Number(e.target.value) : null;
+                  setSelectedPlacowka(value);
+                  setSelectedLekarz(null); // Reset doctor when facility changes
+                  setSelectedSpecjalizacja('all'); // Reset specialization
+                }}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-alimed-blue focus:border-transparent"
+              >
+                <option value="">{t('bookVisit.allFacilities')}</option>
+                {placowki.map((placowka) => (
+                  <option key={placowka.placowkaId} value={placowka.placowkaId}>
+                    {placowka.nazwa} - {placowka.adresPlacowki?.miasto || ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
           {/* Specialization filter */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">

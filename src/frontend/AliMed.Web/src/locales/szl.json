@@ -171,8 +171,10 @@
   },
   "bookVisit": {
     "title": "Umōw wizyta",
-    "subtitle": "Ôbier dochtora, data i godzina wizyty",
+    "subtitle": "Ôbier placōwka, dochtora, data i godzina wizyty",
     "backToDashboard": "Nazod do panelu",
+    "selectFacility": "Ôbier placōwka",
+    "allFacilities": "Wszyjske placōwki",
     "specialization": "Specjalizacyjo",
     "allSpecializations": "Wszyjske specjalizacyje",
     "selectDoctor": "Ôbier dochtora",
@@ -186,6 +188,7 @@
     "errorLoadingSlots": "Feler przi ladowaniu dostympnych terminōw",
     "errorBooking": "Feler przi rezerwacyji wizyty",
     "noDoctorsAvailable": "Niy ma dostympnych dochtorōw",
+    "noSlotsForDay": "Niy ma dostympnych terminōw w ôbranym dniu",
     "successTitle": "Wizyta zarezerwowano!",
     "successMessage": "Twoja wizyta była pomyślnie zarezerwowano",
     "redirecting": "Za chwila bydyš przekierowany..."

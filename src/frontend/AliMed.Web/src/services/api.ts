@@ -182,7 +182,16 @@ export const apiService = {
       credentials: 'include',
     });
     if (!response.ok) throw new Error('Failed to fetch placowki');
-    return response.json();
+    // Map API response to Placowka type (API returns Adres instead of adresPlacowki)
+    const data = await response.json();
+    return data.map((p: { placowkaId: number; nazwa?: string; adres?: { miasto?: string; ulica?: string } }) => ({
+      placowkaId: p.placowkaId,
+      nazwa: p.nazwa,
+      adresPlacowki: p.adres ? {
+        miasto: p.adres.miasto,
+        ulica: p.adres.ulica,
+      } : undefined,
+    }));
   },
 
   // Dokumenty

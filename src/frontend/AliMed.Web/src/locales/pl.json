@@ -171,8 +171,10 @@
   },
   "bookVisit": {
     "title": "Umów wizytę",
-    "subtitle": "Wybierz lekarza, datę i godzinę wizyty",
+    "subtitle": "Wybierz placówkę, lekarza, datę i godzinę wizyty",
     "backToDashboard": "Powrót do panelu",
+    "selectFacility": "Wybierz placówkę",
+    "allFacilities": "Wszystkie placówki",
     "specialization": "Specjalizacja",
     "allSpecializations": "Wszystkie specjalizacje",
     "selectDoctor": "Wybierz lekarza",
@@ -186,6 +188,7 @@
     "errorLoadingSlots": "Błąd podczas wczytywania dostępnych terminów",
     "errorBooking": "Błąd podczas rezerwacji wizyty",
     "noDoctorsAvailable": "Brak dostępnych lekarzy",
+    "noSlotsForDay": "Brak dostępnych terminów w wybranym dniu",
     "successTitle": "Wizyta zarezerwowana!",
     "successMessage": "Twoja wizyta została pomyślnie zarezerwowana",
     "redirecting": "Za chwilę zostaniesz przekierowany..."
