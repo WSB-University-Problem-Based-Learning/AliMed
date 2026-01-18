@@ -3,6 +3,13 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import LanguageSwitcher from './LanguageSwitcher';
+import { 
+  HomeIcon, 
+  CalendarDaysIcon, 
+  PlusCircleIcon, 
+  DocumentTextIcon, 
+  UserCircleIcon 
+} from '@heroicons/react/24/outline';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -23,6 +30,45 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     logout();
     navigate('/');
   };
+
+  // Navigation items with their colors matching dashboard
+  const navItems = [
+    { 
+      path: '/dashboard', 
+      label: t('nav.home'), 
+      icon: HomeIcon,
+      activeColor: 'bg-alimed-blue text-white',
+      hoverColor: 'hover:bg-blue-50 hover:text-alimed-blue'
+    },
+    { 
+      path: '/moje-wizyty', 
+      label: t('nav.myVisits'), 
+      icon: CalendarDaysIcon,
+      activeColor: 'bg-emerald-500 text-white',
+      hoverColor: 'hover:bg-emerald-50 hover:text-emerald-600'
+    },
+    { 
+      path: '/umow-wizyte', 
+      label: t('dashboard.bookVisit'), 
+      icon: PlusCircleIcon,
+      activeColor: 'bg-purple-500 text-white',
+      hoverColor: 'hover:bg-purple-50 hover:text-purple-600'
+    },
+    { 
+      path: '/dokumenty', 
+      label: t('nav.documents'), 
+      icon: DocumentTextIcon,
+      activeColor: 'bg-amber-500 text-white',
+      hoverColor: 'hover:bg-amber-50 hover:text-amber-600'
+    },
+    { 
+      path: '/moje-dane', 
+      label: t('dashboard.myData'), 
+      icon: UserCircleIcon,
+      activeColor: 'bg-rose-500 text-white',
+      hoverColor: 'hover:bg-rose-50 hover:text-rose-600'
+    },
+  ];
 
   // Get user display name
   const getUserName = () => {
@@ -65,43 +111,32 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             </Link>
 
             {/* Navigation */}
-            <nav className="flex items-center gap-4">
+            <nav className="flex items-center gap-2">
               {isLoggedIn ? (
                 <>
-                  {/* Logged in navigation */}
-                  <Link 
-                    to="/dashboard" 
-                    className={`transition ${isActive('/dashboard') ? 'text-alimed-blue font-medium' : 'text-gray-700 hover:text-alimed-blue'}`}
-                  >
-                    {t('nav.home')}
-                  </Link>
-                  <Link 
-                    to="/moje-wizyty" 
-                    className={`transition ${isActive('/moje-wizyty') ? 'text-alimed-blue font-medium' : 'text-gray-700 hover:text-alimed-blue'}`}
-                  >
-                    {t('nav.myVisits')}
-                  </Link>
-                  <Link 
-                    to="/umow-wizyte" 
-                    className={`transition ${isActive('/umow-wizyte') ? 'text-alimed-blue font-medium' : 'text-gray-700 hover:text-alimed-blue'}`}
-                  >
-                    {t('dashboard.bookVisit')}
-                  </Link>
-                  <Link 
-                    to="/dokumenty" 
-                    className={`transition ${isActive('/dokumenty') ? 'text-alimed-blue font-medium' : 'text-gray-700 hover:text-alimed-blue'}`}
-                  >
-                    {t('nav.documents')}
-                  </Link>
-                  <Link 
-                    to="/moje-dane" 
-                    className={`transition ${isActive('/moje-dane') ? 'text-alimed-blue font-medium' : 'text-gray-700 hover:text-alimed-blue'}`}
-                  >
-                    {t('dashboard.myData')}
-                  </Link>
+                  {/* Logged in navigation with color-coded items */}
+                  {navItems.map((item) => {
+                    const Icon = item.icon;
+                    const active = isActive(item.path);
+                    return (
+                      <Link 
+                        key={item.path}
+                        to={item.path} 
+                        className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                          active 
+                            ? item.activeColor + ' shadow-sm' 
+                            : 'text-gray-600 ' + item.hoverColor
+                        }`}
+                      >
+                        <Icon className="w-4 h-4" />
+                        <span className="hidden lg:inline">{item.label}</span>
+                      </Link>
+                    );
+                  })}
+                  <div className="h-6 w-px bg-gray-300 mx-1" />
                   <LanguageSwitcher />
-                  <span className="text-gray-600 text-sm">
-                    {t('dashboard.welcome')}, {getUserName()}
+                  <span className="text-gray-600 text-sm hidden md:inline">
+                    {getUserName()}
                   </span>
                   <button 
                     onClick={handleLogout}
