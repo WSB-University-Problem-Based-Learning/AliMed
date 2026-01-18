@@ -16,8 +16,7 @@ const DokumentyPage: React.FC = () => {
   const { t } = useTranslation();
   const [dokumenty, setDokumenty] = useState<Dokument[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  void setError; // API not implemented yet
+  const [error] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'recepty' | 'wyniki' | 'skierowania' | 'inne'>('all');
   const [sortBy, setSortBy] = useState<'date' | 'name' | 'type'>('date');

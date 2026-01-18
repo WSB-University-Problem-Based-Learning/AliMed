@@ -55,8 +55,8 @@
     "title": "Wlyź do AliMed",
     "email": "Adresa e-mail",
     "password": "Hasło",
-    "submit": "wlyź",
-    "forgotPassword": "Zapōmniołeś hasła?",
+    "submit": "Wlyź",
+    "forgotPassword": "Zapōmniałeś hasła?",
     "fillAllFields": "Proszym wyfołnić wszyjske pola",
     "githubLogin": "Wlyź bez GitHub",
     "orLoginWith": "abo wlyź emailym",
@@ -66,7 +66,8 @@
     "authFailed": "Niy podarziło sie uwierzytelnić",
     "error": "Feler",
     "redirecting": "Przekierowanie...",
-    "noAccount": "Niy mŏsz kōnta? Zarejestruj sie"
+    "noAccount": "Niy mŏsz kōnta?",
+    "registerLink": "Zarejestruj sie"
   },
   "register": {
     "title": "Załōż kōnto w AliMed",
@@ -164,6 +165,7 @@
     "booking": "Rezerwowanie...",
     "fillAllFields": "Proszym wyfołnić wszyjske pola",
     "errorLoadingDoctors": "Feler przi ladowaniu listy dochtorōw",
+    "errorLoadingSlots": "Feler przi ladowaniu dostympnych terminōw",
     "errorBooking": "Feler przi rezerwacyji wizyty",
     "noDoctorsAvailable": "Niy ma dostympnych dochtorōw",
     "successTitle": "Wizyta zarezerwowano!",

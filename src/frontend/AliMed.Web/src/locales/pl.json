@@ -55,7 +55,7 @@
     "title": "Zaloguj się do AliMed",
     "email": "Adres e-mail",
     "password": "Hasło",
-    "submit": "zaloguj się",
+    "submit": "Zaloguj się",
     "forgotPassword": "Zapomniałeś hasła?",
     "fillAllFields": "Proszę wypełnić wszystkie pola",
     "githubLogin": "Zaloguj się przez GitHub",
@@ -66,7 +66,8 @@
     "authFailed": "Nie udało się uwierzytelnić",
     "error": "Błąd",
     "redirecting": "Przekierowywanie...",
-    "noAccount": "Nie masz konta? Zarejestruj się"
+    "noAccount": "Nie masz konta?",
+    "registerLink": "Zarejestruj się"
   },
   "register": {
     "title": "Załóż konto w AliMed",
@@ -164,6 +165,7 @@
     "booking": "Rezerwowanie...",
     "fillAllFields": "Proszę wypełnić wszystkie pola",
     "errorLoadingDoctors": "Błąd podczas wczytywania listy lekarzy",
+    "errorLoadingSlots": "Błąd podczas wczytywania dostępnych terminów",
     "errorBooking": "Błąd podczas rezerwacji wizyty",
     "noDoctorsAvailable": "Brak dostępnych lekarzy",
     "successTitle": "Wizyta zarezerwowana!",

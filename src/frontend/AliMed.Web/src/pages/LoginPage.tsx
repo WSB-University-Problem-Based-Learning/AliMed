@@ -131,9 +131,9 @@ const LoginPage: React.FC = () => {
             {t('login.forgotPassword')}
           </a>
           <p className="text-sm text-gray-600">
-            Nie masz konta?{' '}
+            {t('login.noAccount')}{' '}
             <Link to="/register" className="text-alimed-blue hover:underline font-medium">
-              Zarejestruj się
+              {t('login.registerLink')}
             </Link>
           </p>
         </div>
