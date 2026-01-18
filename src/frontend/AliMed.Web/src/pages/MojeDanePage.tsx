@@ -54,7 +54,9 @@ const MojeDanePage: React.FC = () => {
 
   useEffect(() => {
     const fetchPacjentData = async () => {
-      if (!user) {
+      // Check for token first, not user object
+      const token = localStorage.getItem('alimed_token');
+      if (!token) {
         navigate('/login');
         return;
       }
@@ -65,8 +67,8 @@ const MojeDanePage: React.FC = () => {
         if (isDemoMode) {
           const mockPacjent: Pacjent = {
             pacjentId: 1,
-            imie: user.firstName || 'Jan',
-            nazwisko: user.lastName || 'Kowalski',
+            imie: user?.firstName || 'Jan',
+            nazwisko: user?.lastName || 'Kowalski',
             pesel: '90010112345',
             dataUrodzenia: '1990-01-01',
             adresZamieszkania: {
@@ -80,7 +82,7 @@ const MojeDanePage: React.FC = () => {
           setFormData({
             imie: mockPacjent.imie || '',
             nazwisko: mockPacjent.nazwisko || '',
-            email: user.email || '',
+            email: user?.email || '',
             telefon: '',
             ulica: mockPacjent.adresZamieszkania?.ulica || '',
             numerDomu: mockPacjent.adresZamieszkania?.numerDomu || '',
@@ -95,9 +97,9 @@ const MojeDanePage: React.FC = () => {
           
           // For now, use user data
           setFormData({
-            imie: user.firstName || '',
-            nazwisko: user.lastName || '',
-            email: user.email || '',
+            imie: user?.firstName || '',
+            nazwisko: user?.lastName || '',
+            email: user?.email || '',
             telefon: '',
             ulica: '',
             numerDomu: '',

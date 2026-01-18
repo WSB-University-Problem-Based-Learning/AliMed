@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CalendarIcon, UserIcon, ClockIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import { CalendarIcon, UserIcon, ClockIcon, CheckCircleIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from '../context/LanguageContext';
 import { apiService } from '../services/api';
 import type { Lekarz, WizytaCreateRequest, DostepneTerminyResponse } from '../types/api';
+
+const DOCTORS_PER_PAGE = 8;
 
 const UmowWizytePage: React.FC = () => {
   const { t } = useTranslation();
@@ -14,6 +16,7 @@ const UmowWizytePage: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Form state
   const [selectedLekarz, setSelectedLekarz] = useState<number | null>(null);
@@ -54,6 +57,19 @@ const UmowWizytePage: React.FC = () => {
     }
     return lekarze.filter(l => l.specjalizacja === selectedSpecjalizacja);
   };
+
+  // Pagination for doctors
+  const filteredLekarze = getFilteredLekarze();
+  const totalPages = Math.ceil(filteredLekarze.length / DOCTORS_PER_PAGE);
+  const paginatedLekarze = filteredLekarze.slice(
+    (currentPage - 1) * DOCTORS_PER_PAGE,
+    currentPage * DOCTORS_PER_PAGE
+  );
+
+  // Reset page when filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedSpecjalizacja]);
 
   // Fetch available slots whenever lekarz + date range are selected
   useEffect(() => {
@@ -129,7 +145,6 @@ const UmowWizytePage: React.FC = () => {
     .filter(dt => dt.startsWith(selectedDate))
     .map(dt => dt.split('T')[1]?.substring(0,5))
     .filter(Boolean) as string[];
-  const filteredLekarze = getFilteredLekarze();
   const specjalizacje = getUniqueSpecjalizacje();
 
   // Get minimum date (today)
@@ -207,14 +222,19 @@ const UmowWizytePage: React.FC = () => {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               <UserIcon className="w-5 h-5 inline mr-1" />
               {t('bookVisit.selectDoctor')}
+              {filteredLekarze.length > DOCTORS_PER_PAGE && (
+                <span className="text-gray-500 font-normal ml-2">
+                  ({(currentPage - 1) * DOCTORS_PER_PAGE + 1}-{Math.min(currentPage * DOCTORS_PER_PAGE, filteredLekarze.length)} z {filteredLekarze.length})
+                </span>
+              )}
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {filteredLekarze.length === 0 ? (
+              {paginatedLekarze.length === 0 ? (
                 <div className="col-span-2 text-center py-8 text-gray-500">
                   {t('bookVisit.noDoctorsAvailable')}
                 </div>
               ) : (
-                filteredLekarze.map((lekarz) => (
+                paginatedLekarze.map((lekarz) => (
                   <button
                     key={lekarz.lekarzId}
                     type="button"
@@ -233,6 +253,31 @@ const UmowWizytePage: React.FC = () => {
                 ))
               )}
             </div>
+            
+            {/* Pagination controls */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-4 mt-4">
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="p-2 rounded-lg border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 transition"
+                >
+                  <ChevronLeftIcon className="w-5 h-5" />
+                </button>
+                <span className="text-sm text-gray-600">
+                  {currentPage} / {totalPages}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="p-2 rounded-lg border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 transition"
+                >
+                  <ChevronRightIcon className="w-5 h-5" />
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Date selection */}

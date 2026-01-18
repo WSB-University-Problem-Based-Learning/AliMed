@@ -113,6 +113,7 @@
     "confirmed": "Potwierdzynō",
     "pending": "Czeko",
     "noUpcomingVisits": "Niy ma nadchodzōncych wizyt",
+    "visitDetails": "Szczygůły wizyty",
     "demoNotice": "🎭 Jeżeś w trybie demōnstracyjnym. Dane sōm přikładowe i niy bydōm spamiyntane."
   },
   "patients": {
@@ -120,11 +121,28 @@
     "pesel": "PESEL",
     "birthDate": "Data urodzynio",
     "address": "Adresa",
-    "noPatients": "Niy ma pacjyntōw w bazie danych"
+    "noPatients": "Niy ma pacjyntōw w bazie danych",
+    "accessDenied": "Niy ma dostympu",
+    "accessDeniedDesc": "Ta strona je dostympno ino dlo perschnelu medycznego. Ježli myślisz, że powinieneś mieć dostymp, skontaktuj sie z administratorym.",
+    "demoNotice": "W trybie demo widzisz przikładowe dane pacjyntōw. W prawdziwym systymie dostymp miałby ino perschnel."
   },
   "doctors": {
     "title": "Dochtory",
-    "underConstruction": "Strōna w budowie - czekōmy na endpoint API"
+    "subtitle": "Poglynd na lista dochtoroń w naszych placŏwkach",
+    "errorLoading": "Feler przi ladowaniu listy dochtoroń",
+    "noDoctors": "Niy ma dochtoroń spełniających kryteria",
+    "totalDoctors": "Liczba dochtoroń"
+  },
+  "facilities": {
+    "title": "Placŏwki",
+    "subtitle": "Poglynd na lista naszych placŏwek medycznych",
+    "searchPlaceholder": "Szukej placŏwki po mianie abo mieście...",
+    "noFacilities": "Niy ma placŏwek",
+    "noFacilitiesDesc": "Aktualnie niy ma dostympnych placŏwek",
+    "noSearchResults": "Niy ma placŏwek spełniających kryteria szukaniŏ",
+    "totalFacilities": "Liczba placŏwek",
+    "noAddress": "Niy ma adresy",
+    "unnamed": "Placŏwka bez miana"
   },
   "visits": {
     "title": "Wizyty",

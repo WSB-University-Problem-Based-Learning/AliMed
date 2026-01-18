@@ -18,18 +18,10 @@ import UmowWizytePage from './pages/UmowWizytePage';
 import DokumentyPage from './pages/DokumentyPage';
 import MojeDanePage from './pages/MojeDanePage';
 import Layout from './components/Layout';
+import LekarzePage from './pages/LekarzePage';
+import PlacowkiPage from './pages/PlacowkiPage';
 
-// Placeholder components for doctors and visits pages
-function DoctorsPageContent() {
-  const { t } = useTranslation();
-  return (
-    <div className="text-center py-12">
-      <h2 className="text-3xl font-bold text-alimed-blue mb-4">{t('doctors.title')}</h2>
-      <p className="text-gray-600">{t('doctors.underConstruction')}</p>
-    </div>
-  );
-}
-
+// Placeholder component for visits page
 function VisitsPageContent() {
   const { t } = useTranslation();
   return (
@@ -123,7 +115,14 @@ function App() {
             <Route path="/lekarze" element={
               <ProtectedRoute>
                 <Layout>
-                  <DoctorsPageContent />
+                  <LekarzePage />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/placowki" element={
+              <ProtectedRoute>
+                <Layout>
+                  <PlacowkiPage />
                 </Layout>
               </ProtectedRoute>
             } />

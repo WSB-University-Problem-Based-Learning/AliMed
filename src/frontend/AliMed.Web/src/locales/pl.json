@@ -113,6 +113,7 @@
     "confirmed": "Potwierdzona",
     "pending": "Oczekująca",
     "noUpcomingVisits": "Brak nadchodzących wizyt",
+    "visitDetails": "Szczegóły wizyty",
     "demoNotice": "🎭 Jesteś w trybie demonstracyjnym. Dane są przykładowe i nie będą zapisane."
   },
   "patients": {
@@ -120,11 +121,28 @@
     "pesel": "PESEL",
     "birthDate": "Data urodzenia",
     "address": "Adres",
-    "noPatients": "Brak pacjentów w bazie danych"
+    "noPatients": "Brak pacjentów w bazie danych",
+    "accessDenied": "Brak dostępu",
+    "accessDeniedDesc": "Ta strona jest dostępna tylko dla personelu medycznego. Jeśli uważasz, że powinieneś mieć dostęp, skontaktuj się z administratorem.",
+    "demoNotice": "W trybie demo widzisz przykładowe dane pacjentów. W prawdziwym systemie dostęp miałby tylko personel."
   },
   "doctors": {
     "title": "Lekarze",
-    "underConstruction": "Strona w budowie - czekamy na endpoint API"
+    "subtitle": "Przeglądaj listę lekarzy w naszych placówkach",
+    "errorLoading": "Błąd podczas wczytywania listy lekarzy",
+    "noDoctors": "Brak lekarzy spełniających kryteria",
+    "totalDoctors": "Liczba lekarzy"
+  },
+  "facilities": {
+    "title": "Placówki",
+    "subtitle": "Przeglądaj listę naszych placówek medycznych",
+    "searchPlaceholder": "Szukaj placówki po nazwie lub mieście...",
+    "noFacilities": "Brak placówek",
+    "noFacilitiesDesc": "Aktualnie brak dostępnych placówek",
+    "noSearchResults": "Brak placówek spełniających kryteria wyszukiwania",
+    "totalFacilities": "Liczba placówek",
+    "noAddress": "Brak adresu",
+    "unnamed": "Placówka bez nazwy"
   },
   "visits": {
     "title": "Wizyty",

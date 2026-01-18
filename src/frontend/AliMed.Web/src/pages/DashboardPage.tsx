@@ -4,7 +4,8 @@ import {
   CalendarDaysIcon, 
   PlusCircleIcon, 
   DocumentTextIcon, 
-  UserCircleIcon 
+  UserCircleIcon,
+  XMarkIcon 
 } from '@heroicons/react/24/outline';
 import { useTranslation } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
@@ -56,6 +57,7 @@ const DashboardPage: React.FC = () => {
     return null;
   });
   const [wizyty] = useState<Wizyta[]>(mockWizyty);
+  const [selectedWizyta, setSelectedWizyta] = useState<Wizyta | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -214,7 +216,10 @@ const DashboardPage: React.FC = () => {
                       </span>
                     </td>
                     <td className="py-4">
-                      <button className="text-alimed-blue hover:underline text-sm">
+                      <button 
+                        onClick={() => setSelectedWizyta(wizyta)}
+                        className="text-alimed-blue hover:underline text-sm"
+                      >
                         {t('common.details')}
                       </button>
                     </td>
@@ -231,6 +236,67 @@ const DashboardPage: React.FC = () => {
           )}
         </div>
       </main>
+
+      {/* Visit Details Modal */}
+      {selectedWizyta && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 relative">
+            <button
+              onClick={() => setSelectedWizyta(null)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+            >
+              <XMarkIcon className="w-6 h-6" />
+            </button>
+            
+            <h3 className="text-xl font-bold text-gray-900 mb-4">{t('dashboard.visitDetails')}</h3>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-gray-500">{t('dashboard.dateTime')}</label>
+                <p className="text-gray-900">{selectedWizyta.dataGodzina}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-500">{t('dashboard.doctor')}</label>
+                <p className="text-gray-900">{selectedWizyta.lekarz}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-500">{t('dashboard.specialization')}</label>
+                <p className="text-gray-900">{selectedWizyta.specjalizacja}</p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-500">{t('dashboard.status')}</label>
+                <p>
+                  <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
+                    selectedWizyta.status === 'Potwierdzona' 
+                      ? 'bg-green-100 text-green-700' 
+                      : 'bg-yellow-100 text-yellow-700'
+                  }`}>
+                    {getStatusText(selectedWizyta.status)}
+                  </span>
+                </p>
+              </div>
+            </div>
+            
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={() => setSelectedWizyta(null)}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition"
+              >
+                {t('common.cancel')}
+              </button>
+              <button
+                onClick={() => {
+                  setSelectedWizyta(null);
+                  navigate('/moje-wizyty');
+                }}
+                className="flex-1 px-4 py-2 bg-alimed-blue text-white rounded-lg hover:bg-blue-700 transition"
+              >
+                {t('dashboard.myVisits')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -3,10 +3,42 @@ import { apiService } from '../services/api';
 import type { Wizyta } from '../types/api';
 import Card from '../components/Card';
 import { useTranslation } from '../context/LanguageContext';
-import { CalendarIcon, UserIcon, ClockIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
+import { useAuth } from '../context/AuthContext';
+import { CalendarIcon, UserIcon, ClockIcon, CheckCircleIcon, XCircleIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
+
+// Demo mode mock data
+const mockWizyty: Wizyta[] = [
+  {
+    wizytaId: 1,
+    dataWizyty: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+    czyOdbyta: false,
+    lekarz: { lekarzId: 1, imie: 'Jan', nazwisko: 'Nowak', specjalizacja: 'Kardiolog' },
+  },
+  {
+    wizytaId: 2,
+    dataWizyty: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+    czyOdbyta: false,
+    lekarz: { lekarzId: 2, imie: 'Maria', nazwisko: 'Kowalska', specjalizacja: 'Dermatolog' },
+  },
+  {
+    wizytaId: 3,
+    dataWizyty: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+    czyOdbyta: true,
+    diagnoza: 'Badanie kontrolne - wyniki prawidłowe',
+    lekarz: { lekarzId: 3, imie: 'Piotr', nazwisko: 'Wiśniewski', specjalizacja: 'Ortopeda' },
+  },
+  {
+    wizytaId: 4,
+    dataWizyty: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
+    czyOdbyta: true,
+    diagnoza: 'Zalecono dodatkowe badania',
+    lekarz: { lekarzId: 4, imie: 'Anna', nazwisko: 'Zielińska', specjalizacja: 'Internista' },
+  },
+];
 
 const MojeWizytyPage: React.FC = () => {
   const { t, language } = useTranslation();
+  const { isDemoMode } = useAuth();
   const [wizyty, setWizyty] = useState<Wizyta[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -15,17 +47,27 @@ const MojeWizytyPage: React.FC = () => {
   useEffect(() => {
     const fetchWizyty = async () => {
       try {
-        const data = await apiService.getWizyty();
-        setWizyty(data);
+        if (isDemoMode) {
+          // Use mock data in demo mode
+          setWizyty(mockWizyty);
+        } else {
+          const data = await apiService.getWizyty();
+          setWizyty(data);
+        }
       } catch (err) {
-        setError(err instanceof Error ? err.message : t('error.errorOccurred'));
+        if (isDemoMode) {
+          // Fallback to mock data even on error in demo mode
+          setWizyty(mockWizyty);
+        } else {
+          setError(err instanceof Error ? err.message : t('error.errorOccurred'));
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchWizyty();
-  }, [t]);
+  }, [t, isDemoMode]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -81,6 +123,18 @@ const MojeWizytyPage: React.FC = () => {
     <div>
       <div className="mb-6">
         <h2 className="text-3xl font-bold text-alimed-blue mb-4">{t('myVisits.title')}</h2>
+        
+        {/* Demo mode notice */}
+        {isDemoMode && (
+          <div className="mb-4 bg-gradient-to-r from-purple-50 to-blue-50 border-l-4 border-purple-500 p-4 rounded-lg shadow-sm">
+            <div className="flex items-center">
+              <InformationCircleIcon className="w-6 h-6 text-purple-500 flex-shrink-0" />
+              <p className="ml-3 text-sm font-medium text-purple-800">
+                {t('patients.demoNotice')}
+              </p>
+            </div>
+          </div>
+        )}
         
         {/* Filter buttons */}
         <div className="flex gap-2 flex-wrap">

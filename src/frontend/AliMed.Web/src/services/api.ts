@@ -1,4 +1,4 @@
-import type { Pacjent, Lekarz, Wizyta, AuthResponse, Dokument, RegisterRequest, LoginRequest, WizytaCreateRequest, DostepneTerminyResponse } from '../types/api';
+import type { Pacjent, Lekarz, Wizyta, AuthResponse, Dokument, RegisterRequest, LoginRequest, WizytaCreateRequest, DostepneTerminyResponse, Placowka } from '../types/api';
 import { config } from '../config/env';
 
 const API_BASE_URL = config.apiBaseUrl;
@@ -172,6 +172,16 @@ export const apiService = {
       const errorText = await response.text();
       throw new Error(errorText || 'Failed to fetch available slots');
     }
+    return response.json();
+  },
+
+  // Placówki
+  async getPlacowki(): Promise<Placowka[]> {
+    const response = await fetch(`${API_BASE_URL}/api/placowki`, {
+      headers: getHeaders(true),
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to fetch placowki');
     return response.json();
   },
 
