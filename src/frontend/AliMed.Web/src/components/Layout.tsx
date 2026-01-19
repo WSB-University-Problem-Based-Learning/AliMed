@@ -8,7 +8,8 @@ import {
   CalendarDaysIcon, 
   PlusCircleIcon, 
   DocumentTextIcon, 
-  UserCircleIcon 
+  UserCircleIcon,
+  ShieldExclamationIcon
 } from '@heroicons/react/24/outline';
 
 interface LayoutProps {
@@ -69,6 +70,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       hoverColor: 'hover:bg-rose-50 hover:text-rose-600'
     },
   ];
+
+  if (user?.role === 2) {
+    navItems.push({
+      path: '/admin',
+      label: 'Admin',
+      icon: ShieldExclamationIcon,
+      activeColor: 'bg-slate-700 text-white',
+      hoverColor: 'hover:bg-slate-100 hover:text-slate-700'
+    });
+  }
 
   // Get user display name
   const getUserName = () => {

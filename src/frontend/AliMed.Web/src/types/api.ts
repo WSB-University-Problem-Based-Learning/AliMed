@@ -133,3 +133,18 @@ export interface DostepneTerminyResponse {
   to: string;   // ISO date (yyyy-mm-dd)
   available: string[]; // ISO datetimes (e.g., 2026-01-22T09:30:00)
 }
+
+export interface AdminUserSummary {
+  userId: string;
+  username?: string;
+  email?: string;
+  role: string;
+  isGithubUser: boolean;
+  hasPacjent: boolean;
+  hasLekarz: boolean;
+}
+
+export interface PromoteToDoctorRequest {
+  specjalizacja: string;
+  placowkaId: number;
+}

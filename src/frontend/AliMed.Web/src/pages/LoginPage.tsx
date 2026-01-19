@@ -99,7 +99,7 @@ const LoginPage: React.FC = () => {
 
           <div>
             <input
-              type="email"
+              type="text"
               placeholder={t('login.email')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}

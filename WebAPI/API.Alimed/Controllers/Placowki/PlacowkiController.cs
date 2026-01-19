@@ -18,7 +18,7 @@ namespace API.Alimed.Controllers.Placowki
         }
 
         [HttpGet]
-        [Authorize(Roles = "User")]
+        [Authorize(Roles = "User, Admin")]
         public async Task<IResult> GetPlacowki()
         {
             var placowki = await _db.Placowki

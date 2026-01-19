@@ -1,4 +1,4 @@
-import type { Pacjent, Lekarz, Wizyta, AuthResponse, Dokument, RegisterRequest, LoginRequest, WizytaCreateRequest, DostepneTerminyResponse, Placowka } from '../types/api';
+import type { Pacjent, Lekarz, Wizyta, AuthResponse, Dokument, RegisterRequest, LoginRequest, WizytaCreateRequest, DostepneTerminyResponse, Placowka, AdminUserSummary, PromoteToDoctorRequest } from '../types/api';
 import { config } from '../config/env';
 
 const API_BASE_URL = config.apiBaseUrl;
@@ -269,6 +269,30 @@ export const apiService = {
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(errorText || 'Failed to update profile');
+    }
+    return response.json();
+  },
+
+  // Admin
+  async getAdminUsers(): Promise<AdminUserSummary[]> {
+    const response = await fetch(`${API_BASE_URL}/api/admin/users`, {
+      headers: getHeaders(true),
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to fetch admin users');
+    return response.json();
+  },
+
+  async promoteUserToDoctor(userId: string, data: PromoteToDoctorRequest): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE_URL}/api/admin/users/${userId}/promote-to-doctor`, {
+      method: 'PUT',
+      headers: getHeaders(true),
+      credentials: 'include',
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Failed to promote user');
     }
     return response.json();
   },

@@ -16,6 +16,54 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const roleMap: Record<string, number> = {
+  User: 0,
+  Lekarz: 1,
+  Admin: 2,
+};
+
+const decodeTokenPayload = (token: string): Record<string, unknown> | null => {
+  const parts = token.split('.');
+  if (parts.length !== 3) return null;
+
+  try {
+    const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+    const padded = base64.padEnd(base64.length + (4 - (base64.length % 4)) % 4, '=');
+    const json = atob(padded);
+    return JSON.parse(json) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+};
+
+const getUserFromToken = (token: string): User | null => {
+  const payload = decodeTokenPayload(token);
+  if (!payload) return null;
+
+  const roleValue =
+    (payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] as string | undefined) ||
+    (payload['role'] as string | undefined);
+  const role = roleValue && roleMap[roleValue] !== undefined ? roleMap[roleValue] : 0;
+
+  const userId =
+    (payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'] as string | undefined) ||
+    (payload['sub'] as string | undefined) ||
+    '';
+
+  const name =
+    (payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] as string | undefined) ||
+    (payload['unique_name'] as string | undefined) ||
+    (payload['github_login'] as string | undefined) ||
+    '';
+
+  return {
+    userId,
+    username: name || undefined,
+    githubName: name || undefined,
+    role,
+  };
+};
+
 const readStoredAuth = () => {
   if (typeof window === 'undefined') {
     return { storedToken: null, storedUser: null, storedDemoMode: false };
@@ -35,8 +83,10 @@ const readStoredAuth = () => {
     }
   }
 
+  const derivedUser = storedToken && !storedUser ? getUserFromToken(storedToken) : null;
+
   // RefreshToken is stored as HttpOnly cookie by backend, not in localStorage
-  return { storedToken, storedUser, storedDemoMode };
+  return { storedToken, storedUser: storedUser ?? derivedUser, storedDemoMode };
 };
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -54,6 +104,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setRefreshToken(newRefreshToken || 'stored-in-cookie');
     setIsDemoMode(false);
     localStorage.setItem('alimed_token', newToken);
+    const derivedUser = getUserFromToken(newToken);
+    if (derivedUser) {
+      setUserState(derivedUser);
+      localStorage.setItem('alimed_user', JSON.stringify(derivedUser));
+    }
     // Remove refresh token from localStorage as it's now handled via HttpOnly cookie
     localStorage.removeItem('alimed_refresh_token');
     localStorage.removeItem('alimed_demo_mode');

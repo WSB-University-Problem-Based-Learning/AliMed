@@ -20,6 +20,7 @@ import MojeDanePage from './pages/MojeDanePage';
 import Layout from './components/Layout';
 import LekarzePage from './pages/LekarzePage';
 import PlacowkiPage from './pages/PlacowkiPage';
+import AdminDashboardPage from './pages/AdminDashboardPage';
 
 // Placeholder component for visits page
 function VisitsPageContent() {
@@ -81,6 +82,13 @@ function App() {
               <ProtectedRoute>
                 <Layout>
                   <PacjenciPage />
+                </Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/admin" element={
+              <ProtectedRoute>
+                <Layout>
+                  <AdminDashboardPage />
                 </Layout>
               </ProtectedRoute>
             } />

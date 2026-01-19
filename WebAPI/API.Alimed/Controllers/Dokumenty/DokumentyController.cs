@@ -56,6 +56,48 @@ namespace API.Alimed.Controllers.Dokumenty
             return Results.Ok(dokumenty);
         }
 
+        [HttpGet("wizyty/{wizytaId}")]
+        [Authorize(Roles = "User")]
+        public async Task<IResult> GetDokumentyDlaWizyty(int wizytaId)
+        {
+            var userId = Guid.Parse(
+                User.FindFirst(ClaimTypes.NameIdentifier)!.Value
+            );
+
+            var pacjent = await _db.Pacjenci
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.UserId == userId);
+
+            if (pacjent == null)
+                return Results.NotFound("Nie znaleziono pacjenta.");
+
+            var wizyta = await _db.Wizyty
+                .AsNoTracking()
+                .FirstOrDefaultAsync(w => w.WizytaId == wizytaId && w.PacjentId == pacjent.PacjentId);
+
+            if (wizyta == null)
+                return Results.NotFound("Wizyta nie istnieje.");
+
+            var dokumenty = await _db.Dokumenty
+                .AsNoTracking()
+                .Where(d => d.WizytaId == wizytaId && d.PacjentId == pacjent.PacjentId)
+                .OrderByDescending(d => d.DataUtworzenia)
+                .Select(d => new
+                {
+                    d.DokumentId,
+                    d.NazwaPliku,
+                    d.TypDokumentu,
+                    d.Opis,
+                    d.DataUtworzenia,
+                    RozmiarPliku = d.Zawartosc != null ? d.Zawartosc.Length : 0,
+                    d.WizytaId,
+                    d.PacjentId
+                })
+                .ToListAsync();
+
+            return Results.Ok(dokumenty);
+        }
+
         [HttpGet("{id}")]
         [Authorize(Roles = "User")]
         public async Task<IResult> GetDokument(int id)
@@ -178,6 +220,99 @@ namespace API.Alimed.Controllers.Dokumenty
                 dokument.Opis,
                 dokument.DataUtworzenia,
                 RozmiarPliku = dokument.Zawartosc.Length,
+                dokument.WizytaId,
+                dokument.PacjentId
+            });
+        }
+
+        [HttpGet("wizyty/{wizytaId}/lekarz")]
+        [Authorize(Roles = "Lekarz")]
+        public async Task<IResult> GetDokumentyDlaWizytyLekarza(int wizytaId)
+        {
+            var userId = Guid.Parse(
+                User.FindFirst(ClaimTypes.NameIdentifier)!.Value
+            );
+
+            var lekarz = await _db.Lekarze
+                .AsNoTracking()
+                .FirstOrDefaultAsync(l => l.UserId == userId);
+
+            if (lekarz == null)
+                return Results.NotFound("Nie znaleziono lekarza.");
+
+            var wizyta = await _db.Wizyty
+                .AsNoTracking()
+                .FirstOrDefaultAsync(w => w.WizytaId == wizytaId && w.LekarzId == lekarz.LekarzId);
+
+            if (wizyta == null)
+                return Results.NotFound("Wizyta nie istnieje.");
+
+            var dokumenty = await _db.Dokumenty
+                .AsNoTracking()
+                .Where(d => d.WizytaId == wizytaId && d.LekarzId == lekarz.LekarzId)
+                .OrderByDescending(d => d.DataUtworzenia)
+                .Select(d => new
+                {
+                    d.DokumentId,
+                    d.NazwaPliku,
+                    d.TypDokumentu,
+                    d.Opis,
+                    d.DataUtworzenia,
+                    RozmiarPliku = d.Zawartosc != null ? d.Zawartosc.Length : 0,
+                    d.WizytaId,
+                    d.PacjentId
+                })
+                .ToListAsync();
+
+            return Results.Ok(dokumenty);
+        }
+
+        [HttpPut("{id}")]
+        [Authorize(Roles = "Lekarz")]
+        public async Task<IResult> UpdateDokument(int id, [FromBody] DokumentUpdateDto dto)
+        {
+            if (!ModelState.IsValid)
+                return Results.BadRequest(ModelState);
+
+            var userId = Guid.Parse(
+                User.FindFirst(ClaimTypes.NameIdentifier)!.Value
+            );
+
+            var lekarz = await _db.Lekarze
+                .FirstOrDefaultAsync(l => l.UserId == userId);
+
+            if (lekarz == null)
+                return Results.NotFound("Nie znaleziono lekarza.");
+
+            var dokument = await _db.Dokumenty
+                .FirstOrDefaultAsync(d => d.DokumentId == id);
+
+            if (dokument == null)
+                return Results.NotFound("Dokument nie istnieje.");
+
+            if (dokument.LekarzId != lekarz.LekarzId)
+                return Results.Forbid();
+
+            dokument.TypDokumentu = dto.TypDokumentu;
+            dokument.NazwaPliku = string.IsNullOrWhiteSpace(dto.NazwaPliku) ? dokument.NazwaPliku : dto.NazwaPliku;
+            dokument.Opis = dto.Opis;
+
+            if (dto.Tresc != null)
+            {
+                dokument.Zawartosc = Encoding.UTF8.GetBytes(dto.Tresc);
+                dokument.TypMime = "text/plain";
+            }
+
+            await _db.SaveChangesAsync();
+
+            return Results.Ok(new
+            {
+                dokument.DokumentId,
+                dokument.NazwaPliku,
+                dokument.TypDokumentu,
+                dokument.Opis,
+                dokument.DataUtworzenia,
+                RozmiarPliku = dokument.Zawartosc != null ? dokument.Zawartosc.Length : 0,
                 dokument.WizytaId,
                 dokument.PacjentId
             });

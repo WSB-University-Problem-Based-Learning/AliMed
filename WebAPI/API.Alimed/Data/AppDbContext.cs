@@ -302,7 +302,10 @@ namespace API.Alimed.Data
                     Username = "admin_alimed",
                     Role = UserRole.Admin,
                     IsGithubUser = false,
-                    GithubId = (string?)null
+                    GithubId = (string?)null,
+                    Email = "admin_alimed",
+                    PasswordHash = "+vh4KTHWlJkQCfFV5mqYitJZMdjRN7NfLpQAksOX/Lw=",
+                    PasswordSalt = "j/mq42W01uUykBVkWe/PBw=="
                 },
                 new
                 {
