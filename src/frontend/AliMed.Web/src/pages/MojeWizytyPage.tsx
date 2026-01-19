@@ -113,6 +113,11 @@ const MojeWizytyPage: React.FC = () => {
     return new Date(b.dataWizyty).getTime() - new Date(a.dataWizyty).getTime();
   });
 
+  const formatDocumentName = (name?: string) => {
+    if (!name) return '';
+    return name.endsWith('.txt') ? name.slice(0, -4) : name;
+  };
+
   const handlePreview = async (dokument: Dokument) => {
     const popup = window.open('', '_blank');
     if (!popup) {
@@ -317,17 +322,27 @@ const MojeWizytyPage: React.FC = () => {
 
       {selectedWizyta && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-lg max-w-2xl w-full mx-4">
-            <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-              <h3 className="text-lg font-semibold text-gray-900">Szczegoly wizyty</h3>
+          <div className="bg-white rounded-2xl shadow-xl max-w-3xl w-full mx-4 overflow-hidden">
+            <div className="px-6 py-5 border-b border-gray-100 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-full bg-alimed-blue/10 text-alimed-blue flex items-center justify-center">
+                  <CalendarIcon className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Szczegoly wizyty</h3>
+                  <p className="text-sm text-gray-500">
+                    Sprawdz informacje, dokumenty i pobierz PDF.
+                  </p>
+                </div>
+              </div>
               <button
                 onClick={() => setSelectedWizyta(null)}
-                className="text-gray-500 hover:text-gray-700"
+                className="px-3 py-1.5 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
               >
-                X
+                Zamknij
               </button>
             </div>
-            <div className="p-6 space-y-4">
+            <div className="p-6 space-y-6">
               {detailsError && (
                 <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded">
                   {detailsError}
@@ -337,37 +352,68 @@ const MojeWizytyPage: React.FC = () => {
                 <div className="text-gray-500">Ladowanie...</div>
               ) : (
                 <>
-                  <div className="text-sm text-gray-700">
-                    <div><strong>Data:</strong> {formatDate(selectedWizyta.dataWizyty)} {formatTime(selectedWizyta.dataWizyty)}</div>
-                    <div><strong>Status:</strong> {selectedWizyta.status}</div>
-                    <div><strong>Lekarz:</strong> {selectedWizyta.lekarz} ({selectedWizyta.specjalizacja})</div>
-                    <div><strong>Placowka:</strong> {selectedWizyta.placowka}</div>
-                  </div>
-                  {selectedWizyta.diagnoza && (
-                    <div className="text-sm text-gray-700">
-                      <strong>Diagnoza:</strong> {selectedWizyta.diagnoza}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="rounded-xl border border-gray-100 bg-gray-50 p-4 text-sm text-gray-700 space-y-2">
+                      <div className="text-xs uppercase tracking-wide text-gray-400">Termin wizyty</div>
+                      <div className="text-base font-semibold text-gray-900">
+                        {formatDate(selectedWizyta.dataWizyty)} · {formatTime(selectedWizyta.dataWizyty)}
+                      </div>
+                      <div><span className="text-gray-500">Status:</span> {selectedWizyta.status}</div>
+                      <div><span className="text-gray-500">Placowka:</span> {selectedWizyta.placowka}</div>
                     </div>
-                  )}
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">Dokumenty</h4>
+                    <div className="rounded-xl border border-gray-100 bg-white p-4 text-sm text-gray-700 space-y-2">
+                      <div className="text-xs uppercase tracking-wide text-gray-400">Lekarz</div>
+                      <div className="text-base font-semibold text-gray-900">
+                        {selectedWizyta.lekarz} ({selectedWizyta.specjalizacja})
+                      </div>
+                      {selectedWizyta.diagnoza ? (
+                        <div>
+                          <span className="text-gray-500">Diagnoza:</span> {selectedWizyta.diagnoza}
+                        </div>
+                      ) : (
+                        <div className="text-gray-400">Diagnoza nie zostala jeszcze uzupelniona.</div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl border border-gray-100 p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <h4 className="font-semibold text-gray-900">Dokumenty z wizyty</h4>
+                        <p className="text-sm text-gray-500">Kliknij, aby pobrac dokument w PDF.</p>
+                      </div>
+                      <span className="text-xs text-gray-400">
+                        {selectedWizyta.dokumenty.length} plikow
+                      </span>
+                    </div>
                     {selectedWizyta.dokumenty.length > 0 ? (
-                      <ul className="space-y-2">
+                      <div className="space-y-2">
                         {selectedWizyta.dokumenty.map((d: Dokument) => (
-                          <li key={d.dokumentId} className="text-sm text-gray-700 flex items-center justify-between gap-2">
-                            <span>
-                              {d.nazwaPliku || `Dokument #${d.dokumentId}`} - {d.typDokumentu || 'inne'}
-                            </span>
+                          <div
+                            key={d.dokumentId}
+                            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 rounded-lg border border-gray-100 px-3 py-2"
+                          >
+                            <div className="text-sm text-gray-700">
+                              <div className="font-medium text-gray-900">
+                                {formatDocumentName(d.nazwaPliku) || `Dokument #${d.dokumentId}`}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                Typ: {d.typDokumentu || 'inne'}
+                              </div>
+                            </div>
                             <button
                               onClick={() => handlePreview(d)}
-                              className="text-alimed-blue hover:underline text-sm"
+                              className="inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-alimed-blue bg-alimed-blue/10 rounded-lg hover:bg-alimed-blue/20 transition"
                             >
                               Pobierz jako PDF
                             </button>
-                          </li>
+                          </div>
                         ))}
-                      </ul>
+                      </div>
                     ) : (
-                      <div className="text-sm text-gray-500">Brak dokumentow.</div>
+                      <div className="text-sm text-gray-500">
+                        Brak dokumentow. Pojawia sie po zakonczonej wizycie.
+                      </div>
                     )}
                   </div>
                 </>

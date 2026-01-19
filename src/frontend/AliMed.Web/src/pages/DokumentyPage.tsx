@@ -3,7 +3,6 @@ import { useTranslation } from '../context/LanguageContext';
 import Card from '../components/Card';
 import {
   DocumentTextIcon,
-  EyeIcon,
   ArrowDownTrayIcon,
   FolderIcon,
   CalendarIcon,
@@ -144,23 +143,12 @@ const DokumentyPage: React.FC = () => {
     return sorted;
   };
 
-  const handleDownload = async (dokument: Dokument) => {
-    try {
-      const blob = await apiService.downloadDokument(dokument.dokumentId);
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = dokument.nazwaPliku || `dokument-${dokument.dokumentId}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-    } catch (err) {
-      alert(t('documents.errorDownloading'));
-    }
+  const formatDocumentName = (name?: string) => {
+    if (!name) return '';
+    return name.endsWith('.txt') ? name.slice(0, -4) : name;
   };
 
-  const handlePreview = async (dokument: Dokument) => {
+  const handleDownloadPdf = async (dokument: Dokument) => {
     const popup = window.open('', '_blank');
     if (!popup) {
       alert('Popup zablokowany. Zezwol na otwieranie okien.');
@@ -308,19 +296,19 @@ const DokumentyPage: React.FC = () => {
           <Card key={dokument.dokumentId}>
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div className="flex items-start gap-4 flex-1">
-                <div className="p-3 bg-alimed-blue bg-opacity-10 rounded-lg">
+                <div className="p-3 bg-alimed-blue/10 rounded-lg">
                   <DocumentTextIcon className="h-8 w-8 text-alimed-blue" />
                 </div>
                 
                 <div className="flex-1 space-y-2">
                   {/* Document Name */}
                   <h3 className="text-lg font-semibold text-gray-900">
-                    {dokument.nazwaPliku}
+                    {formatDocumentName(dokument.nazwaPliku)}
                   </h3>
 
                   {/* Document Type and Date */}
                   <div className="flex flex-wrap items-center gap-3 text-sm">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-alimed-blue bg-opacity-10 text-alimed-blue">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-alimed-blue/10 text-alimed-blue">
                       {getDocumentTypeLabel(dokument.typDokumentu || 'inne')}
                     </span>
                     <span className="flex items-center gap-1 text-gray-600">
@@ -349,22 +337,13 @@ const DokumentyPage: React.FC = () => {
               </div>
 
               {/* Download Button */}
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => handlePreview(dokument)}
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-                >
-                  <EyeIcon className="h-5 w-5" />
-                  Pobierz jako PDF
-                </button>
-                <button
-                  onClick={() => handleDownload(dokument)}
-                  className="flex items-center gap-2 px-4 py-2 bg-alimed-blue text-white rounded-lg hover:bg-alimed-light-blue transition-colors"
-                >
-                  <ArrowDownTrayIcon className="h-5 w-5" />
-                  {t('documents.download')}
-                </button>
-              </div>
+              <button
+                onClick={() => handleDownloadPdf(dokument)}
+                className="flex items-center gap-2 px-4 py-2 bg-alimed-blue text-white rounded-lg hover:bg-alimed-light-blue transition-colors"
+              >
+                <ArrowDownTrayIcon className="h-5 w-5" />
+                Pobierz jako PDF
+              </button>
             </div>
           </Card>
         ))}

@@ -37,7 +37,8 @@ type PdfPayload = {
 };
 
 export const openDocumentPdf = ({ dokument, pacjent, wizyta, tresc, targetWindow }: PdfPayload) => {
-  const docTitle = dokument.nazwaPliku || `Dokument #${dokument.dokumentId}`;
+  const docTitleRaw = dokument.nazwaPliku || `Dokument #${dokument.dokumentId}`;
+  const docTitle = docTitleRaw.endsWith('.txt') ? docTitleRaw.slice(0, -4) : docTitleRaw;
   const typ = dokument.typDokumentu || 'inne';
   const generatedAt = new Date().toLocaleString('pl-PL');
 
