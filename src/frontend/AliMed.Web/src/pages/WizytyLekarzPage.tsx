@@ -135,12 +135,13 @@ const WizytyLekarzPage: React.FC = () => {
   }, [selectedWizytaId, wizyty]);
 
   useEffect(() => {
-    setDiagnoza('');
+    const current = wizyty.find((w) => w.wizytaId === selectedWizytaId);
+    setDiagnoza(current?.diagnoza ?? '');
     setStatusMessage(null);
     setStatusError(null);
     setDokMessage(null);
     setDokError(null);
-  }, [selectedWizytaId]);
+  }, [selectedWizytaId, wizyty]);
 
   useEffect(() => {
     const loadDokumenty = async () => {
@@ -281,6 +282,11 @@ const WizytyLekarzPage: React.FC = () => {
     } finally {
       setStatusSaving(false);
     }
+  };
+
+  const isWizytaZrealizowana = (status?: string) => {
+    const normalized = String(status ?? '').toLowerCase();
+    return normalized.includes('odbyta') || normalized.includes('zrealizowana');
   };
 
   const handleCreateDocument = async () => {
@@ -566,8 +572,14 @@ const WizytyLekarzPage: React.FC = () => {
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                     rows={3}
                     placeholder="Wpisz diagnoze do wizyty"
+                    readOnly={isWizytaZrealizowana(selectedWizyta.status)}
                     disabled={isDemoMode}
                   />
+                  {isWizytaZrealizowana(selectedWizyta.status) && (
+                    <div className="text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded px-3 py-2">
+                      Wizyta jest juz zrealizowana. Diagnoza jest tylko do odczytu.
+                    </div>
+                  )}
                   {statusError && (
                     <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2">
                       {statusError}
@@ -584,9 +596,7 @@ const WizytyLekarzPage: React.FC = () => {
                     disabled={
                       statusSaving ||
                       isDemoMode ||
-                      (typeof selectedWizyta.status === 'string'
-                        ? ['odbyta', 'zrealizowana'].includes(selectedWizyta.status.toLowerCase())
-                        : ['odbyta', 'zrealizowana'].includes(String(selectedWizyta.status ?? '').toLowerCase()))
+                      isWizytaZrealizowana(selectedWizyta.status)
                     }
                   >
                     <PencilSquareIcon className="w-5 h-5" />

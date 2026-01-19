@@ -115,7 +115,8 @@ namespace API.Alimed.Controllers.Lekarze
                     w.DataWizyty,
                     w.Status,
                     w.PacjentId,
-                    Pacjent = w.Pacjent.Imie + " " + w.Pacjent.Nazwisko
+                    Pacjent = w.Pacjent.Imie + " " + w.Pacjent.Nazwisko,
+                    w.Diagnoza
                 })
                 .ToListAsync();
 
@@ -151,7 +152,8 @@ namespace API.Alimed.Controllers.Lekarze
                     w.DataWizyty,
                     w.Status,
                     w.PacjentId,
-                    Pacjent = w.Pacjent.Imie + " " + w.Pacjent.Nazwisko
+                    Pacjent = w.Pacjent.Imie + " " + w.Pacjent.Nazwisko,
+                    w.Diagnoza
                 })
                 .ToListAsync();
 
@@ -185,7 +187,8 @@ namespace API.Alimed.Controllers.Lekarze
                     w.DataWizyty,
                     w.Status,
                     w.PacjentId,
-                    Pacjent = w.Pacjent.Imie + " " + w.Pacjent.Nazwisko
+                    Pacjent = w.Pacjent.Imie + " " + w.Pacjent.Nazwisko,
+                    w.Diagnoza
                 })
                 .ToListAsync();
 
@@ -225,7 +228,8 @@ namespace API.Alimed.Controllers.Lekarze
                     w.DataWizyty,
                     w.Status,
                     w.PacjentId,
-                    Pacjent = w.Pacjent.Imie + " " + w.Pacjent.Nazwisko
+                    Pacjent = w.Pacjent.Imie + " " + w.Pacjent.Nazwisko,
+                    w.Diagnoza
                 })
                 .ToListAsync();
 

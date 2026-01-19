@@ -164,6 +164,7 @@ export interface LekarzWizytaSummary {
   status: string;
   pacjentId?: number;
   pacjent: string;
+  diagnoza?: string;
 }
 
 export interface AdminUserSummary {

@@ -412,6 +412,17 @@ export const apiService = {
   },
 
   // Lekarz
+  mapLekarzWizyta(data: any): LekarzWizytaSummary {
+    return {
+      wizytaId: data.wizytaId,
+      dataWizyty: data.dataWizyty,
+      status: normalizeStatus(data.status) || String(data.status ?? ''),
+      pacjentId: data.pacjentId,
+      pacjent: data.pacjent,
+      diagnoza: data.diagnoza,
+    };
+  },
+
   async getLekarzWizytyDzien(date: string): Promise<LekarzWizytaSummary[]> {
     const qs = new URLSearchParams({ date }).toString();
     const response = await fetch(`${API_BASE_URL}/api/lekarze/moje-wizyty/dzien?${qs}`, {
@@ -419,7 +430,8 @@ export const apiService = {
       credentials: 'include',
     });
     if (!response.ok) throw new Error('Failed to fetch doctor day visits');
-    return response.json();
+    const data = await response.json();
+    return data.map((row: any) => this.mapLekarzWizyta(row));
   },
 
   async getLekarzWizytyTydzien(date: string): Promise<LekarzWizytaSummary[]> {
@@ -429,7 +441,8 @@ export const apiService = {
       credentials: 'include',
     });
     if (!response.ok) throw new Error('Failed to fetch doctor week visits');
-    return response.json();
+    const data = await response.json();
+    return data.map((row: any) => this.mapLekarzWizyta(row));
   },
 
   async getLekarzWizytyMiesiac(date: string): Promise<LekarzWizytaSummary[]> {
@@ -439,7 +452,8 @@ export const apiService = {
       credentials: 'include',
     });
     if (!response.ok) throw new Error('Failed to fetch doctor month visits');
-    return response.json();
+    const data = await response.json();
+    return data.map((row: any) => this.mapLekarzWizyta(row));
   },
 
   async getLekarzWizyty(): Promise<LekarzWizytaSummary[]> {
@@ -448,7 +462,8 @@ export const apiService = {
       credentials: 'include',
     });
     if (!response.ok) throw new Error('Failed to fetch doctor visits');
-    return response.json();
+    const data = await response.json();
+    return data.map((row: any) => this.mapLekarzWizyta(row));
   },
 
   async getLekarzPacjenci(query?: string): Promise<Pacjent[]> {
