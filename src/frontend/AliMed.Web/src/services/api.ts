@@ -442,6 +442,15 @@ export const apiService = {
     return response.json();
   },
 
+  async getLekarzWizyty(): Promise<LekarzWizytaSummary[]> {
+    const response = await fetch(`${API_BASE_URL}/api/lekarze/moje-wizyty`, {
+      headers: getHeaders(true),
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to fetch doctor visits');
+    return response.json();
+  },
+
   async getLekarzPacjenci(query?: string): Promise<Pacjent[]> {
     const qs = query ? `?${new URLSearchParams({ query }).toString()}` : '';
     const response = await fetch(`${API_BASE_URL}/api/lekarze/pacjenci${qs}`, {

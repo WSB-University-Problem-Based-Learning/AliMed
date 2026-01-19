@@ -1,99 +1,250 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  CalendarDaysIcon, 
-  UsersIcon, 
-  DocumentTextIcon, 
+import {
+  CalendarDaysIcon,
+  UsersIcon,
+  DocumentTextIcon,
   UserCircleIcon,
   FunnelIcon,
-  CalendarIcon
 } from '@heroicons/react/24/outline';
 import { useTranslation } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import LanguageSwitcher from '../components/LanguageSwitcher';
-
-type TypDokumentu = 'wynik' | 'recepta' | 'opis' | 'skierowanie';
-
-interface DokumentLekarza {
-  id: number;
-  data: string;
-  pacjentImie: string;
-  pacjentNazwisko: string;
-  pacjentPesel: string;
-  typ: TypDokumentu;
-}
+import { apiService } from '../services/api';
+import type { Dokument, DokumentCreateRequest, LekarzWizytaSummary } from '../types/api';
 
 interface NowyDokument {
-  pacjentId: string;
+  wizytaId: number | '';
   typDokumentu: string;
-  data: string;
-  trescDokumentu: string;
+  tresc: string;
 }
 
-// Mock data - w przyszłości z API
-const mockDokumenty: DokumentLekarza[] = [
-  { id: 1, data: '14.03.2024', pacjentImie: 'Maria', pacjentNazwisko: 'Nowak', pacjentPesel: '85031234567', typ: 'wynik' },
-  { id: 2, data: '13.03.2024', pacjentImie: 'Jan', pacjentNazwisko: 'Kowalski', pacjentPesel: '78012345678', typ: 'recepta' },
-  { id: 3, data: '12.03.2024', pacjentImie: 'Anna', pacjentNazwisko: 'Wiśniewska', pacjentPesel: '92040987654', typ: 'opis' },
-  { id: 4, data: '11.03.2024', pacjentImie: 'Piotr', pacjentNazwisko: 'Zieliński', pacjentPesel: '65081234567', typ: 'wynik' },
+const mockWizyty: LekarzWizytaSummary[] = [
+  {
+    wizytaId: 1,
+    dataWizyty: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+    status: 'Zrealizowana',
+    pacjentId: 1,
+    pacjent: 'Maria Nowak',
+  },
+  {
+    wizytaId: 2,
+    dataWizyty: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+    status: 'Zrealizowana',
+    pacjentId: 2,
+    pacjent: 'Jan Kowalski',
+  },
+  {
+    wizytaId: 3,
+    dataWizyty: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
+    status: 'Zaplanowana',
+    pacjentId: 3,
+    pacjent: 'Anna Wisniewska',
+  },
 ];
 
-const mockPacjenci = [
-  { id: '1', imie: 'Maria', nazwisko: 'Nowak' },
-  { id: '2', imie: 'Jan', nazwisko: 'Kowalski' },
-  { id: '3', imie: 'Anna', nazwisko: 'Wiśniewska' },
-  { id: '4', imie: 'Piotr', nazwisko: 'Zieliński' },
-];
-
-const mockStatystyki = {
-  wizyty: 12,
-  pacjenci: 248,
-  dokumentacja: 34,
+const mockDokumentyByWizyta: Record<number, Dokument[]> = {
+  1: [
+    {
+      dokumentId: 101,
+      nazwaPliku: 'wynik-krwi-2024-03-14.txt',
+      typDokumentu: 'wynik',
+      opis: 'Morfologia krwi - kontrola',
+      dataUtworzenia: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+      rozmiarPliku: 1200,
+      wizytaId: 1,
+      pacjentId: 1,
+    },
+  ],
+  2: [
+    {
+      dokumentId: 102,
+      nazwaPliku: 'recepta-2024-03-16.txt',
+      typDokumentu: 'recepta',
+      opis: 'Recepta na leki kardiologiczne',
+      dataUtworzenia: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+      rozmiarPliku: 900,
+      wizytaId: 2,
+      pacjentId: 2,
+    },
+  ],
 };
 
 const DokumentacjaLekarzPage: React.FC = () => {
   const { t } = useTranslation();
   const { user, logout, isDemoMode } = useAuth();
   const navigate = useNavigate();
-  
-  const [dokumenty] = useState<DokumentLekarza[]>(mockDokumenty);
-  const [statystyki] = useState(mockStatystyki);
+
+  const [wizyty, setWizyty] = useState<LekarzWizytaSummary[]>([]);
+  const [dokumenty, setDokumenty] = useState<Dokument[]>([]);
+  const [selectedWizytaId, setSelectedWizytaId] = useState<number | ''>('');
+  const [statystyki, setStatystyki] = useState({ wizyty: 0, pacjenci: 0, dokumentacja: 0 });
+  const [loading, setLoading] = useState(true);
+  const [loadingDokumenty, setLoadingDokumenty] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
   const [activeCard, setActiveCard] = useState<string>('dokumentacja');
   const [nowyDokument, setNowyDokument] = useState<NowyDokument>({
-    pacjentId: '',
+    wizytaId: '',
     typDokumentu: '',
-    data: '',
-    trescDokumentu: ''
+    tresc: '',
   });
+
+  const selectedWizyta = useMemo(
+    () => wizyty.find(w => w.wizytaId === selectedWizytaId),
+    [wizyty, selectedWizytaId]
+  );
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pl-PL', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    });
+  };
+
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString('pl-PL', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  useEffect(() => {
+    const loadWizyty = async () => {
+      try {
+        setLoading(true);
+        if (isDemoMode) {
+          setWizyty(mockWizyty);
+          return;
+        }
+        const data = await apiService.getLekarzWizyty();
+        setWizyty(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Blad ladowania wizyt');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadWizyty();
+  }, [isDemoMode]);
+
+  useEffect(() => {
+    if (!wizyty.length) {
+      setStatystyki({ wizyty: 0, pacjenci: 0, dokumentacja: 0 });
+      return;
+    }
+
+    const pacjenciSet = new Set(
+      wizyty.map(w => w.pacjentId ?? w.pacjent)
+    );
+
+    setStatystyki(prev => ({
+      ...prev,
+      wizyty: wizyty.length,
+      pacjenci: pacjenciSet.size,
+    }));
+
+    if (selectedWizytaId === '') {
+      setSelectedWizytaId(wizyty[0].wizytaId);
+      setNowyDokument(prev => ({ ...prev, wizytaId: wizyty[0].wizytaId }));
+    }
+  }, [wizyty, selectedWizytaId]);
+
+  useEffect(() => {
+    const loadDokumenty = async () => {
+      if (!selectedWizytaId) {
+        setDokumenty([]);
+        setStatystyki(prev => ({ ...prev, dokumentacja: 0 }));
+        return;
+      }
+
+      try {
+        setLoadingDokumenty(true);
+        if (isDemoMode) {
+          const demoDocs = mockDokumentyByWizyta[selectedWizytaId] || [];
+          setDokumenty(demoDocs);
+          setStatystyki(prev => ({ ...prev, dokumentacja: demoDocs.length }));
+          return;
+        }
+        const docs = await apiService.getDokumentyWizytyLekarz(selectedWizytaId);
+        setDokumenty(docs);
+        setStatystyki(prev => ({ ...prev, dokumentacja: docs.length }));
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Blad ladowania dokumentow');
+      } finally {
+        setLoadingDokumenty(false);
+      }
+    };
+
+    loadDokumenty();
+  }, [isDemoMode, selectedWizytaId]);
 
   const handleLogout = () => {
     logout();
     navigate('/');
   };
 
-  const handleViewDocument = (id: number) => {
-    console.log('Podgląd dokumentu:', id);
-    // W przyszłości modal lub nawigacja do szczegółów dokumentu
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
-    setNowyDokument(prev => ({ ...prev, [name]: value }));
+    setNowyDokument(prev => ({
+      ...prev,
+      [name]: name === 'wizytaId' ? (value ? Number(value) : '') : value,
+    }));
   };
 
-  const handleSubmitDocument = (e: React.FormEvent) => {
+  const handleSubmitDocument = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Dodaj dokument:', nowyDokument);
-    // W przyszłości wywołanie API
-    setNowyDokument({
-      pacjentId: '',
-      typDokumentu: '',
-      data: '',
-      trescDokumentu: ''
-    });
+    setSubmitError(null);
+    setSubmitSuccess(null);
+
+    if (!nowyDokument.wizytaId || !nowyDokument.typDokumentu) {
+      setSubmitError('Wybierz wizyte i typ dokumentu.');
+      return;
+    }
+
+    const payload: DokumentCreateRequest = {
+      wizytaId: nowyDokument.wizytaId,
+      typDokumentu: nowyDokument.typDokumentu,
+      tresc: nowyDokument.tresc || undefined,
+    };
+
+    try {
+      if (isDemoMode) {
+        const newDoc: Dokument = {
+          dokumentId: Math.floor(Math.random() * 100000),
+          nazwaPliku: `dokument-${nowyDokument.wizytaId}.txt`,
+          typDokumentu: nowyDokument.typDokumentu,
+          opis: '',
+          dataUtworzenia: new Date().toISOString(),
+          rozmiarPliku: nowyDokument.tresc.length,
+          wizytaId: nowyDokument.wizytaId,
+        };
+        setDokumenty(prev => [newDoc, ...prev]);
+      } else {
+        await apiService.createDokument(payload);
+        const docs = await apiService.getDokumentyWizytyLekarz(nowyDokument.wizytaId);
+        setDokumenty(docs);
+      }
+
+      setNowyDokument(prev => ({
+        ...prev,
+        typDokumentu: '',
+        tresc: '',
+      }));
+      setSubmitSuccess('Dokument zostal zapisany.');
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : 'Blad zapisu dokumentu');
+    }
   };
 
-  const getTypBadge = (typ: TypDokumentu) => {
+  const getTypBadge = (typ: string) => {
     switch (typ) {
       case 'wynik':
         return (
@@ -119,49 +270,55 @@ const DokumentacjaLekarzPage: React.FC = () => {
             {t('doctorDocumentation.typeSkierowanie')}
           </span>
         );
+      default:
+        return (
+          <span className="px-3 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-700">
+            {typ}
+          </span>
+        );
     }
   };
 
-  const userName = user?.firstName && user?.lastName 
-    ? `dr ${user.firstName} ${user.lastName}` 
+  const userName = user?.firstName && user?.lastName
+    ? `dr ${user.firstName} ${user.lastName}`
     : user?.firstName || user?.username || user?.githubName || 'Lekarz';
 
   const statCards = [
-    { 
+    {
       id: 'wizyty',
-      icon: CalendarDaysIcon, 
-      title: t('doctorDashboard.visits'), 
+      icon: CalendarDaysIcon,
+      title: t('doctorDashboard.visits'),
       value: statystyki.wizyty,
       color: 'bg-blue-100 text-blue-600',
       borderColor: 'border-alimed-blue',
-      onClick: () => navigate('/wizyty-lekarza')
+      onClick: () => navigate('/wizyty-lekarza'),
     },
-    { 
+    {
       id: 'pacjenci',
-      icon: UsersIcon, 
-      title: t('doctorDashboard.patients'), 
+      icon: UsersIcon,
+      title: t('doctorDashboard.patients'),
       value: statystyki.pacjenci,
       color: 'bg-green-100 text-green-600',
       borderColor: 'border-green-500',
-      onClick: () => navigate('/pacjenci-lekarza')
+      onClick: () => navigate('/pacjenci-lekarza'),
     },
-    { 
+    {
       id: 'dokumentacja',
-      icon: DocumentTextIcon, 
-      title: t('doctorDashboard.documentation'), 
+      icon: DocumentTextIcon,
+      title: t('doctorDashboard.documentation'),
       value: statystyki.dokumentacja,
       color: 'bg-purple-100 text-purple-600',
       borderColor: 'border-purple-500',
-      onClick: () => setActiveCard('dokumentacja')
+      onClick: () => setActiveCard('dokumentacja'),
     },
-    { 
+    {
       id: 'moje-dane',
-      icon: UserCircleIcon, 
-      title: t('doctorDashboard.myData'), 
+      icon: UserCircleIcon,
+      title: t('doctorDashboard.myData'),
       value: null,
       color: 'bg-orange-100 text-orange-500',
       borderColor: 'border-orange-500',
-      onClick: () => navigate('/moje-dane-lekarza')
+      onClick: () => navigate('/moje-dane-lekarza'),
     },
   ];
 
@@ -172,27 +329,27 @@ const DokumentacjaLekarzPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
-            <div 
+            <div
               className="flex items-center space-x-3 cursor-pointer"
               onClick={() => navigate('/panel-lekarza')}
             >
               <img src="/logo.svg" alt="AliMed" className="h-10 w-10" />
               <span className="text-2xl font-bold text-alimed-blue">AliMed</span>
             </div>
-            
+
             {/* User info & actions */}
             <div className="flex items-center space-x-4">
               <span className="text-gray-700">
                 {t('doctorDashboard.welcome')}, {userName}
               </span>
               <LanguageSwitcher />
-              <button 
+              <button
                 onClick={() => navigate('/moje-dane-lekarza')}
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
               >
                 {t('nav.myAccount')}
               </button>
-              <button 
+              <button
                 onClick={handleLogout}
                 className="px-4 py-2 text-sm font-medium text-white bg-alimed-blue rounded-lg hover:bg-blue-700 transition-colors"
               >
@@ -209,6 +366,12 @@ const DokumentacjaLekarzPage: React.FC = () => {
         {isDemoMode && (
           <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-800">
             {t('dashboard.demoNotice')}
+          </div>
+        )}
+
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+            {error}
           </div>
         )}
 
@@ -242,7 +405,7 @@ const DokumentacjaLekarzPage: React.FC = () => {
 
         {/* Dokumentacja section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Lista dokumentów */}
+          {/* Lista dokumentow */}
           <div className="lg:col-span-2 bg-white rounded-xl shadow-sm overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
               <h3 className="text-lg font-medium text-gray-900">
@@ -253,7 +416,7 @@ const DokumentacjaLekarzPage: React.FC = () => {
                 {t('doctorDocumentation.filter')}
               </button>
             </div>
-            
+
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50">
@@ -274,33 +437,30 @@ const DokumentacjaLekarzPage: React.FC = () => {
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {dokumenty.map((dokument) => (
-                    <tr 
-                      key={dokument.id} 
+                    <tr
+                      key={dokument.dokumentId}
                       className="hover:bg-gray-50 transition-colors"
                     >
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {dokument.data}
+                        {formatDate(dokument.dataUtworzenia)}
                       </td>
                       <td className="px-6 py-4">
                         <div>
                           <p className="font-medium text-gray-900">
-                            {dokument.pacjentImie} {dokument.pacjentNazwisko}
+                            {selectedWizyta?.pacjent || '-'}
                           </p>
-                          <p className="text-sm text-gray-500">
-                            PESEL: {dokument.pacjentPesel}
-                          </p>
+                          {selectedWizyta && (
+                            <p className="text-sm text-gray-500">
+                              {formatDate(selectedWizyta.dataWizyty)} {formatTime(selectedWizyta.dataWizyty)}
+                            </p>
+                          )}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        {getTypBadge(dokument.typ)}
+                        {getTypBadge(dokument.typDokumentu || '')}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <button 
-                          onClick={() => handleViewDocument(dokument.id)}
-                          className="text-alimed-blue hover:text-blue-700 text-sm font-medium hover:underline"
-                        >
-                          {t('doctorDocumentation.preview')}
-                        </button>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                        -
                       </td>
                     </tr>
                   ))}
@@ -308,7 +468,13 @@ const DokumentacjaLekarzPage: React.FC = () => {
               </table>
             </div>
 
-            {dokumenty.length === 0 && (
+            {loadingDokumenty && (
+              <div className="px-6 py-12 text-center text-gray-500">
+                {t('common.loading')}
+              </div>
+            )}
+
+            {!loadingDokumenty && dokumenty.length === 0 && (
               <div className="px-6 py-12 text-center text-gray-500">
                 {t('doctorDocumentation.noDocuments')}
               </div>
@@ -322,22 +488,24 @@ const DokumentacjaLekarzPage: React.FC = () => {
                 {t('doctorDocumentation.addDocument')}
               </h3>
             </div>
-            
+
             <form onSubmit={handleSubmitDocument} className="p-6 space-y-4">
-              {/* Pacjent */}
+              {/* Wizyta */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('doctorDocumentation.patient')}
+                  {t('doctorVisits.visit')}
                 </label>
                 <select
-                  name="pacjentId"
-                  value={nowyDokument.pacjentId}
+                  name="wizytaId"
+                  value={nowyDokument.wizytaId}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-alimed-blue focus:border-alimed-blue transition-colors"
                 >
-                  <option value="">{t('doctorDocumentation.selectPatient')}</option>
-                  {mockPacjenci.map(p => (
-                    <option key={p.id} value={p.id}>{p.imie} {p.nazwisko}</option>
+                  <option value="">Wybierz wizyte</option>
+                  {wizyty.map(w => (
+                    <option key={w.wizytaId} value={w.wizytaId}>
+                      {w.pacjent} • {formatDate(w.dataWizyty)} {formatTime(w.dataWizyty)}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -361,32 +529,14 @@ const DokumentacjaLekarzPage: React.FC = () => {
                 </select>
               </div>
 
-              {/* Data */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('doctorDocumentation.date')}
-                </label>
-                <div className="relative">
-                  <input
-                    type="date"
-                    name="data"
-                    value={nowyDokument.data}
-                    onChange={handleInputChange}
-                    placeholder="dd.mm.rrrr"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-alimed-blue focus:border-alimed-blue transition-colors"
-                  />
-                  <CalendarIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-                </div>
-              </div>
-
-              {/* Treść dokumentu */}
+              {/* Tresc dokumentu */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   {t('doctorDocumentation.documentContent')}
                 </label>
                 <textarea
-                  name="trescDokumentu"
-                  value={nowyDokument.trescDokumentu}
+                  name="tresc"
+                  value={nowyDokument.tresc}
                   onChange={handleInputChange}
                   rows={4}
                   placeholder={t('doctorDocumentation.enterDocumentContent')}
@@ -394,10 +544,17 @@ const DokumentacjaLekarzPage: React.FC = () => {
                 />
               </div>
 
-              {/* Submit button - w przyszłości */}
+              {submitError && (
+                <div className="text-sm text-red-600">{submitError}</div>
+              )}
+              {submitSuccess && (
+                <div className="text-sm text-green-600">{submitSuccess}</div>
+              )}
+
               <button
                 type="submit"
-                className="w-full px-4 py-3 bg-alimed-blue text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                disabled={loading || loadingDokumenty}
+                className="w-full px-4 py-3 bg-alimed-blue text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {t('doctorDocumentation.saveDocument')}
               </button>

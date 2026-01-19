@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { apiService } from '../services/api';
-import type { Dokument, Wizyta, WizytaDetail } from '../types/api';
+import type { Dokument, Pacjent, Wizyta, WizytaDetail } from '../types/api';
 import Card from '../components/Card';
 import { useTranslation } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { CalendarIcon, UserIcon, ClockIcon, CheckCircleIcon, XCircleIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
+import { openDocumentPdf } from '../utils/documentPdf';
 
 // Demo mode mock data
 const mockWizyty: Wizyta[] = [
@@ -46,6 +47,7 @@ const MojeWizytyPage: React.FC = () => {
   const [selectedWizyta, setSelectedWizyta] = useState<WizytaDetail | null>(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [detailsError, setDetailsError] = useState<string | null>(null);
+  const [pacjentCache, setPacjentCache] = useState<Pacjent | null>(null);
 
   useEffect(() => {
     const fetchWizyty = async () => {
@@ -110,6 +112,40 @@ const MojeWizytyPage: React.FC = () => {
   const sortedWizyty = [...filterWizyty(wizyty)].sort((a, b) => {
     return new Date(b.dataWizyty).getTime() - new Date(a.dataWizyty).getTime();
   });
+
+  const handlePreview = async (dokument: Dokument) => {
+    const popup = window.open('', '_blank');
+    if (!popup) {
+      alert('Popup zablokowany. Zezwol na otwieranie okien.');
+      return;
+    }
+    try {
+      const pacjentPromise = pacjentCache
+        ? Promise.resolve(pacjentCache)
+        : apiService.getMojProfil().catch(() => undefined);
+      const trescPromise = apiService
+        .downloadDokument(dokument.dokumentId)
+        .then((blob) => blob.text())
+        .catch(() => undefined);
+
+      const [pacjent, tresc] = await Promise.all([pacjentPromise, trescPromise]);
+
+      if (pacjent && !pacjentCache) {
+        setPacjentCache(pacjent);
+      }
+
+      openDocumentPdf({
+        dokument,
+        pacjent: pacjent ?? undefined,
+        wizyta: selectedWizyta ?? undefined,
+        tresc,
+        targetWindow: popup,
+      });
+    } catch (err) {
+      popup.close();
+      alert(t('documents.errorDownloading'));
+    }
+  };
 
   if (loading) {
     return (
@@ -317,8 +353,16 @@ const MojeWizytyPage: React.FC = () => {
                     {selectedWizyta.dokumenty.length > 0 ? (
                       <ul className="space-y-2">
                         {selectedWizyta.dokumenty.map((d: Dokument) => (
-                          <li key={d.dokumentId} className="text-sm text-gray-700">
-                            {d.nazwaPliku || `Dokument #${d.dokumentId}`} - {d.typDokumentu || 'inne'}
+                          <li key={d.dokumentId} className="text-sm text-gray-700 flex items-center justify-between gap-2">
+                            <span>
+                              {d.nazwaPliku || `Dokument #${d.dokumentId}`} - {d.typDokumentu || 'inne'}
+                            </span>
+                            <button
+                              onClick={() => handlePreview(d)}
+                              className="text-alimed-blue hover:underline text-sm"
+                            >
+                              Pobierz jako PDF
+                            </button>
                           </li>
                         ))}
                       </ul>

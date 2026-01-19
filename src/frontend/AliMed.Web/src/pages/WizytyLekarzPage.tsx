@@ -1,16 +1,18 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   CalendarDaysIcon,
   UsersIcon,
   UserCircleIcon,
   PencilSquareIcon,
+  DocumentTextIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { useTranslation } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import { apiService } from '../services/api';
-import type { LekarzWizytaSummary } from '../types/api';
+import type { Dokument, DokumentCreateRequest, LekarzWizytaSummary } from '../types/api';
 
 const mockWizyty: LekarzWizytaSummary[] = [
   {
@@ -24,6 +26,19 @@ const mockWizyty: LekarzWizytaSummary[] = [
     dataWizyty: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
     status: 'Zaplanowana',
     pacjent: 'Maria Kowalczyk',
+  },
+];
+
+const mockDokumenty: Dokument[] = [
+  {
+    dokumentId: 1,
+    nazwaPliku: 'dokument-1.txt',
+    typDokumentu: 'wynik',
+    opis: 'Opis dokumentu',
+    dataUtworzenia: new Date().toISOString(),
+    rozmiarPliku: 1200,
+    wizytaId: 1,
+    pacjentId: 1,
   },
 ];
 
@@ -56,40 +71,57 @@ const WizytyLekarzPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedWizytaId, setSelectedWizytaId] = useState<number | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [diagnoza, setDiagnoza] = useState('');
   const [statusSaving, setStatusSaving] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [statusError, setStatusError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchWizyty = async () => {
+  const [dokumenty, setDokumenty] = useState<Dokument[]>([]);
+  const [dokLoading, setDokLoading] = useState(false);
+  const [dokError, setDokError] = useState<string | null>(null);
+  const [dokSaving, setDokSaving] = useState(false);
+  const [dokMessage, setDokMessage] = useState<string | null>(null);
+  const [nowyDokument, setNowyDokument] = useState<{ typDokumentu: string; tresc: string }>({
+    typDokumentu: '',
+    tresc: '',
+  });
+
+  const reloadWizyty = useCallback(async (silent = false) => {
+    if (!silent) {
       setLoading(true);
-      setError(null);
+    }
+    setError(null);
 
-      if (isDemoMode) {
-        setWizyty(mockWizyty);
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const data =
-          range === 'day'
-            ? await apiService.getLekarzWizytyDzien(selectedDate)
-            : range === 'week'
-              ? await apiService.getLekarzWizytyTydzien(selectedDate)
-              : await apiService.getLekarzWizytyMiesiac(selectedDate);
-        setWizyty(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : t('common.error'));
-      } finally {
+    if (isDemoMode) {
+      setWizyty(mockWizyty);
+      if (!silent) {
         setLoading(false);
       }
-    };
+      return;
+    }
 
-    fetchWizyty();
-  }, [selectedDate, range, isDemoMode, t]);
+    try {
+      const data =
+        range === 'day'
+          ? await apiService.getLekarzWizytyDzien(selectedDate)
+          : range === 'week'
+            ? await apiService.getLekarzWizytyTydzien(selectedDate)
+            : await apiService.getLekarzWizytyMiesiac(selectedDate);
+      setWizyty(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('common.error'));
+    } finally {
+      if (!silent) {
+        setLoading(false);
+      }
+    }
+  }, [isDemoMode, range, selectedDate, t]);
+
+  useEffect(() => {
+    reloadWizyty();
+  }, [reloadWizyty]);
 
   useEffect(() => {
     if (!selectedWizytaId && wizyty.length > 0) {
@@ -106,7 +138,31 @@ const WizytyLekarzPage: React.FC = () => {
     setDiagnoza('');
     setStatusMessage(null);
     setStatusError(null);
+    setDokMessage(null);
+    setDokError(null);
   }, [selectedWizytaId]);
+
+  useEffect(() => {
+    const loadDokumenty = async () => {
+      if (!isModalOpen || !selectedWizytaId) return;
+      setDokLoading(true);
+      setDokError(null);
+      try {
+        if (isDemoMode) {
+          setDokumenty(mockDokumenty.filter((d) => d.wizytaId === selectedWizytaId));
+        } else {
+          const data = await apiService.getDokumentyWizytyLekarz(selectedWizytaId);
+          setDokumenty(data);
+        }
+      } catch (err) {
+        setDokError(err instanceof Error ? err.message : t('common.error'));
+      } finally {
+        setDokLoading(false);
+      }
+    };
+
+    loadDokumenty();
+  }, [isModalOpen, selectedWizytaId, isDemoMode, t]);
 
   const selectedWizyta = useMemo(
     () => wizyty.find((w) => w.wizytaId === selectedWizytaId) || null,
@@ -116,6 +172,31 @@ const WizytyLekarzPage: React.FC = () => {
   const handleLogout = () => {
     logout();
     navigate('/');
+  };
+
+  const openModal = (wizytaId: number) => {
+    setSelectedWizytaId(wizytaId);
+    setIsModalOpen(true);
+    setDokMessage(null);
+    setDokError(null);
+    setStatusMessage(null);
+    setStatusError(null);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setDokMessage(null);
+    setDokError(null);
+    setStatusMessage(null);
+    setStatusError(null);
+    setNowyDokument({ typDokumentu: '', tresc: '' });
+  };
+
+  const handleDokInputChange = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
+  ) => {
+    const { name, value } = event.target;
+    setNowyDokument((prev) => ({ ...prev, [name]: value }));
   };
 
   const getStatusBadge = (status: string) => {
@@ -194,15 +275,52 @@ const WizytyLekarzPage: React.FC = () => {
     try {
       await apiService.oznaczWizyteOdbyta(selectedWizyta.wizytaId, diagnoza);
       setStatusMessage('Status wizyty zaktualizowany.');
-      setWizyty((prev) =>
-        prev.map((w) =>
-          w.wizytaId === selectedWizyta.wizytaId ? { ...w, status: 'Zrealizowana' } : w,
-        ),
-      );
+      await reloadWizyty(true);
     } catch (err) {
       setStatusError(err instanceof Error ? err.message : t('common.error'));
     } finally {
       setStatusSaving(false);
+    }
+  };
+
+  const handleCreateDocument = async () => {
+    if (!selectedWizyta || !nowyDokument.typDokumentu) {
+      setDokError('Wybierz typ dokumentu.');
+      return;
+    }
+    setDokSaving(true);
+    setDokError(null);
+    setDokMessage(null);
+    try {
+      const payload: DokumentCreateRequest = {
+        wizytaId: selectedWizyta.wizytaId,
+        typDokumentu: nowyDokument.typDokumentu,
+        tresc: nowyDokument.tresc || undefined,
+      };
+
+      if (isDemoMode) {
+        const newDoc: Dokument = {
+          dokumentId: Math.floor(Math.random() * 100000),
+          nazwaPliku: `dokument-${selectedWizyta.wizytaId}.txt`,
+          typDokumentu: nowyDokument.typDokumentu,
+          opis: '',
+          dataUtworzenia: new Date().toISOString(),
+          rozmiarPliku: nowyDokument.tresc.length,
+          wizytaId: selectedWizyta.wizytaId,
+        };
+        setDokumenty((prev) => [newDoc, ...prev]);
+      } else {
+        await apiService.createDokument(payload);
+        const data = await apiService.getDokumentyWizytyLekarz(selectedWizyta.wizytaId);
+        setDokumenty(data);
+      }
+
+      setNowyDokument({ typDokumentu: '', tresc: '' });
+      setDokMessage('Dokument zapisany.');
+    } catch (err) {
+      setDokError(err instanceof Error ? err.message : t('common.error'));
+    } finally {
+      setDokSaving(false);
     }
   };
 
@@ -284,8 +402,7 @@ const WizytyLekarzPage: React.FC = () => {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 bg-white rounded-xl shadow-sm overflow-hidden">
+        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-100 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <h2 className="text-xl font-semibold text-gray-900">{t('doctorVisits.title')}</h2>
               <div className="flex flex-col md:flex-row md:items-center gap-3">
@@ -370,7 +487,10 @@ const WizytyLekarzPage: React.FC = () => {
                       className={`hover:bg-gray-50 transition-colors cursor-pointer ${
                         selectedWizytaId === wizyta.wizytaId ? 'bg-blue-50' : ''
                       }`}
-                      onClick={() => setSelectedWizytaId(wizyta.wizytaId)}
+                      onClick={() => {
+                        setSelectedWizytaId(wizyta.wizytaId);
+                        openModal(wizyta.wizytaId);
+                      }}
                     >
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         {formatTime(wizyta.dataWizyty)}
@@ -384,7 +504,7 @@ const WizytyLekarzPage: React.FC = () => {
                         <button
                           onClick={(event) => {
                             event.stopPropagation();
-                            setSelectedWizytaId(wizyta.wizytaId);
+                            openModal(wizyta.wizytaId);
                           }}
                           className="text-alimed-blue hover:text-blue-700 text-sm font-medium hover:underline"
                         >
@@ -403,36 +523,39 @@ const WizytyLekarzPage: React.FC = () => {
                 </tbody>
               </table>
             </div>
-          </div>
+        </div>
+        {isModalOpen && selectedWizyta && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+            <div className="bg-white rounded-xl shadow-lg max-w-3xl w-full mx-4">
+              <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {t('doctorVisits.visitDetails')}
+                </h3>
+                <button
+                  onClick={closeModal}
+                  className="text-gray-500 hover:text-gray-700"
+                  aria-label="Zamknij"
+                >
+                  <XMarkIcon className="w-5 h-5" />
+                </button>
+              </div>
 
-          <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100">
-              <h2 className="text-lg font-semibold text-gray-900">
-                {t('doctorVisits.visitDetails')}
-              </h2>
-            </div>
-
-            {selectedWizyta ? (
               <div className="p-6 space-y-6">
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500 mb-2">{t('doctorVisits.patient')}</h3>
-                  <p className="text-lg font-semibold text-gray-900">{selectedWizyta.pacjent}</p>
-                </div>
-
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500 mb-2">{t('doctorVisits.currentVisit')}</h3>
-                  <div className="text-sm text-gray-700 space-y-1">
-                    <p>
-                      {t('doctorVisits.time')}: {formatDate(selectedWizyta.dataWizyty)}{' '}
-                      {formatTime(selectedWizyta.dataWizyty)}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500 mb-2">{t('doctorVisits.patient')}</h4>
+                    <p className="text-lg font-semibold text-gray-900">{selectedWizyta.pacjent}</p>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-500 mb-2">{t('doctorVisits.currentVisit')}</h4>
+                    <p className="text-sm text-gray-700">
+                      {formatDate(selectedWizyta.dataWizyty)} {formatTime(selectedWizyta.dataWizyty)}
                     </p>
-                    <p>
-                      {t('doctorVisits.status')}: {selectedWizyta.status}
-                    </p>
+                    <div className="mt-2">{getStatusBadge(selectedWizyta.status)}</div>
                   </div>
                 </div>
 
-                <div className="space-y-3">
+                <div className="border-t border-gray-100 pt-4 space-y-3">
                   <label className="text-sm font-medium text-gray-500" htmlFor="diagnoza">
                     Diagnoza
                   </label>
@@ -470,12 +593,86 @@ const WizytyLekarzPage: React.FC = () => {
                     {statusSaving ? 'Zapisywanie...' : 'Oznacz jako zrealizowana'}
                   </button>
                 </div>
+
+                <div className="border-t border-gray-100 pt-4 space-y-4">
+                  <div className="flex items-center gap-2">
+                    <DocumentTextIcon className="w-5 h-5 text-gray-500" />
+                    <h4 className="text-sm font-medium text-gray-700">Dokumenty wizyty</h4>
+                  </div>
+
+                  {dokError && (
+                    <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2">
+                      {dokError}
+                    </div>
+                  )}
+                  {dokMessage && (
+                    <div className="text-sm text-green-700 bg-green-50 border border-green-200 rounded px-3 py-2">
+                      {dokMessage}
+                    </div>
+                  )}
+
+                  {dokLoading ? (
+                    <div className="text-sm text-gray-500">{t('common.loading')}</div>
+                  ) : dokumenty.length > 0 ? (
+                    <ul className="space-y-2">
+                      {dokumenty.map((doc) => (
+                        <li key={doc.dokumentId} className="text-sm text-gray-700">
+                          {doc.nazwaPliku || `Dokument #${doc.dokumentId}`} · {doc.typDokumentu || 'inne'}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <div className="text-sm text-gray-500">Brak dokumentow dla wizyty.</div>
+                  )}
+
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-600 mb-1" htmlFor="typDokumentu">
+                        Typ dokumentu
+                      </label>
+                      <select
+                        id="typDokumentu"
+                        name="typDokumentu"
+                        value={nowyDokument.typDokumentu}
+                        onChange={handleDokInputChange}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                      >
+                        <option value="">Wybierz typ dokumentu</option>
+                        <option value="wynik">Wynik</option>
+                        <option value="recepta">Recepta</option>
+                        <option value="opis">Opis</option>
+                        <option value="skierowanie">Skierowanie</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-600 mb-1" htmlFor="tresc">
+                        Tresc dokumentu
+                      </label>
+                      <textarea
+                        id="tresc"
+                        name="tresc"
+                        value={nowyDokument.tresc}
+                        onChange={handleDokInputChange}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                        rows={4}
+                        placeholder="Wpisz tresc dokumentu"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleCreateDocument}
+                      disabled={dokSaving || isDemoMode}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-alimed-blue text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:bg-blue-200"
+                    >
+                      <DocumentTextIcon className="w-5 h-5" />
+                      {dokSaving ? 'Zapisywanie...' : 'Dodaj dokument'}
+                    </button>
+                  </div>
+                </div>
               </div>
-            ) : (
-              <div className="p-6 text-center text-gray-500">{t('doctorVisits.selectVisit')}</div>
-            )}
+            </div>
           </div>
-        </div>
+        )}
       </main>
     </div>
   );

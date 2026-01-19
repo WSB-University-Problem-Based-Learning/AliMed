@@ -3,6 +3,7 @@ import { useTranslation } from '../context/LanguageContext';
 import Card from '../components/Card';
 import {
   DocumentTextIcon,
+  EyeIcon,
   ArrowDownTrayIcon,
   FolderIcon,
   CalendarIcon,
@@ -10,7 +11,8 @@ import {
   FunnelIcon,
 } from '@heroicons/react/24/outline';
 import { apiService } from '../services/api';
-import type { Dokument } from '../types/api';
+import type { Dokument, Pacjent, WizytaDetail } from '../types/api';
+import { openDocumentPdf } from '../utils/documentPdf';
 
 const DokumentyPage: React.FC = () => {
   const { t } = useTranslation();
@@ -20,6 +22,7 @@ const DokumentyPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'recepty' | 'wyniki' | 'skierowania' | 'inne'>('all');
   const [sortBy, setSortBy] = useState<'date' | 'name' | 'type'>('date');
+  const [pacjentCache, setPacjentCache] = useState<Pacjent | null>(null);
 
   useEffect(() => {
     const fetchDokumenty = async () => {
@@ -153,6 +156,47 @@ const DokumentyPage: React.FC = () => {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (err) {
+      alert(t('documents.errorDownloading'));
+    }
+  };
+
+  const handlePreview = async (dokument: Dokument) => {
+    const popup = window.open('', '_blank');
+    if (!popup) {
+      alert('Popup zablokowany. Zezwol na otwieranie okien.');
+      return;
+    }
+    try {
+      const pacjentPromise = pacjentCache
+        ? Promise.resolve(pacjentCache)
+        : apiService.getMojProfil().catch(() => undefined);
+      const wizytaPromise = dokument.wizytaId
+        ? apiService.getWizytaById(dokument.wizytaId).catch(() => undefined)
+        : Promise.resolve(undefined);
+      const trescPromise = apiService
+        .downloadDokument(dokument.dokumentId)
+        .then((blob) => blob.text())
+        .catch(() => undefined);
+
+      const [pacjent, wizyta, tresc] = await Promise.all([
+        pacjentPromise,
+        wizytaPromise,
+        trescPromise,
+      ]);
+
+      if (pacjent && !pacjentCache) {
+        setPacjentCache(pacjent);
+      }
+
+      openDocumentPdf({
+        dokument,
+        pacjent: pacjent ?? undefined,
+        wizyta: wizyta as WizytaDetail | undefined,
+        tresc,
+        targetWindow: popup,
+      });
+    } catch (err) {
+      popup.close();
       alert(t('documents.errorDownloading'));
     }
   };
@@ -305,13 +349,22 @@ const DokumentyPage: React.FC = () => {
               </div>
 
               {/* Download Button */}
-              <button
-                onClick={() => handleDownload(dokument)}
-                className="flex items-center gap-2 px-4 py-2 bg-alimed-blue text-white rounded-lg hover:bg-alimed-light-blue transition-colors"
-              >
-                <ArrowDownTrayIcon className="h-5 w-5" />
-                {t('documents.download')}
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handlePreview(dokument)}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  <EyeIcon className="h-5 w-5" />
+                  Pobierz jako PDF
+                </button>
+                <button
+                  onClick={() => handleDownload(dokument)}
+                  className="flex items-center gap-2 px-4 py-2 bg-alimed-blue text-white rounded-lg hover:bg-alimed-light-blue transition-colors"
+                >
+                  <ArrowDownTrayIcon className="h-5 w-5" />
+                  {t('documents.download')}
+                </button>
+              </div>
             </div>
           </Card>
         ))}
