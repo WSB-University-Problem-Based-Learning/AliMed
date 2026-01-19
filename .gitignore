@@ -29,6 +29,34 @@ yarn-error.log*
 # local env files
 .env*.local
 .env
+.env.development
+.env.test
+.env.staging
+
+# Build artifacts
+*.tar.gz
+dist/
+build/
+
+# IDE and Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+tmp/
+temp/
+.temp/
+
+# OS files
+Thumbs.db
+
+# .NET specific
+**/obj/
+**/bin/
+*.user
 
 # vercel
 .vercel
