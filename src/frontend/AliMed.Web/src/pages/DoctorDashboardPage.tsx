@@ -1,79 +1,99 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   CalendarDaysIcon, 
   UsersIcon, 
   DocumentTextIcon, 
   UserCircleIcon,
-  CheckIcon,
-  XMarkIcon
+  CalendarIcon
 } from '@heroicons/react/24/outline';
 import { useTranslation } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import LanguageSwitcher from '../components/LanguageSwitcher';
+import { apiService } from '../services/api';
+import type { Dokument, LekarzWizytaSummary } from '../types/api';
 
 interface NadchodzacaWizyta {
   id: number;
-  pacjentImie: string;
-  pacjentNazwisko: string;
-  typWizyty: string;
+  pacjent: string;
   godzina: string;
-  dzien: 'dzisiaj' | 'jutro' | string;
+  dzien: string;
+  status: string;
 }
-
-interface OczekujacaWizyta {
-  id: number;
-  pacjentImie: string;
-  pacjentNazwisko: string;
-  dataGodzina: string;
-}
-
-// Mock data - w przyszłości z API
-const mockNadchodzaceWizyty: NadchodzacaWizyta[] = [
-  { id: 1, pacjentImie: 'Anna', pacjentNazwisko: 'Nowak', typWizyty: 'Konsultacja ogólna', godzina: '10:00', dzien: 'dzisiaj' },
-  { id: 2, pacjentImie: 'Piotr', pacjentNazwisko: 'Wiśniewski', typWizyty: 'Kontrola okresowa', godzina: '11:30', dzien: 'dzisiaj' },
-  { id: 3, pacjentImie: 'Maria', pacjentNazwisko: 'Kowalczyk', typWizyty: 'Badanie specjalistyczne', godzina: '14:00', dzien: 'dzisiaj' },
-  { id: 4, pacjentImie: 'Tomasz', pacjentNazwisko: 'Lewandowski', typWizyty: 'Konsultacja', godzina: '15:30', dzien: 'dzisiaj' },
-];
-
-const mockOczekujaceWizyty: OczekujacaWizyta[] = [
-  { id: 1, pacjentImie: 'Katarzyna', pacjentNazwisko: 'Zielińska', dataGodzina: '15.12.2024, 09:00' },
-  { id: 2, pacjentImie: 'Michał', pacjentNazwisko: 'Szymański', dataGodzina: '15.12.2024, 11:00' },
-  { id: 3, pacjentImie: 'Agnieszka', pacjentNazwisko: 'Dąbrowska', dataGodzina: '16.12.2024, 10:30' },
-  { id: 4, pacjentImie: 'Kamil', pacjentNazwisko: 'Wójcik', dataGodzina: '16.12.2024, 14:00' },
-];
-
-const mockStatystyki = {
-  wizyty: 12,
-  pacjenci: 248,
-  dokumentacja: 34,
-};
 
 const DoctorDashboardPage: React.FC = () => {
   const { t } = useTranslation();
   const { user, logout, isDemoMode } = useAuth();
   const navigate = useNavigate();
   
-  const [nadchodzaceWizyty] = useState<NadchodzacaWizyta[]>(mockNadchodzaceWizyty);
-  const [oczekujaceWizyty, setOczekujaceWizyty] = useState<OczekujacaWizyta[]>(mockOczekujaceWizyty);
-  const [statystyki] = useState(mockStatystyki);
+  const [nadchodzaceWizyty, setNadchodzaceWizyty] = useState<NadchodzacaWizyta[]>([]);
+  const [wizytyTygodnia, setWizytyTygodnia] = useState<NadchodzacaWizyta[]>([]);
+  const [statystyki, setStatystyki] = useState({ wizyty: 0, pacjenci: 0, dokumentacja: 0 });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [activeCard, setActiveCard] = useState<string>('wizyty');
+
+  const dzisiaj = useMemo(() => new Date(), []);
+  const dateOnly = dzisiaj.toISOString().split('T')[0];
+
+  const mapWizyty = (wizyty: LekarzWizytaSummary[]): NadchodzacaWizyta[] =>
+    wizyty.map(w => {
+      const date = new Date(w.dataWizyty);
+      return {
+        id: w.wizytaId,
+        pacjent: w.pacjent,
+        godzina: date.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' }),
+        dzien: date.toLocaleDateString('pl-PL'),
+        status: w.status,
+      };
+    });
+
+  const countDocuments = async (wizyty: LekarzWizytaSummary[]) => {
+    if (!wizyty.length) return 0;
+    const docs = await Promise.all(
+      wizyty.map(w => apiService.getDokumentyWizytyLekarz(w.wizytaId).catch(() => [] as Dokument[]))
+    );
+    return docs.reduce((sum, list) => sum + list.length, 0);
+  };
+
+  useEffect(() => {
+    const loadDashboard = async () => {
+      try {
+        setLoading(true);
+        const [wizytyDnia, wizytyTygodniaResp, pacjenci] = await Promise.all([
+          apiService.getLekarzWizytyDzien(dateOnly),
+          apiService.getLekarzWizytyTydzien(dateOnly),
+          apiService.getLekarzPacjenci(),
+        ]);
+
+        const mappedDay = mapWizyty(wizytyDnia);
+        const mappedWeek = mapWizyty(wizytyTygodniaResp);
+        setNadchodzaceWizyty(mappedDay);
+        setWizytyTygodnia(mappedWeek);
+
+        const dokumentyCount = await countDocuments(wizytyDnia);
+        setStatystyki({
+          wizyty: wizytyTygodniaResp.length,
+          pacjenci: pacjenci.length,
+          dokumentacja: dokumentyCount,
+        });
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Blad ladowania');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (!isDemoMode) {
+      loadDashboard();
+    } else {
+      setLoading(false);
+    }
+  }, [dateOnly, isDemoMode]);
 
   const handleLogout = () => {
     logout();
     navigate('/');
-  };
-
-  const handleConfirmVisit = (id: number) => {
-    // W przyszłości wywołanie API
-    setOczekujaceWizyty(prev => prev.filter(w => w.id !== id));
-    console.log('Potwierdzono wizytę:', id);
-  };
-
-  const handleRejectVisit = (id: number) => {
-    // W przyszłości wywołanie API
-    setOczekujaceWizyty(prev => prev.filter(w => w.id !== id));
-    console.log('Odrzucono wizytę:', id);
   };
 
   const userName = user?.firstName && user?.lastName 
@@ -137,7 +157,7 @@ const DoctorDashboardPage: React.FC = () => {
               </span>
               <LanguageSwitcher />
               <button 
-                onClick={() => navigate('/moje-dane')}
+                onClick={() => navigate('/moje-dane-lekarza')}
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
               >
                 {t('nav.myAccount')}
@@ -159,6 +179,12 @@ const DoctorDashboardPage: React.FC = () => {
         {isDemoMode && (
           <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-800">
             {t('dashboard.demoNotice')}
+          </div>
+        )}
+
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+            {error}
           </div>
         )}
 
@@ -185,7 +211,10 @@ const DoctorDashboardPage: React.FC = () => {
           ))}
         </div>
 
-        {/* Two column layout for visits */}
+        {loading ? (
+          <div className="text-center text-gray-500">Ladowanie...</div>
+        ) : (
+        /* Two column layout for visits */
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Nadchodzące wizyty */}
           <div className="bg-white rounded-xl shadow-sm overflow-hidden">
@@ -203,15 +232,13 @@ const DoctorDashboardPage: React.FC = () => {
                   <div className="flex justify-between items-start">
                     <div>
                       <p className="font-medium text-gray-900">
-                        {wizyta.pacjentImie} {wizyta.pacjentNazwisko}
+                        {wizyta.pacjent}
                       </p>
-                      <p className="text-sm text-gray-500">{wizyta.typWizyty}</p>
+                      <p className="text-sm text-gray-500">Status: {wizyta.status}</p>
                     </div>
                     <div className="text-right">
                       <p className="font-medium text-gray-900">{wizyta.godzina}</p>
-                      <p className="text-sm text-gray-500 capitalize">
-                        {wizyta.dzien === 'dzisiaj' ? t('doctorDashboard.today') : wizyta.dzien}
-                      </p>
+                      <p className="text-sm text-gray-500 capitalize">{wizyta.dzien}</p>
                     </div>
                   </div>
                 </div>
@@ -224,55 +251,39 @@ const DoctorDashboardPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Oczekujące potwierdzenia */}
+          {/* Wizyty w tym tygodniu */}
           <div className="bg-white rounded-xl shadow-sm overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
               <h2 className="text-lg font-semibold text-gray-900">
-                {t('doctorDashboard.pendingConfirmations')}
+                Wizyty w tym tygodniu
               </h2>
-              <span className="px-3 py-1 text-sm font-medium text-orange-600 bg-orange-100 rounded-full">
-                {oczekujaceWizyty.length} {t('doctorDashboard.new')}
-              </span>
+              <CalendarIcon className="w-5 h-5 text-gray-400" />
             </div>
             <div className="divide-y divide-gray-100">
-              {oczekujaceWizyty.map((wizyta) => (
+              {wizytyTygodnia.map((wizyta) => (
                 <div key={wizyta.id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
                   <div className="flex justify-between items-center">
                     <div>
                       <p className="font-medium text-gray-900">
-                        {wizyta.pacjentImie} {wizyta.pacjentNazwisko}
+                        {wizyta.pacjent}
                       </p>
                       <p className="text-sm text-gray-500">
-                        {t('doctorDashboard.visit')} - {wizyta.dataGodzina}
+                        {wizyta.dzien}, {wizyta.godzina}
                       </p>
                     </div>
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => handleConfirmVisit(wizyta.id)}
-                        className="w-9 h-9 rounded-lg bg-green-500 text-white flex items-center justify-center hover:bg-green-600 transition-colors"
-                        title={t('doctorDashboard.confirm')}
-                      >
-                        <CheckIcon className="w-5 h-5" />
-                      </button>
-                      <button
-                        onClick={() => handleRejectVisit(wizyta.id)}
-                        className="w-9 h-9 rounded-lg bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-colors"
-                        title={t('doctorDashboard.reject')}
-                      >
-                        <XMarkIcon className="w-5 h-5" />
-                      </button>
-                    </div>
+                    <span className="text-xs text-gray-500">Status: {wizyta.status}</span>
                   </div>
                 </div>
               ))}
-              {oczekujaceWizyty.length === 0 && (
+              {wizytyTygodnia.length === 0 && (
                 <div className="px-6 py-8 text-center text-gray-500">
-                  {t('doctorDashboard.noPendingConfirmations')}
+                  Brak wizyt w tym tygodniu.
                 </div>
               )}
             </div>
           </div>
         </div>
+        )}
       </main>
     </div>
   );

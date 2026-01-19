@@ -102,6 +102,29 @@ public class AdminController : ControllerBase
         return Ok(pacjenci);
     }
 
+    [HttpGet("lekarze")]
+    public async Task<IActionResult> GetLekarze()
+    {
+        var lekarze = await _db.Lekarze
+            .AsNoTracking()
+            .OrderBy(l => l.Nazwisko)
+            .Select(l => new
+            {
+                l.LekarzId,
+                l.Imie,
+                l.Nazwisko,
+                l.Specjalizacja,
+                l.PlacowkaId,
+                Placowka = l.Placowka != null ? l.Placowka.Nazwa : null,
+                UserId = l.UserId,
+                Email = l.User != null ? l.User.Email : null,
+                Username = l.User != null ? l.User.Username : null
+            })
+            .ToListAsync();
+
+        return Ok(lekarze);
+    }
+
     [HttpPut("users/{userId}/promote-to-doctor")]
     public async Task<IResult> PromoteUserToDoctor(Guid userId, [FromBody] AdminPromoteToDoctorDto dto)
     {
@@ -164,6 +187,30 @@ public class AdminController : ControllerBase
         _db.Lekarze.Add(lekarz);
         user.Role = UserRole.Lekarz;
 
+        await _db.SaveChangesAsync();
+
+        var godziny = new List<GodzinyPracyLekarza>();
+        foreach (var day in new[]
+        {
+            DayOfWeek.Monday,
+            DayOfWeek.Tuesday,
+            DayOfWeek.Wednesday,
+            DayOfWeek.Thursday,
+            DayOfWeek.Friday
+        })
+        {
+            godziny.Add(new GodzinyPracyLekarza
+            {
+                LekarzId = lekarz.LekarzId,
+                PlacowkaId = lekarz.PlacowkaId ?? dto.PlacowkaId,
+                DzienTygodnia = day,
+                GodzinaOd = new TimeSpan(8, 0, 0),
+                GodzinaDo = new TimeSpan(16, 0, 0),
+                CzasWizytyMinuty = 30
+            });
+        }
+
+        _db.GodzinyPracyLekarzy.AddRange(godziny);
         await _db.SaveChangesAsync();
 
         return Results.Ok(new

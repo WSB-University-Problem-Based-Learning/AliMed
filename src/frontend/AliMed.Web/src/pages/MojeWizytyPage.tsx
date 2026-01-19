@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { apiService } from '../services/api';
-import type { Wizyta } from '../types/api';
+import type { Dokument, Wizyta, WizytaDetail } from '../types/api';
 import Card from '../components/Card';
 import { useTranslation } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
@@ -43,6 +43,9 @@ const MojeWizytyPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'upcoming' | 'completed'>('all');
+  const [selectedWizyta, setSelectedWizyta] = useState<WizytaDetail | null>(null);
+  const [loadingDetails, setLoadingDetails] = useState(false);
+  const [detailsError, setDetailsError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchWizyty = async () => {
@@ -86,14 +89,19 @@ const MojeWizytyPage: React.FC = () => {
     });
   };
 
+  const isCompletedStatus = (status?: string) => {
+    const normalized = (status || '').toLowerCase();
+    return normalized === 'odbyta' || normalized === 'zrealizowana';
+  };
+
   const filterWizyty = (wizyty: Wizyta[]) => {
     const now = new Date();
     
     switch (filter) {
       case 'upcoming':
-        return wizyty.filter(w => !w.czyOdbyta && new Date(w.dataWizyty) >= now);
+        return wizyty.filter(w => !isCompletedStatus(w.status) && new Date(w.dataWizyty) >= now);
       case 'completed':
-        return wizyty.filter(w => w.czyOdbyta || new Date(w.dataWizyty) < now);
+        return wizyty.filter(w => isCompletedStatus(w.status) || new Date(w.dataWizyty) < now);
       default:
         return wizyty;
     }
@@ -174,7 +182,7 @@ const MojeWizytyPage: React.FC = () => {
       <div className="space-y-4">
         {sortedWizyty.map((wizyta) => {
           const isPast = new Date(wizyta.dataWizyty) < new Date();
-          const isCompleted = wizyta.czyOdbyta;
+          const isCompleted = isCompletedStatus(wizyta.status);
           
           return (
             <Card key={wizyta.wizytaId}>
@@ -189,15 +197,15 @@ const MojeWizytyPage: React.FC = () => {
                   </div>
 
                   {/* Doctor */}
-                  {wizyta.lekarz && (
+                  {(wizyta.lekarz || wizyta.lekarzName) && (
                     <div className="flex items-center gap-2 text-gray-700">
                       <UserIcon className="h-5 w-5" />
                       <span className="font-medium">
-                        {t('myVisits.doctor')}: {wizyta.lekarz.imie} {wizyta.lekarz.nazwisko}
+                        {t('myVisits.doctor')}: {wizyta.lekarzName || `${wizyta.lekarz!.imie} ${wizyta.lekarz!.nazwisko}`}
                       </span>
-                      {wizyta.lekarz.specjalizacja && (
+                      {(wizyta.specjalizacja || wizyta.lekarzX.specjalizacja) && (
                         <span className="text-sm text-gray-500">
-                          ({wizyta.lekarz.specjalizacja})
+                          ({wizyta.specjalizacja || wizyta.lekarzX.specjalizacja})
                         </span>
                       )}
                     </div>
@@ -237,6 +245,23 @@ const MojeWizytyPage: React.FC = () => {
                       {t('myVisits.statusUpcoming')}
                     </span>
                   )}
+                  <button
+                    onClick={async () => {
+                      setDetailsError(null);
+                      setLoadingDetails(true);
+                      try {
+                        const details = await apiService.getWizytaById(wizyta.wizytaId);
+                        setSelectedWizyta(details);
+                      } catch (err) {
+                        setDetailsError(err instanceof Error ? err.message : t('common.error'));
+                      } finally {
+                        setLoadingDetails(false);
+                      }
+                    }}
+                    className="text-sm text-alimed-blue hover:underline"
+                  >
+                    Szczegoly wizyty
+                  </button>
                 </div>
               </div>
             </Card>
@@ -252,6 +277,60 @@ const MojeWizytyPage: React.FC = () => {
             <p className="text-gray-400 text-sm mt-2">{t('myVisits.noVisitsHint')}</p>
           </div>
         </Card>
+      )}
+
+      {selectedWizyta && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-lg max-w-2xl w-full mx-4">
+            <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+              <h3 className="text-lg font-semibold text-gray-900">Szczegoly wizyty</h3>
+              <button
+                onClick={() => setSelectedWizyta(null)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                X
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              {detailsError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded">
+                  {detailsError}
+                </div>
+              )}
+              {loadingDetails ? (
+                <div className="text-gray-500">Ladowanie...</div>
+              ) : (
+                <>
+                  <div className="text-sm text-gray-700">
+                    <div><strong>Data:</strong> {formatDate(selectedWizyta.dataWizyty)} {formatTime(selectedWizyta.dataWizyty)}</div>
+                    <div><strong>Status:</strong> {selectedWizyta.status}</div>
+                    <div><strong>Lekarz:</strong> {selectedWizyta.lekarz} ({selectedWizyta.specjalizacja})</div>
+                    <div><strong>Placowka:</strong> {selectedWizyta.placowka}</div>
+                  </div>
+                  {selectedWizyta.diagnoza && (
+                    <div className="text-sm text-gray-700">
+                      <strong>Diagnoza:</strong> {selectedWizyta.diagnoza}
+                    </div>
+                  )}
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-2">Dokumenty</h4>
+                    {selectedWizyta.dokumenty.length > 0 ? (
+                      <ul className="space-y-2">
+                        {selectedWizyta.dokumenty.map((d: Dokument) => (
+                          <li key={d.dokumentId} className="text-sm text-gray-700">
+                            {d.nazwaPliku || `Dokument #${d.dokumentId}`} - {d.typDokumentu || 'inne'}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <div className="text-sm text-gray-500">Brak dokumentow.</div>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

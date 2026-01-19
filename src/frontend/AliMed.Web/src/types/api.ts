@@ -30,11 +30,15 @@ export interface Wizyta {
   dataWizyty: string;
   diagnoza?: string;
   czyOdbyta: boolean;
+  status?: string;
   pacjentId?: number;
   lekarzId?: number;
   placowkaId?: number;
   pacjent?: Pacjent;
   lekarz?: Lekarz;
+  lekarzName?: string;
+  specjalizacja?: string;
+  placowka?: string;
 }
 
 export interface Placowka {
@@ -86,6 +90,25 @@ export interface Dokument {
   pacjentId?: number;
 }
 
+export interface WizytaDetail {
+  wizytaId: number;
+  dataWizyty: string;
+  status?: string;
+  diagnoza?: string;
+  lekarz?: string;
+  specjalizacja?: string;
+  placowka?: string;
+  dokumenty: Dokument[];
+}
+
+export interface DokumentCreateRequest {
+  wizytaId: number;
+  typDokumentu: string;
+  nazwaPliku?: string;
+  opis?: string;
+  tresc?: string;
+}
+
 // Request DTOs matching backend
 export interface RegisterRequest {
   email: string;
@@ -135,6 +158,14 @@ export interface DostepneTerminyResponse {
   available: string[]; // ISO datetimes (e.g., 2026-01-22T09:30:00)
 }
 
+export interface LekarzWizytaSummary {
+  wizytaId: number;
+  dataWizyty: string;
+  status: string;
+  pacjentId?: number;
+  pacjent: string;
+}
+
 export interface AdminUserSummary {
   userId: string;
   username?: string;
@@ -148,4 +179,40 @@ export interface AdminUserSummary {
 export interface PromoteToDoctorRequest {
   specjalizacja: string;
   placowkaId: number;
+}
+
+export interface AdminPacjentSummary {
+  pacjentId: number;
+  imie?: string;
+  nazwisko?: string;
+  pesel?: string;
+  dataUrodzenia?: string;
+  wizyty?: Array<{
+    wizytaId: number;
+    dataWizyty: string;
+    status: string;
+    diagnoza?: string;
+    lekarz?: string | null;
+    specjalizacja?: string | null;
+    placowka?: string | null;
+    dokumenty?: Array<{
+      dokumentId: number;
+      nazwaPliku?: string;
+      typDokumentu?: string;
+      opis?: string;
+      dataUtworzenia: string;
+    }>;
+  }>;
+}
+
+export interface AdminLekarzSummary {
+  lekarzId: number;
+  imie?: string;
+  nazwisko?: string;
+  specjalizacja?: string;
+  placowkaId?: number;
+  placowka?: string | null;
+  userId?: string;
+  email?: string | null;
+  username?: string | null;
 }
