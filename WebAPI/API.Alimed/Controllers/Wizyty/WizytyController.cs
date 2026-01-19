@@ -46,9 +46,21 @@ namespace API.Alimed.Controllers.Wizyty
                     w.WizytaId,
                     w.DataWizyty,
                     w.Status,
-                    Lekarz = $"{w.Lekarz!.Imie} {w.Lekarz!.Nazwisko}",
-                    w.Lekarz!.Specjalizacja,
-                    Placowka = w.Placowka!.Nazwa
+                    w.Diagnoza,
+                    CzyOdbyta = w.Status == StatusWizyty.Zrealizowana,
+                    Lekarz = w.Lekarz != null ? new
+                    {
+                        LekarzId = w.Lekarz.LekarzId,
+                        Imie = w.Lekarz.Imie,
+                        Nazwisko = w.Lekarz.Nazwisko,
+                        Specjalizacja = w.Lekarz.Specjalizacja
+                    } : null,
+                    Placowka = w.Placowka != null ? new
+                    {
+                        PlacowkaId = w.Placowka.PlacowkaId,
+                        Nazwa = w.Placowka.Nazwa,
+                        AdresPlacowki = w.Placowka.AdresPlacowki
+                    } : null
                 })
                 .ToListAsync();
 
@@ -331,12 +343,12 @@ namespace API.Alimed.Controllers.Wizyty
             if (wizyta.Status != StatusWizyty.Zaplanowana)
                 return Results.BadRequest("Nie można zmienić statusu tej wizyty.");
 
-            wizyta.Status = StatusWizyty.Odbyta;
+            wizyta.Status = StatusWizyty.Zrealizowana;
             wizyta.Diagnoza = diagnoza;
 
             await _db.SaveChangesAsync();
 
-            return Results.Ok("Wizyta oznaczona jako odbyta.");
+            return Results.Ok("Wizyta oznaczona jako zrealizowana.");
         }
 
 

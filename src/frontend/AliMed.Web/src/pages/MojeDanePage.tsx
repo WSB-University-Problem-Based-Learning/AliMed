@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { UserCircleIcon, EnvelopeIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
-import type { User, Pacjent } from '../types/api';
+import { apiService } from '../services/api';
+import type { User, Pacjent, UpdatePacjentProfileRequest } from '../types/api';
 
 const MojeDanePage: React.FC = () => {
   const { t } = useTranslation();
@@ -50,6 +51,9 @@ const MojeDanePage: React.FC = () => {
     numerDomu: '',
     kodPocztowy: '',
     miasto: '',
+    pesel: '',
+    dataUrodzenia: '',
+    kraj: '',
   });
 
   useEffect(() => {
@@ -90,21 +94,20 @@ const MojeDanePage: React.FC = () => {
             miasto: mockPacjent.adresZamieszkania?.miasto || '',
           });
         } else {
-          // TODO: Fetch real data from API
-          // const pacjentData = await apiService.getPacjentByUserId(user.userId);
-          // setPacjent(pacjentData);
-          // setFormData({ ... });
-          
-          // For now, use user data
+          const pacjentData = await apiService.getMojProfil();
+          setPacjent(pacjentData);
           setFormData({
-            imie: user?.firstName || '',
-            nazwisko: user?.lastName || '',
+            imie: pacjentData.imie || user?.firstName || '',
+            nazwisko: pacjentData.nazwisko || user?.lastName || '',
             email: user?.email || '',
             telefon: '',
-            ulica: '',
-            numerDomu: '',
-            kodPocztowy: '',
-            miasto: '',
+            ulica: pacjentData.adresZamieszkania?.ulica || '',
+            numerDomu: pacjentData.adresZamieszkania?.numerDomu || '',
+            kodPocztowy: pacjentData.adresZamieszkania?.kodPocztowy || '',
+            miasto: pacjentData.adresZamieszkania?.miasto || '',
+            pesel: pacjentData.pesel || '',
+            dataUrodzenia: pacjentData.dataUrodzenia || '',
+            kraj: pacjentData.adresZamieszkania?.kraj || '',
           });
         }
       } catch (err) {
@@ -135,9 +138,37 @@ const MojeDanePage: React.FC = () => {
     }
 
     try {
-      // TODO: Call API to update patient data
-      // await apiService.updatePacjent(pacjent.pacjentId, formData);
-      
+      const payload: UpdatePacjentProfileRequest = {
+        imie: formData.imie,
+        nazwisko: formData.nazwisko,
+        pesel: formData.pesel || pacjent?.pesel || '',
+        dataUrodzenia: formData.dataUrodzenia || pacjent?.dataUrodzenia || '',
+        ulica: formData.ulica,
+        numerDomu: formData.numerDomu,
+        kodPocztowy: formData.kodPocztowy,
+        miasto: formData.miasto,
+        kraj: formData.kraj || 'Polska',
+      };
+
+      await apiService.updateMojProfil(payload);
+
+      // Refresh data after save
+      const refreshed = await apiService.getMojProfil();
+      setPacjent(refreshed);
+      setFormData({
+        imie: refreshed.imie || '',
+        nazwisko: refreshed.nazwisko || '',
+        email: formData.email, // email not persisted backend yet
+        telefon: formData.telefon,
+        ulica: refreshed.adresZamieszkania?.ulica || '',
+        numerDomu: refreshed.adresZamieszkania?.numerDomu || '',
+        kodPocztowy: refreshed.adresZamieszkania?.kodPocztowy || '',
+        miasto: refreshed.adresZamieszkania?.miasto || '',
+        pesel: refreshed.pesel || '',
+        dataUrodzenia: refreshed.dataUrodzenia || '',
+        kraj: refreshed.adresZamieszkania?.kraj || '',
+      });
+
       setSaveSuccess(true);
       setIsEditing(false);
       setTimeout(() => setSaveSuccess(false), 3000);
@@ -159,6 +190,9 @@ const MojeDanePage: React.FC = () => {
         numerDomu: pacjent.adresZamieszkania?.numerDomu || '',
         kodPocztowy: pacjent.adresZamieszkania?.kodPocztowy || '',
         miasto: pacjent.adresZamieszkania?.miasto || '',
+        pesel: pacjent.pesel || '',
+        dataUrodzenia: pacjent.dataUrodzenia || '',
+        kraj: pacjent.adresZamieszkania?.kraj || '',
       });
     }
     setIsEditing(false);

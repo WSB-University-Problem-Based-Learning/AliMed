@@ -1,4 +1,4 @@
-import type { Pacjent, Lekarz, Wizyta, AuthResponse, Dokument, RegisterRequest, LoginRequest, WizytaCreateRequest, DostepneTerminyResponse, Placowka } from '../types/api';
+import type { Pacjent, Lekarz, Wizyta, AuthResponse, Dokument, RegisterRequest, LoginRequest, WizytaCreateRequest, DostepneTerminyResponse, Placowka, UpdatePacjentProfileRequest } from '../types/api';
 import { config } from '../config/env';
 
 const API_BASE_URL = config.apiBaseUrl;
@@ -256,6 +256,20 @@ export const apiService = {
     });
     if (!response.ok) throw new Error('Failed to fetch patient profile');
     return response.json();
+  },
+
+  // Update current user's patient profile
+  async updateMojProfil(payload: UpdatePacjentProfileRequest): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/api/pacjenci/moj-profil`, {
+      method: 'PUT',
+      headers: getHeaders(true),
+      credentials: 'include',
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Failed to update profile');
+    }
   },
 
   // Update current user's patient profile

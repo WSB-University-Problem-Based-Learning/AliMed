@@ -86,6 +86,13 @@ const MojeWizytyPage: React.FC = () => {
     });
   };
 
+  const formatAddress = (adres?: { ulica?: string; numerDomu?: string; kodPocztowy?: string; miasto?: string; kraj?: string }) => {
+    if (!adres) return '';
+    const street = [adres.ulica, adres.numerDomu].filter(Boolean).join(' ');
+    const city = [adres.kodPocztowy, adres.miasto].filter(Boolean).join(' ');
+    return [street, city, adres.kraj].filter(Boolean).join(', ');
+  };
+
   const filterWizyty = (wizyty: Wizyta[]) => {
     const now = new Date();
     
@@ -199,6 +206,17 @@ const MojeWizytyPage: React.FC = () => {
                         <span className="text-sm text-gray-500">
                           ({wizyta.lekarz.specjalizacja})
                         </span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Facility */}
+                  {wizyta.placowka && (
+                    <div className="text-sm text-gray-700">
+                      <span className="font-medium">{t('dashboard.facility')}:</span>{' '}
+                      {wizyta.placowka.nazwa || '-'}
+                      {wizyta.placowka.adresPlacowki && (
+                        <span className="text-gray-500"> — {formatAddress(wizyta.placowka.adresPlacowki)}</span>
                       )}
                     </div>
                   )}

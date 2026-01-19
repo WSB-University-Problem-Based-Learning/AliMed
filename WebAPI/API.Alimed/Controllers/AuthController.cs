@@ -228,6 +228,21 @@ namespace API.Alimed.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto dto)
         {
+            if (dto == null)
+                return BadRequest("Brak danych rejestracji.");
+
+            if (string.IsNullOrWhiteSpace(dto.Email))
+                return BadRequest("Email jest wymagany.");
+
+            if (string.IsNullOrWhiteSpace(dto.Username))
+                return BadRequest("Nazwa użytkownika jest wymagana.");
+
+            if (string.IsNullOrWhiteSpace(dto.Password))
+                return BadRequest("Hasło jest wymagane.");
+
+            if (dto.Password.Length < 6)
+                return BadRequest("Hasło musi mieć co najmniej 6 znaków.");
+
             // Czy email istnieje?
             var existing = await _userService.FindByEmailAsync(dto.Email);
             if (existing != null)

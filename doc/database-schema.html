@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AliMed - Schemat Bazy Danych</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #10b981;
+            --accent: #8b5cf6;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 40px rgba(37, 99, 235, 0.3);
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: var(--card);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border);
+        }
+        
+        .stat-card .number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .stat-card .label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            color: var(--text);
+            margin: 2rem 0 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid var(--primary);
+            display: inline-block;
+        }
+        
+        .tables-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .table-card {
+            background: var(--card);
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border);
+        }
+        
+        .table-header {
+            padding: 1rem 1.5rem;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .table-header h3 {
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .table-header .icon {
+            font-size: 1.5rem;
+        }
+        
+        .table-header .count {
+            background: rgba(255,255,255,0.2);
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.85rem;
+        }
+        
+        .table-users .table-header { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+        .table-pacjenci .table-header { background: linear-gradient(135deg, #10b981, #059669); }
+        .table-lekarze .table-header { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+        .table-placowki .table-header { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .table-wizyty .table-header { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .table-godziny .table-header { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+        .table-refresh .table-header { background: linear-gradient(135deg, #64748b, #475569); }
+        .table-migrations .table-header { background: linear-gradient(135deg, #84cc16, #65a30d); }
+        
+        .columns-list {
+            padding: 1rem 1.5rem;
+        }
+        
+        .column-item {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .column-item:last-child {
+            border-bottom: none;
+        }
+        
+        .column-name {
+            font-weight: 600;
+            min-width: 180px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9rem;
+        }
+        
+        .column-type {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-family: 'Consolas', 'Monaco', monospace;
+            flex: 1;
+        }
+        
+        .column-badges {
+            display: flex;
+            gap: 0.25rem;
+        }
+        
+        .badge {
+            padding: 0.15rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .badge-pk {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .badge-fk {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .badge-unique {
+            background: #f3e8ff;
+            color: #6b21a8;
+        }
+        
+        .badge-nullable {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+        
+        .relations-section {
+            margin-top: 2rem;
+        }
+        
+        .relation-card {
+            background: var(--card);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .relation-arrow {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+        
+        .relation-table {
+            background: var(--bg);
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+        
+        .relation-column {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        
+        .erd-container {
+            background: var(--card);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-top: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border);
+            overflow-x: auto;
+        }
+        
+        .erd-diagram {
+            display: flex;
+            justify-content: center;
+            min-width: 900px;
+        }
+        
+        .erd-svg {
+            max-width: 100%;
+        }
+        
+        .data-sample {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 0.5rem;
+            font-size: 0.85rem;
+        }
+        
+        .data-sample h4 {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+        
+        .data-sample ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .data-sample li {
+            background: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.8rem;
+            border: 1px solid var(--border);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .tables-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .column-name {
+                min-width: 120px;
+            }
+            
+            header h1 {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏥 AliMed - Schemat Bazy Danych</h1>
+            <p>MySQL 9.5.0 | System zarządzania przychodnią medyczną</p>
+        </header>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="number">7</div>
+                <div class="label">Tabel</div>
+            </div>
+            <div class="stat-card">
+                <div class="number">7</div>
+                <div class="label">Użytkowników</div>
+            </div>
+            <div class="stat-card">
+                <div class="number">7</div>
+                <div class="label">Pacjentów</div>
+            </div>
+            <div class="stat-card">
+                <div class="number">50</div>
+                <div class="label">Lekarzy</div>
+            </div>
+            <div class="stat-card">
+                <div class="number">5</div>
+                <div class="label">Placówek</div>
+            </div>
+            <div class="stat-card">
+                <div class="number">29</div>
+                <div class="label">Wizyt</div>
+            </div>
+        </div>
+
+        <h2 class="section-title">📊 Diagram ERD</h2>
+        <div class="erd-container">
+            <div class="erd-diagram">
+                <svg class="erd-svg" viewBox="0 0 900 500" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Users -->
+                    <rect x="50" y="50" width="180" height="120" rx="8" fill="#3b82f6" opacity="0.1" stroke="#3b82f6" stroke-width="2"/>
+                    <text x="140" y="80" text-anchor="middle" font-weight="bold" fill="#1e40af">Users</text>
+                    <text x="60" y="105" font-size="11" fill="#64748b">UserId (PK, GUID)</text>
+                    <text x="60" y="120" font-size="11" fill="#64748b">Username, Email</text>
+                    <text x="60" y="135" font-size="11" fill="#64748b">GithubId, Role</text>
+                    <text x="60" y="150" font-size="11" fill="#64748b">PasswordHash/Salt</text>
+                    
+                    <!-- Pacjenci -->
+                    <rect x="350" y="50" width="180" height="120" rx="8" fill="#10b981" opacity="0.1" stroke="#10b981" stroke-width="2"/>
+                    <text x="440" y="80" text-anchor="middle" font-weight="bold" fill="#059669">Pacjenci</text>
+                    <text x="360" y="105" font-size="11" fill="#64748b">PacjentId (PK, INT)</text>
+                    <text x="360" y="120" font-size="11" fill="#64748b">Imie, Nazwisko, Pesel</text>
+                    <text x="360" y="135" font-size="11" fill="#64748b">AdresZamieszkania_*</text>
+                    <text x="360" y="150" font-size="11" fill="#64748b">UserId (FK → Users)</text>
+                    
+                    <!-- Lekarze -->
+                    <rect x="650" y="50" width="180" height="120" rx="8" fill="#8b5cf6" opacity="0.1" stroke="#8b5cf6" stroke-width="2"/>
+                    <text x="740" y="80" text-anchor="middle" font-weight="bold" fill="#7c3aed">Lekarze</text>
+                    <text x="660" y="105" font-size="11" fill="#64748b">LekarzId (PK, INT)</text>
+                    <text x="660" y="120" font-size="11" fill="#64748b">Imie, Nazwisko</text>
+                    <text x="660" y="135" font-size="11" fill="#64748b">Specjalizacja</text>
+                    <text x="660" y="150" font-size="11" fill="#64748b">PlacowkaId, UserId (FK)</text>
+                    
+                    <!-- Placowki -->
+                    <rect x="650" y="220" width="180" height="120" rx="8" fill="#f59e0b" opacity="0.1" stroke="#f59e0b" stroke-width="2"/>
+                    <text x="740" y="250" text-anchor="middle" font-weight="bold" fill="#d97706">Placowki</text>
+                    <text x="660" y="275" font-size="11" fill="#64748b">PlacowkaId (PK, INT)</text>
+                    <text x="660" y="290" font-size="11" fill="#64748b">Nazwa</text>
+                    <text x="660" y="305" font-size="11" fill="#64748b">AdresPlacowki_*</text>
+                    <text x="660" y="320" font-size="11" fill="#64748b">NumerKonta</text>
+                    
+                    <!-- Wizyty -->
+                    <rect x="350" y="220" width="180" height="120" rx="8" fill="#ef4444" opacity="0.1" stroke="#ef4444" stroke-width="2"/>
+                    <text x="440" y="250" text-anchor="middle" font-weight="bold" fill="#dc2626">Wizyty</text>
+                    <text x="360" y="275" font-size="11" fill="#64748b">WizytaId (PK, INT)</text>
+                    <text x="360" y="290" font-size="11" fill="#64748b">DataWizyty, Diagnoza</text>
+                    <text x="360" y="305" font-size="11" fill="#64748b">Status (INT)</text>
+                    <text x="360" y="320" font-size="11" fill="#64748b">PacjentId, LekarzId (FK)</text>
+                    
+                    <!-- GodzinyPracyLekarzy -->
+                    <rect x="50" y="220" width="180" height="120" rx="8" fill="#06b6d4" opacity="0.1" stroke="#06b6d4" stroke-width="2"/>
+                    <text x="140" y="250" text-anchor="middle" font-weight="bold" fill="#0891b2">GodzinyPracyLekarzy</text>
+                    <text x="60" y="275" font-size="11" fill="#64748b">Id (PK, INT)</text>
+                    <text x="60" y="290" font-size="11" fill="#64748b">LekarzId, PlacowkaId (FK)</text>
+                    <text x="60" y="305" font-size="11" fill="#64748b">DzienTygodnia</text>
+                    <text x="60" y="320" font-size="11" fill="#64748b">GodzinaOd/Do, CzasWizyty</text>
+                    
+                    <!-- RefreshToken -->
+                    <rect x="50" y="380" width="180" height="100" rx="8" fill="#64748b" opacity="0.1" stroke="#64748b" stroke-width="2"/>
+                    <text x="140" y="410" text-anchor="middle" font-weight="bold" fill="#475569">RefreshToken</text>
+                    <text x="60" y="435" font-size="11" fill="#64748b">Id (PK, GUID)</text>
+                    <text x="60" y="450" font-size="11" fill="#64748b">Token, ExpiresOnUtc</text>
+                    <text x="60" y="465" font-size="11" fill="#64748b">UserId (FK → Users)</text>
+                    
+                    <!-- Relationships -->
+                    <!-- Users -> Pacjenci -->
+                    <line x1="230" y1="110" x2="350" y2="110" stroke="#64748b" stroke-width="2" stroke-dasharray="5,3"/>
+                    <polygon points="345,105 355,110 345,115" fill="#64748b"/>
+                    
+                    <!-- Users -> Lekarze -->
+                    <path d="M 230 100 Q 280 30 650 100" stroke="#64748b" stroke-width="2" stroke-dasharray="5,3" fill="none"/>
+                    <polygon points="645,95 655,100 645,105" fill="#64748b"/>
+                    
+                    <!-- Pacjenci -> Wizyty -->
+                    <line x1="440" y1="170" x2="440" y2="220" stroke="#10b981" stroke-width="2"/>
+                    <polygon points="435,215 440,225 445,215" fill="#10b981"/>
+                    
+                    <!-- Lekarze -> Wizyty -->
+                    <line x1="650" y1="150" x2="530" y2="250" stroke="#8b5cf6" stroke-width="2"/>
+                    <polygon points="525,245 530,255 535,247" fill="#8b5cf6"/>
+                    
+                    <!-- Placowki -> Wizyty -->
+                    <line x1="650" y1="280" x2="530" y2="280" stroke="#f59e0b" stroke-width="2"/>
+                    <polygon points="535,275 525,280 535,285" fill="#f59e0b"/>
+                    
+                    <!-- Placowki -> Lekarze -->
+                    <line x1="740" y1="220" x2="740" y2="170" stroke="#f59e0b" stroke-width="2"/>
+                    <polygon points="735,175 740,165 745,175" fill="#f59e0b"/>
+                    
+                    <!-- Lekarze -> GodzinyPracy -->
+                    <path d="M 650 120 Q 400 180 230 250" stroke="#06b6d4" stroke-width="2" fill="none"/>
+                    <polygon points="235,245 225,250 232,257" fill="#06b6d4"/>
+                    
+                    <!-- Placowki -> GodzinyPracy -->
+                    <line x1="650" y1="300" x2="230" y2="300" stroke="#06b6d4" stroke-width="2"/>
+                    <polygon points="235,295 225,300 235,305" fill="#06b6d4"/>
+                    
+                    <!-- Users -> RefreshToken -->
+                    <line x1="140" y1="170" x2="140" y2="380" stroke="#64748b" stroke-width="2" stroke-dasharray="5,3"/>
+                    <polygon points="135,375 140,385 145,375" fill="#64748b"/>
+                </svg>
+            </div>
+        </div>
+
+        <h2 class="section-title">📋 Struktura Tabel</h2>
+        <div class="tables-grid">
+            <!-- Users -->
+            <div class="table-card table-users">
+                <div class="table-header">
+                    <h3><span class="icon">👤</span> Users</h3>
+                    <span class="count">7 rekordów</span>
+                </div>
+                <div class="columns-list">
+                    <div class="column-item">
+                        <span class="column-name">UserId</span>
+                        <span class="column-type">CHAR(36) GUID</span>
+                        <div class="column-badges"><span class="badge badge-pk">PK</span></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">GithubId</span>
+                        <span class="column-type">VARCHAR(255)</span>
+                        <div class="column-badges"><span class="badge badge-unique">UNIQUE</span></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">GithubName</span>
+                        <span class="column-type">LONGTEXT</span>
+                        <div class="column-badges"><span class="badge badge-nullable">NULL</span></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">Username</span>
+                        <span class="column-type">LONGTEXT</span>
+                        <div class="column-badges"><span class="badge badge-nullable">NULL</span></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">Token</span>
+                        <span class="column-type">LONGTEXT</span>
+                        <div class="column-badges"><span class="badge badge-nullable">NULL</span></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">Role</span>
+                        <span class="column-type">INT</span>
+                        <div class="column-badges"></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">Email</span>
+                        <span class="column-type">LONGTEXT</span>
+                        <div class="column-badges"><span class="badge badge-nullable">NULL</span></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">PasswordHash</span>
+                        <span class="column-type">LONGTEXT</span>
+                        <div class="column-badges"><span class="badge badge-nullable">NULL</span></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">PasswordSalt</span>
+                        <span class="column-type">LONGTEXT</span>
+                        <div class="column-badges"><span class="badge badge-nullable">NULL</span></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">IsGithubUser</span>
+                        <span class="column-type">TINYINT(1)</span>
+                        <div class="column-badges"></div>
+                    </div>
+                </div>
+                <div class="data-sample">
+                    <h4>Role (ENUM jako INT)</h4>
+                    <ul>
+                        <li>0 = Pacjent</li>
+                        <li>2 = Admin</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Pacjenci -->
+            <div class="table-card table-pacjenci">
+                <div class="table-header">
+                    <h3><span class="icon">🏥</span> Pacjenci</h3>
+                    <span class="count">7 rekordów</span>
+                </div>
+                <div class="columns-list">
+                    <div class="column-item">
+                        <span class="column-name">PacjentId</span>
+                        <span class="column-type">INT AUTO_INCREMENT</span>
+                        <div class="column-badges"><span class="badge badge-pk">PK</span></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">Imie</span>
+                        <span class="column-type">LONGTEXT</span>
+                        <div class="column-badges"></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">Nazwisko</span>
+                        <span class="column-type">LONGTEXT</span>
+                        <div class="column-badges"></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">Pesel</span>
+                        <span class="column-type">VARCHAR(255)</span>
+                        <div class="column-badges"><span class="badge badge-unique">UNIQUE</span></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">AdresZamieszkania_Ulica</span>
+                        <span class="column-type">LONGTEXT</span>
+                        <div class="column-badges"></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">AdresZamieszkania_NumerDomu</span>
+                        <span class="column-type">LONGTEXT</span>
+                        <div class="column-badges"></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">AdresZamieszkania_KodPocztowy</span>
+                        <span class="column-type">LONGTEXT</span>
+                        <div class="column-badges"></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">AdresZamieszkania_Miasto</span>
+                        <span class="column-type">LONGTEXT</span>
+                        <div class="column-badges"></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">AdresZamieszkania_Kraj</span>
+                        <span class="column-type">LONGTEXT DEFAULT 'Polska'</span>
+                        <div class="column-badges"></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">DataUrodzenia</span>
+                        <span class="column-type">DATETIME(6)</span>
+                        <div class="column-badges"></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">UserId</span>
+                        <span class="column-type">CHAR(36)</span>
+                        <div class="column-badges"><span class="badge badge-fk">FK</span><span class="badge badge-unique">UNIQUE</span></div>
+                    </div>
+                </div>
+                <div class="data-sample">
+                    <h4>Przykładowi pacjenci</h4>
+                    <ul>
+                        <li>Alicja Bąk (Warszawa)</li>
+                        <li>Robert Cygan (Kraków)</li>
+                        <li>Karolina Duda (Gdańsk)</li>
+                        <li>Maksymilian Falkowski (Poznań)</li>
+                        <li>Zofia Górecka (Wrocław)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Lekarze -->
+            <div class="table-card table-lekarze">
+                <div class="table-header">
+                    <h3><span class="icon">👨‍⚕️</span> Lekarze</h3>
+                    <span class="count">50 rekordów</span>
+                </div>
+                <div class="columns-list">
+                    <div class="column-item">
+                        <span class="column-name">LekarzId</span>
+                        <span class="column-type">INT AUTO_INCREMENT</span>
+                        <div class="column-badges"><span class="badge badge-pk">PK</span></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">Imie</span>
+                        <span class="column-type">LONGTEXT</span>
+                        <div class="column-badges"></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">Nazwisko</span>
+                        <span class="column-type">LONGTEXT</span>
+                        <div class="column-badges"></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">Specjalizacja</span>
+                        <span class="column-type">LONGTEXT</span>
+                        <div class="column-badges"></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">PlacowkaId</span>
+                        <span class="column-type">INT</span>
+                        <div class="column-badges"><span class="badge badge-fk">FK</span></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">UserId</span>
+                        <span class="column-type">CHAR(36)</span>
+                        <div class="column-badges"><span class="badge badge-fk">FK</span><span class="badge badge-unique">UNIQUE</span></div>
+                    </div>
+                </div>
+                <div class="data-sample">
+                    <h4>Specjalizacje</h4>
+                    <ul>
+                        <li>Internista</li>
+                        <li>Pediatra</li>
+                        <li>Kardiolog</li>
+                        <li>Dermatolog</li>
+                        <li>Ortopeda</li>
+                        <li>Ginekolog</li>
+                        <li>Neurolog</li>
+                        <li>Psychiatra</li>
+                        <li>Okulista</li>
+                        <li>Chirurg</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Placowki -->
+            <div class="table-card table-placowki">
+                <div class="table-header">
+                    <h3><span class="icon">🏢</span> Placowki</h3>
+                    <span class="count">5 rekordów</span>
+                </div>
+                <div class="columns-list">
+                    <div class="column-item">
+                        <span class="column-name">PlacowkaId</span>
+                        <span class="column-type">INT AUTO_INCREMENT</span>
+                        <div class="column-badges"><span class="badge badge-pk">PK</span></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">Nazwa</span>
+                        <span class="column-type">LONGTEXT</span>
+                        <div class="column-badges"></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">AdresPlacowki_Ulica</span>
+                        <span class="column-type">LONGTEXT</span>
+                        <div class="column-badges"></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">AdresPlacowki_NumerDomu</span>
+                        <span class="column-type">LONGTEXT</span>
+                        <div class="column-badges"></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">AdresPlacowki_KodPocztowy</span>
+                        <span class="column-type">LONGTEXT</span>
+                        <div class="column-badges"></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">AdresPlacowki_Miasto</span>
+                        <span class="column-type">LONGTEXT</span>
+                        <div class="column-badges"></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">AdresPlacowki_Kraj</span>
+                        <span class="column-type">LONGTEXT DEFAULT 'Polska'</span>
+                        <div class="column-badges"></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">NumerKonta</span>
+                        <span class="column-type">LONGTEXT</span>
+                        <div class="column-badges"></div>
+                    </div>
+                </div>
+                <div class="data-sample">
+                    <h4>Placówki medyczne</h4>
+                    <ul>
+                        <li>Przychodnia Zdrowie (Warszawa)</li>
+                        <li>Szpital Miejski (Kraków)</li>
+                        <li>Centrum Rehabilitacji (Gdańsk)</li>
+                        <li>Novum Centrum Diagnostyki (Poznań)</li>
+                        <li>VitaMed Klinika (Wrocław)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Wizyty -->
+            <div class="table-card table-wizyty">
+                <div class="table-header">
+                    <h3><span class="icon">📅</span> Wizyty</h3>
+                    <span class="count">29 rekordów</span>
+                </div>
+                <div class="columns-list">
+                    <div class="column-item">
+                        <span class="column-name">WizytaId</span>
+                        <span class="column-type">INT AUTO_INCREMENT</span>
+                        <div class="column-badges"><span class="badge badge-pk">PK</span></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">DataWizyty</span>
+                        <span class="column-type">DATETIME(6)</span>
+                        <div class="column-badges"></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">Diagnoza</span>
+                        <span class="column-type">LONGTEXT</span>
+                        <div class="column-badges"><span class="badge badge-nullable">NULL</span></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">Status</span>
+                        <span class="column-type">INT</span>
+                        <div class="column-badges"></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">PacjentId</span>
+                        <span class="column-type">INT</span>
+                        <div class="column-badges"><span class="badge badge-fk">FK</span></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">LekarzId</span>
+                        <span class="column-type">INT</span>
+                        <div class="column-badges"><span class="badge badge-fk">FK</span></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">PlacowkaId</span>
+                        <span class="column-type">INT</span>
+                        <div class="column-badges"><span class="badge badge-fk">FK</span></div>
+                    </div>
+                </div>
+                <div class="data-sample">
+                    <h4>Status wizyty (ENUM jako INT)</h4>
+                    <ul>
+                        <li>0 = Zaplanowana</li>
+                        <li>1 = Zakończona</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- GodzinyPracyLekarzy -->
+            <div class="table-card table-godziny">
+                <div class="table-header">
+                    <h3><span class="icon">⏰</span> GodzinyPracyLekarzy</h3>
+                    <span class="count">5 rekordów</span>
+                </div>
+                <div class="columns-list">
+                    <div class="column-item">
+                        <span class="column-name">Id</span>
+                        <span class="column-type">INT AUTO_INCREMENT</span>
+                        <div class="column-badges"><span class="badge badge-pk">PK</span></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">LekarzId</span>
+                        <span class="column-type">INT</span>
+                        <div class="column-badges"><span class="badge badge-fk">FK</span></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">PlacowkaId</span>
+                        <span class="column-type">INT</span>
+                        <div class="column-badges"><span class="badge badge-fk">FK</span></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">DzienTygodnia</span>
+                        <span class="column-type">INT</span>
+                        <div class="column-badges"></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">GodzinaOd</span>
+                        <span class="column-type">TIME(6)</span>
+                        <div class="column-badges"></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">GodzinaDo</span>
+                        <span class="column-type">TIME(6)</span>
+                        <div class="column-badges"></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">CzasWizytyMinuty</span>
+                        <span class="column-type">INT</span>
+                        <div class="column-badges"></div>
+                    </div>
+                </div>
+                <div class="data-sample">
+                    <h4>Dzień tygodnia (1-7)</h4>
+                    <ul>
+                        <li>1 = Poniedziałek</li>
+                        <li>2 = Wtorek</li>
+                        <li>3 = Środa</li>
+                        <li>4 = Czwartek</li>
+                        <li>5 = Piątek</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- RefreshToken -->
+            <div class="table-card table-refresh">
+                <div class="table-header">
+                    <h3><span class="icon">🔐</span> RefreshToken</h3>
+                    <span class="count">5 rekordów</span>
+                </div>
+                <div class="columns-list">
+                    <div class="column-item">
+                        <span class="column-name">Id</span>
+                        <span class="column-type">CHAR(36) GUID</span>
+                        <div class="column-badges"><span class="badge badge-pk">PK</span></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">Token</span>
+                        <span class="column-type">LONGTEXT</span>
+                        <div class="column-badges"></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">ExpiresOnUtc</span>
+                        <span class="column-type">DATETIME(6)</span>
+                        <div class="column-badges"></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">IsRevoked</span>
+                        <span class="column-type">TINYINT(1)</span>
+                        <div class="column-badges"></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">UserId</span>
+                        <span class="column-type">CHAR(36)</span>
+                        <div class="column-badges"><span class="badge badge-fk">FK</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- __EFMigrationsHistory -->
+            <div class="table-card table-migrations">
+                <div class="table-header">
+                    <h3><span class="icon">📜</span> __EFMigrationsHistory</h3>
+                    <span class="count">2 migracje</span>
+                </div>
+                <div class="columns-list">
+                    <div class="column-item">
+                        <span class="column-name">MigrationId</span>
+                        <span class="column-type">VARCHAR(150)</span>
+                        <div class="column-badges"><span class="badge badge-pk">PK</span></div>
+                    </div>
+                    <div class="column-item">
+                        <span class="column-name">ProductVersion</span>
+                        <span class="column-type">VARCHAR(32)</span>
+                        <div class="column-badges"></div>
+                    </div>
+                </div>
+                <div class="data-sample">
+                    <h4>Wykonane migracje</h4>
+                    <ul>
+                        <li>AddStatusWizyty (EF Core 9.0.11)</li>
+                        <li>AddGodzinyPracyLekarza (EF Core 9.0.11)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <h2 class="section-title">🔗 Relacje między tabelami</h2>
+        <div class="relations-section">
+            <div class="relation-card">
+                <span class="relation-table">Users</span>
+                <span class="relation-arrow">←</span>
+                <span class="relation-table">Pacjenci</span>
+                <span class="relation-column">(UserId → UserId) ON DELETE CASCADE</span>
+            </div>
+            <div class="relation-card">
+                <span class="relation-table">Users</span>
+                <span class="relation-arrow">←</span>
+                <span class="relation-table">Lekarze</span>
+                <span class="relation-column">(UserId → UserId) ON DELETE RESTRICT</span>
+            </div>
+            <div class="relation-card">
+                <span class="relation-table">Users</span>
+                <span class="relation-arrow">←</span>
+                <span class="relation-table">RefreshToken</span>
+                <span class="relation-column">(UserId → UserId)</span>
+            </div>
+            <div class="relation-card">
+                <span class="relation-table">Placowki</span>
+                <span class="relation-arrow">←</span>
+                <span class="relation-table">Lekarze</span>
+                <span class="relation-column">(PlacowkaId → PlacowkaId) ON DELETE RESTRICT</span>
+            </div>
+            <div class="relation-card">
+                <span class="relation-table">Pacjenci</span>
+                <span class="relation-arrow">←</span>
+                <span class="relation-table">Wizyty</span>
+                <span class="relation-column">(PacjentId → PacjentId)</span>
+            </div>
+            <div class="relation-card">
+                <span class="relation-table">Lekarze</span>
+                <span class="relation-arrow">←</span>
+                <span class="relation-table">Wizyty</span>
+                <span class="relation-column">(LekarzId → LekarzId)</span>
+            </div>
+            <div class="relation-card">
+                <span class="relation-table">Placowki</span>
+                <span class="relation-arrow">←</span>
+                <span class="relation-table">Wizyty</span>
+                <span class="relation-column">(PlacowkaId → PlacowkaId)</span>
+            </div>
+            <div class="relation-card">
+                <span class="relation-table">Lekarze</span>
+                <span class="relation-arrow">←</span>
+                <span class="relation-table">GodzinyPracyLekarzy</span>
+                <span class="relation-column">(LekarzId → LekarzId) ON DELETE CASCADE</span>
+            </div>
+            <div class="relation-card">
+                <span class="relation-table">Placowki</span>
+                <span class="relation-arrow">←</span>
+                <span class="relation-table">GodzinyPracyLekarzy</span>
+                <span class="relation-column">(PlacowkaId → PlacowkaId) ON DELETE CASCADE</span>
+            </div>
+        </div>
+
+        <h2 class="section-title">📑 Indeksy</h2>
+        <div class="erd-container">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background: var(--bg);">
+                        <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid var(--border);">Tabela</th>
+                        <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid var(--border);">Nazwa indeksu</th>
+                        <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid var(--border);">Kolumny</th>
+                        <th style="padding: 0.75rem; text-align: left; border-bottom: 2px solid var(--border);">Typ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Users</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">IX_Users_GithubId</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">GithubId</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);"><span class="badge badge-unique">UNIQUE</span></td></tr>
+                    <tr><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Pacjenci</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">IX_Pacjenci_Pesel</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Pesel</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);"><span class="badge badge-unique">UNIQUE</span></td></tr>
+                    <tr><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Pacjenci</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">IX_Pacjenci_UserId</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">UserId</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);"><span class="badge badge-unique">UNIQUE</span></td></tr>
+                    <tr><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Lekarze</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">IX_Lekarze_PlacowkaId</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">PlacowkaId</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);"><span class="badge badge-fk">INDEX</span></td></tr>
+                    <tr><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Lekarze</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">IX_Lekarze_UserId</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">UserId</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);"><span class="badge badge-unique">UNIQUE</span></td></tr>
+                    <tr><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Wizyty</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">IX_Wizyty_LekarzId_PlacowkaId_DataWizyty</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">LekarzId, PlacowkaId, DataWizyty</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);"><span class="badge badge-unique">UNIQUE</span></td></tr>
+                    <tr><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Wizyty</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">IX_Wizyty_PacjentId</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">PacjentId</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);"><span class="badge badge-fk">INDEX</span></td></tr>
+                    <tr><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">Wizyty</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">IX_Wizyty_PlacowkaId</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">PlacowkaId</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);"><span class="badge badge-fk">INDEX</span></td></tr>
+                    <tr><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">GodzinyPracyLekarzy</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">IX_GodzinyPracyLekarzy_LekarzId</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">LekarzId</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);"><span class="badge badge-fk">INDEX</span></td></tr>
+                    <tr><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">GodzinyPracyLekarzy</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">IX_GodzinyPracyLekarzy_PlacowkaId</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);">PlacowkaId</td><td style="padding: 0.5rem; border-bottom: 1px solid var(--border);"><span class="badge badge-fk">INDEX</span></td></tr>
+                    <tr><td style="padding: 0.5rem;">RefreshToken</td><td style="padding: 0.5rem;">IX_RefreshToken_UserId</td><td style="padding: 0.5rem;">UserId</td><td style="padding: 0.5rem;"><span class="badge badge-fk">INDEX</span></td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <footer>
+            <p>📅 Wygenerowano: 18 stycznia 2026 | 🗄️ MySQL 9.5.0 | ⚙️ Entity Framework Core 9.0.11</p>
+            <p>🏥 AliMed - System zarządzania przychodnią medyczną</p>
+        </footer>
+    </div>
+</body>
+</html>

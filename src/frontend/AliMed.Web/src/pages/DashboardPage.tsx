@@ -10,27 +10,14 @@ import {
 import { useTranslation } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import LanguageSwitcher from '../components/LanguageSwitcher';
-import type { User } from '../types/api';
-
-interface Wizyta {
-  id: number;
-  dataGodzina: string;
-  lekarz: string;
-  specjalizacja: string;
-  status: 'Potwierdzona' | 'Oczekująca';
-}
-
-// Mock data dla wizyt (w przyszłości z API)
-const mockWizyty: Wizyta[] = [
-  { id: 1, dataGodzina: '12.06.2025 14:30', lekarz: 'dr Jan Nowak', specjalizacja: 'Kardiolog', status: 'Potwierdzona' },
-  { id: 2, dataGodzina: '15.06.2025 10:15', lekarz: 'dr Maria Kowalska', specjalizacja: 'Dermatolog', status: 'Oczekująca' },
-  { id: 3, dataGodzina: '18.06.2025 16:00', lekarz: 'dr Piotr Wiśniewski', specjalizacja: 'Ortopeda', status: 'Potwierdzona' },
-  { id: 4, dataGodzina: '22.06.2025 11:30', lekarz: 'dr Anna Zielińska', specjalizacja: 'Ginekolog', status: 'Oczekująca' },
-];
+import type { User, Wizyta } from '../types/api';
+import { apiService } from '../services/api';
 
 const DashboardPage: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const { user: authUser, logout, isDemoMode } = useAuth();
+    const [wizyty, setWizyty] = useState<Wizyta[]>([]);
+    const [loading, setLoading] = useState(true);
   const [user] = useState<User | null>(() => {
     if (authUser) return authUser;
     const userData = localStorage.getItem('alimed_user');
@@ -56,7 +43,6 @@ const DashboardPage: React.FC = () => {
     }
     return null;
   });
-  const [wizyty] = useState<Wizyta[]>(mockWizyty);
   const [selectedWizyta, setSelectedWizyta] = useState<Wizyta | null>(null);
   const navigate = useNavigate();
 
@@ -68,6 +54,47 @@ const DashboardPage: React.FC = () => {
       navigate('/login');
     }
   }, [navigate]);
+  useEffect(() => {
+    const fetchWizyty = async () => {
+      try {
+        setLoading(true);
+        const data = await apiService.getWizyty();
+        // Filter only upcoming visits
+        const now = new Date();
+        const upcomingWizyty = data.filter(w => 
+          !w.czyOdbyta && new Date(w.dataWizyty) >= now
+        );
+        setWizyty(upcomingWizyty);
+      } catch (err) {
+        console.error('Failed to fetch wizyty:', err);
+        setWizyty([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user) {
+      fetchWizyty();
+    }
+  }, [user]);
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString(language === 'szl' ? 'pl-PL' : 'pl-PL', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    });
+  };
+
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString(language === 'szl' ? 'pl-PL' : 'pl-PL', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
 
   const handleLogout = () => {
     logout();
@@ -112,10 +139,6 @@ const DashboardPage: React.FC = () => {
       onClick: () => navigate('/moje-dane')
     },
   ];
-
-  const getStatusText = (status: string) => {
-    return status === 'Potwierdzona' ? t('dashboard.confirmed') : t('dashboard.pending');
-  };
 
   const userName = user.firstName || user.username || user.githubName || 'User';
 
@@ -189,31 +212,38 @@ const DashboardPage: React.FC = () => {
         <div className="bg-white rounded-xl shadow-sm p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('dashboard.upcomingVisits')}</h2>
           
-          <div className="overflow-x-auto">
+          {loading ? (
+            <div className="text-center py-8 text-gray-500">{t('common.loading')}</div>
+          ) : wizyty.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              {t('dashboard.noUpcomingVisits')}
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="text-left text-sm text-gray-500 border-b">
                   <th className="pb-3 font-medium">{t('dashboard.dateTime')}</th>
                   <th className="pb-3 font-medium">{t('dashboard.doctor')}</th>
                   <th className="pb-3 font-medium">{t('dashboard.specialization')}</th>
-                  <th className="pb-3 font-medium">{t('dashboard.status')}</th>
+                  <th className="pb-3 font-medium">{t('dashboard.facility')}</th>
                   <th className="pb-3 font-medium">{t('common.actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {wizyty.map((wizyta) => (
-                  <tr key={wizyta.id} className="text-sm">
-                    <td className="py-4 text-gray-900">{wizyta.dataGodzina}</td>
-                    <td className="py-4 text-gray-900">{wizyta.lekarz}</td>
-                    <td className="py-4 text-gray-600">{wizyta.specjalizacja}</td>
-                    <td className="py-4">
-                      <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
-                        wizyta.status === 'Potwierdzona' 
-                          ? 'bg-green-100 text-green-700' 
-                          : 'bg-yellow-100 text-yellow-700'
-                      }`}>
-                        {getStatusText(wizyta.status)}
-                      </span>
+                  <tr key={wizyta.wizytaId} className="text-sm">
+                    <td className="py-4 text-gray-900">
+                      {formatDate(wizyta.dataWizyty)} {formatTime(wizyta.dataWizyty)}
+                    </td>
+                    <td className="py-4 text-gray-900">
+                      {wizyta.lekarz ? `${wizyta.lekarz.imie} ${wizyta.lekarz.nazwisko}` : '-'}
+                    </td>
+                    <td className="py-4 text-gray-600">
+                      {wizyta.lekarz?.specjalizacja || '-'}
+                    </td>
+                    <td className="py-4 text-gray-600">
+                      {wizyta.placowka?.nazwa || '-'}
                     </td>
                     <td className="py-4">
                       <button 
@@ -228,11 +258,6 @@ const DashboardPage: React.FC = () => {
               </tbody>
             </table>
           </div>
-
-          {wizyty.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
-              {t('dashboard.noUpcomingVisits')}
-            </div>
           )}
         </div>
       </main>
@@ -253,27 +278,23 @@ const DashboardPage: React.FC = () => {
             <div className="space-y-4">
               <div>
                 <label className="text-sm font-medium text-gray-500">{t('dashboard.dateTime')}</label>
-                <p className="text-gray-900">{selectedWizyta.dataGodzina}</p>
+                <p className="text-gray-900">
+                  {formatDate(selectedWizyta.dataWizyty)} {formatTime(selectedWizyta.dataWizyty)}
+                </p>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-500">{t('dashboard.doctor')}</label>
-                <p className="text-gray-900">{selectedWizyta.lekarz}</p>
+                <p className="text-gray-900">
+                  {selectedWizyta.lekarz ? `${selectedWizyta.lekarz.imie} ${selectedWizyta.lekarz.nazwisko}` : '-'}
+                </p>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-500">{t('dashboard.specialization')}</label>
-                <p className="text-gray-900">{selectedWizyta.specjalizacja}</p>
+                <p className="text-gray-900">{selectedWizyta.lekarz?.specjalizacja || '-'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">{t('dashboard.status')}</label>
-                <p>
-                  <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
-                    selectedWizyta.status === 'Potwierdzona' 
-                      ? 'bg-green-100 text-green-700' 
-                      : 'bg-yellow-100 text-yellow-700'
-                  }`}>
-                    {getStatusText(selectedWizyta.status)}
-                  </span>
-                </p>
+                <label className="text-sm font-medium text-gray-500">{t('dashboard.facility')}</label>
+                <p className="text-gray-900">{selectedWizyta.placowka?.nazwa || '-'}</p>
               </div>
             </div>
             

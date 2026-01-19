@@ -158,7 +158,7 @@ namespace API.Alimed.Services
                 Imie = dto.FirstName,
                 Nazwisko = dto.LastName,
                 Pesel = dto.Pesel,
-                DataUrodzenia = dto.DataUrodzenia,
+                DataUrodzenia = dto.DataUrodzenia ?? DateTime.MinValue,
                 UserId = user.UserId,
                 AdresZamieszkania = new Adres
                 {

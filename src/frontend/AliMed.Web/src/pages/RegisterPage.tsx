@@ -70,7 +70,17 @@ const RegisterPage: React.FC = () => {
 
     try {
       setLoading(true);
-      const response = await apiService.register(formData);
+      
+      // Prepare data with proper date format
+      const payload: RegisterRequest = {
+        ...formData,
+        // Convert date to ISO format if provided
+        dataUrodzenia: formData.dataUrodzenia ? 
+          new Date(formData.dataUrodzenia).toISOString() : 
+          undefined,
+      };
+      
+      const response = await apiService.register(payload);
       login(response.token, response.refreshToken);
       navigate('/dashboard');
     } catch (err) {

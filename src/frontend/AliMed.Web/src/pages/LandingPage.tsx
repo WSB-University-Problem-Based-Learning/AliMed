@@ -43,9 +43,9 @@ const LandingPage: React.FC = () => {
               <Link to="/" className="text-gray-700 hover:text-alimed-blue transition">
                 {t('nav.home')}
               </Link>
-              <Link to="/pacjenci" className="text-gray-700 hover:text-alimed-blue transition">
+              <a href="#features" className="text-gray-700 hover:text-alimed-blue transition">
                 {t('nav.functionality')}
-              </Link>
+              </a>
               <LanguageSwitcher />
               <Link 
                 to="/login" 
@@ -96,7 +96,7 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* Features Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <section id="features" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid md:grid-cols-2 gap-8">
           {/* For Patients */}
           <div className="bg-white rounded-2xl shadow-sm p-6 border-t-4 border-alimed-blue">

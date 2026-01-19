@@ -34,6 +34,7 @@ export interface Wizyta {
   placowkaId?: number;
   pacjent?: Pacjent;
   lekarz?: Lekarz;
+  placowka?: Placowka;
 }
 
 export interface Placowka {

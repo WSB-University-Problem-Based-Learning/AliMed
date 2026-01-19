@@ -10,7 +10,7 @@
         public string LastName { get; set; }
 
         public string Pesel { get; set; } = string.Empty;
-        public DateTime DataUrodzenia { get; set; }
+        public DateTime? DataUrodzenia { get; set; }
 
         // Adres
         public string Ulica { get; set; } = string.Empty;

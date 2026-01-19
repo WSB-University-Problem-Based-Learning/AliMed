@@ -106,6 +106,7 @@ namespace API.Alimed.Controllers.Pacjenci
             pacjent.Pesel = dto.Pesel;
             pacjent.DataUrodzenia = dto.DataUrodzenia;
 
+            pacjent.AdresZamieszkania ??= new Entities.Adres();
             pacjent.AdresZamieszkania.Ulica = dto.Ulica;
             pacjent.AdresZamieszkania.NumerDomu = dto.NumerDomu;
             pacjent.AdresZamieszkania.KodPocztowy = dto.KodPocztowy;
