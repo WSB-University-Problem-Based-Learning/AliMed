@@ -6,6 +6,7 @@ export interface Pacjent {
   adresZamieszkania?: Adres;
   dataUrodzenia: string;
   userId?: string;
+  email?: string;
 }
 
 export interface Adres {

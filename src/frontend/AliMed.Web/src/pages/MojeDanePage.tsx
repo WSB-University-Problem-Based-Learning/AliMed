@@ -4,6 +4,7 @@ import { UserCircleIcon, EnvelopeIcon, MapPinIcon } from '@heroicons/react/24/ou
 import { useTranslation } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import type { User, Pacjent } from '../types/api';
+import { apiService } from '../services/api';
 
 const MojeDanePage: React.FC = () => {
   const { t } = useTranslation();
@@ -50,6 +51,7 @@ const MojeDanePage: React.FC = () => {
     numerDomu: '',
     kodPocztowy: '',
     miasto: '',
+    kraj: 'Polska',
   });
 
   useEffect(() => {
@@ -90,21 +92,18 @@ const MojeDanePage: React.FC = () => {
             miasto: mockPacjent.adresZamieszkania?.miasto || '',
           });
         } else {
-          // TODO: Fetch real data from API
-          // const pacjentData = await apiService.getPacjentByUserId(user.userId);
-          // setPacjent(pacjentData);
-          // setFormData({ ... });
-          
-          // For now, use user data
+          const pacjentData = await apiService.getMojProfil();
+          setPacjent(pacjentData);
           setFormData({
-            imie: user?.firstName || '',
-            nazwisko: user?.lastName || '',
-            email: user?.email || '',
+            imie: pacjentData.imie || '',
+            nazwisko: pacjentData.nazwisko || '',
+            email: pacjentData.email || user?.email || '',
             telefon: '',
-            ulica: '',
-            numerDomu: '',
-            kodPocztowy: '',
-            miasto: '',
+            ulica: pacjentData.adresZamieszkania?.ulica || '',
+            numerDomu: pacjentData.adresZamieszkania?.numerDomu || '',
+            kodPocztowy: pacjentData.adresZamieszkania?.kodPocztowy || '',
+            miasto: pacjentData.adresZamieszkania?.miasto || '',
+            kraj: pacjentData.adresZamieszkania?.kraj || 'Polska',
           });
         }
       } catch (err) {
@@ -135,9 +134,23 @@ const MojeDanePage: React.FC = () => {
     }
 
     try {
-      // TODO: Call API to update patient data
-      // await apiService.updatePacjent(pacjent.pacjentId, formData);
-      
+      if (!pacjent) {
+        setError(t('myData.errorSaving'));
+        return;
+      }
+
+      await apiService.updateMojProfil({
+        imie: formData.imie,
+        nazwisko: formData.nazwisko,
+        pesel: pacjent.pesel || '',
+        dataUrodzenia: pacjent.dataUrodzenia,
+        ulica: formData.ulica,
+        numerDomu: formData.numerDomu,
+        kodPocztowy: formData.kodPocztowy,
+        miasto: formData.miasto,
+        kraj: formData.kraj || 'Polska',
+      });
+
       setSaveSuccess(true);
       setIsEditing(false);
       setTimeout(() => setSaveSuccess(false), 3000);
@@ -159,6 +172,7 @@ const MojeDanePage: React.FC = () => {
         numerDomu: pacjent.adresZamieszkania?.numerDomu || '',
         kodPocztowy: pacjent.adresZamieszkania?.kodPocztowy || '',
         miasto: pacjent.adresZamieszkania?.miasto || '',
+        kraj: pacjent.adresZamieszkania?.kraj || 'Polska',
       });
     }
     setIsEditing(false);

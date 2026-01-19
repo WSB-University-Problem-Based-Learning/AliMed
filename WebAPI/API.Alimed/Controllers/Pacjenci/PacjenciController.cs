@@ -44,6 +44,7 @@ namespace API.Alimed.Controllers.Pacjenci
 
             var pacjent = await _db.Pacjenci
                 .Include(p => p.AdresZamieszkania)
+                .Include(p => p.User)
                 .FirstOrDefaultAsync(p => p.UserId == userId);
 
             if (pacjent == null)
@@ -56,6 +57,7 @@ namespace API.Alimed.Controllers.Pacjenci
                 pacjent.Nazwisko,
                 pacjent.Pesel,
                 pacjent.DataUrodzenia,
+                pacjent.User!.Email,
                 Adres = new
                 {
                     pacjent.AdresZamieszkania.Ulica,

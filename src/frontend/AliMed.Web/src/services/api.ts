@@ -255,7 +255,23 @@ export const apiService = {
       credentials: 'include',
     });
     if (!response.ok) throw new Error('Failed to fetch patient profile');
-    return response.json();
+    const data = await response.json();
+    return {
+      pacjentId: data.pacjentId,
+      imie: data.imie,
+      nazwisko: data.nazwisko,
+      pesel: data.pesel,
+      dataUrodzenia: data.dataUrodzenia,
+      email: data.email,
+      adresZamieszkania: data.adres ? {
+        ulica: data.adres.ulica,
+        numerDomu: data.adres.numerDomu,
+        kodPocztowy: data.adres.kodPocztowy,
+        miasto: data.adres.miasto,
+        kraj: data.adres.kraj,
+      } : undefined,
+      userId: undefined,
+    };
   },
 
   // Update current user's patient profile
