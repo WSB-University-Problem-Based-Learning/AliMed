@@ -291,7 +291,7 @@ namespace API.Alimed.Controllers.Wizyty
             if (wizyta.Status != StatusWizyty.Zaplanowana)
                 return Results.BadRequest("Tej wizyty nie można już anulować.");
 
-            if (wizyta.DataWizyty < DateTime.UtcNow.AddHours(24))
+            if (wizyta.DataWizyty < DateTime.Now.AddHours(24))
                 return Results.BadRequest("Wizytę można anulować najpóźniej 24h przed terminem.");
 
             wizyta.Status = StatusWizyty.Anulowana;

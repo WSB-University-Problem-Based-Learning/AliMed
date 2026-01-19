@@ -131,8 +131,8 @@ const UmowWizytePage: React.FC = () => {
       return;
     }
 
-    // Combine date and time into ISO format
-    const dateTime = new Date(`${selectedDate}T${selectedTime}`).toISOString();
+    // Keep local time without converting to UTC
+    const dateTime = `${selectedDate}T${selectedTime}:00`;
     
     // Get the placówka for the selected doctor
     const lekarz = lekarze.find(l => l.lekarzId === selectedLekarz);

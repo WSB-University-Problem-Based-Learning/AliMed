@@ -23,5 +23,7 @@ namespace API.Alimed.Entities
         // foreign key do Placowki
         public int? PlacowkaId { get; set; }
         public Placowka? Placowka { get; set; }
+
+        public ICollection<Dokument>? Dokumenty { get; set; }
     }
 }

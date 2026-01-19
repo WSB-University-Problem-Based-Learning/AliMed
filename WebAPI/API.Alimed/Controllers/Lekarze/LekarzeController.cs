@@ -43,6 +43,43 @@ namespace API.Alimed.Controllers.Lekarze
                     w.WizytaId,
                     w.DataWizyty,
                     w.Status,
+                    w.PacjentId,
+                    Pacjent = w.Pacjent.Imie + " " + w.Pacjent.Nazwisko,
+                    w.Diagnoza
+                })
+                .ToListAsync();
+
+            return Results.Ok(wizyty);
+        }
+
+        [HttpGet("moje-nadchodzace-wizyty")]
+        [Authorize(Roles = "Lekarz")]
+        public async Task<IResult> GetMojeNadchodzaceWizytyLekarza()
+        {
+            var userId = Guid.Parse(
+                User.FindFirst(ClaimTypes.NameIdentifier)!.Value
+            );
+
+            var lekarz = await _db.Lekarze
+                .FirstOrDefaultAsync(l => l.UserId == userId);
+
+            if (lekarz == null)
+                return Results.NotFound("Nie znaleziono lekarza.");
+
+            var teraz = DateTime.Now;
+
+            var wizyty = await _db.Wizyty
+                .Where(w =>
+                    w.LekarzId == lekarz.LekarzId &&
+                    w.Status == StatusWizyty.Zaplanowana &&
+                    w.DataWizyty >= teraz)
+                .OrderBy(w => w.DataWizyty)
+                .Select(w => new
+                {
+                    w.WizytaId,
+                    w.DataWizyty,
+                    w.Status,
+                    w.PacjentId,
                     Pacjent = w.Pacjent.Imie + " " + w.Pacjent.Nazwisko,
                     w.Diagnoza
                 })
