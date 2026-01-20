@@ -1,31 +1,17 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { 
   ClipboardDocumentListIcon, 
   DocumentMagnifyingGlassIcon,
   UserGroupIcon,
   CalendarIcon,
-  CheckCircleIcon,
-  PlayCircleIcon
+  CheckCircleIcon
 } from '@heroicons/react/24/outline';
 import { useTranslation } from '../context/LanguageContext';
-import { useAuth } from '../context/AuthContext';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 
 const LandingPage: React.FC = () => {
   const { t } = useTranslation();
-  const { enableDemoMode, enableDemoModeAsDoctor } = useAuth();
-  const navigate = useNavigate();
-
-  const handleDemoClick = () => {
-    enableDemoMode();
-    navigate('/dashboard');
-  };
-
-  const handleDemoDoctorClick = () => {
-    enableDemoModeAsDoctor();
-    navigate('/panel-lekarza');
-  };
 
   return (
     <div className="min-h-screen bg-slate-100">
@@ -166,48 +152,6 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Demo Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 mb-8">
-        <div className="relative overflow-hidden bg-gradient-to-br from-alimed-blue via-alimed-light-blue to-[#ACD045] rounded-3xl shadow-2xl p-8 md:p-12">
-          {/* Decorative background elements */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 animate-pulse-soft"></div>
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full -ml-24 -mb-24 animate-pulse-soft"></div>
-          
-          <div className="relative z-10 text-center text-white">
-            <PlayCircleIcon className="w-16 h-16 mx-auto mb-4 animate-pulse" />
-            <h2 className="text-3xl md:text-4xl font-bold mb-3">
-              {t('landing.tryDemo')}
-            </h2>
-            <p className="text-lg md:text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-              {t('landing.demoDescription')}
-            </p>
-            <button
-              onClick={handleDemoClick}
-              className="group inline-flex items-center gap-3 bg-white text-alimed-blue px-8 py-4 rounded-xl font-bold text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300"
-            >
-              <PlayCircleIcon className="w-6 h-6 group-hover:animate-pulse" />
-              <span>{t('landing.tryDemo')}</span>
-              <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </button>
-            <button
-              onClick={handleDemoDoctorClick}
-              className="group inline-flex items-center gap-3 bg-amber-500 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 ml-4"
-            >
-              <CalendarIcon className="w-6 h-6 group-hover:animate-pulse" />
-              <span>{t('doctorDashboard.tryDemoDoctor')}</span>
-              <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </button>
-            <p className="mt-4 text-sm text-white/75">
-              {t('landing.demoMode')} • Brak rejestracji • Bez logowania
-            </p>
-          </div>
-        </div>
-      </section>
-
       {/* Footer */}
       <footer className="bg-alimed-blue text-white mt-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
@@ -219,3 +163,4 @@ const LandingPage: React.FC = () => {
 };
 
 export default LandingPage;
+

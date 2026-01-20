@@ -66,7 +66,10 @@ const LoginPage: React.FC = () => {
     <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-md">
         {/* Language Switcher */}
-        <div className="flex justify-end mb-4">
+        <div className="flex items-center justify-between mb-4">
+          <Link to="/" className="text-sm text-gray-600 hover:text-alimed-blue transition">
+            ← {t('common.backToHome')}
+          </Link>
           <LanguageSwitcher />
         </div>
 
