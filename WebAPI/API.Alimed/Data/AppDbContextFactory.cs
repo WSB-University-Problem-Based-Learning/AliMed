@@ -23,38 +23,12 @@ namespace API.Alimed.Data
                 configuration.GetConnectionString("MySqlConnection");
 
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
-
-            // Allow connection string also from environment variables (CI-friendly)
-            var envConn = Environment.GetEnvironmentVariable("ConnectionStrings__MySqlConnection");
-            var conn = !string.IsNullOrWhiteSpace(connectionString) ? connectionString : envConn;
-
-            if (!string.IsNullOrWhiteSpace(conn))
-            {
-                try
-                {
-                    // Prefer AutoDetect when a valid connection string is available.
-                    optionsBuilder.UseMySql(conn, ServerVersion.AutoDetect(conn));
-                }
-                catch
-                {
-                    // Fallback: explicit server version to avoid AutoDetect network probe failures
-                    try
-                    {
-                        optionsBuilder.UseMySql(conn, new MySqlServerVersion(new Version(9, 5, 2)));
-                    }
-                    catch
-                    {
-                        // If even that fails (very unlikely), provide an in-memory DB so design-time
-                        // tools can still create a DbContext without a remote DB.
-                        optionsBuilder.UseInMemoryDatabase("DesignTimeDb");
-                    }
-                }
-            }
-            else
-            {
-                // No connection string: use in-memory DB for design-time scenarios.
-                optionsBuilder.UseInMemoryDatabase("DesignTimeDb");
-            }
+            // Use an explicit server version so EF design-time tools (and CI runners)
+            // don't attempt to probe the database during build.
+            optionsBuilder.UseMySql(
+                configuration.GetConnectionString("MySqlConnection"),
+                new MySqlServerVersion(new Version(9, 5, 2))
+            );
 
             return new AppDbContext(optionsBuilder.Options);
         }
