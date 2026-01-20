@@ -237,10 +237,10 @@ const DashboardPage: React.FC = () => {
                       {formatDate(wizyta.dataWizyty)} {formatTime(wizyta.dataWizyty)}
                     </td>
                     <td className="py-4 text-gray-900">
-                      {wizyta.lekarz ? `${wizyta.lekarz.imie} ${wizyta.lekarz.nazwisko}` : '-'}
+                      {wizyta.lekarzName || (wizyta.lekarz ? `${wizyta.lekarz.imie} ${wizyta.lekarz.nazwisko}` : '-')}
                     </td>
                     <td className="py-4 text-gray-600">
-                      {wizyta.lekarz?.specjalizacja || '-'}
+                      {wizyta.specjalizacja || wizyta.lekarz?.specjalizacja || '-'}
                     </td>
                     <td className="py-4 text-gray-600">
                       {typeof wizyta.placowka === 'string' ? wizyta.placowka : wizyta.placowka?.nazwa || '-'}
@@ -285,12 +285,12 @@ const DashboardPage: React.FC = () => {
               <div>
                 <label className="text-sm font-medium text-gray-500">{t('dashboard.doctor')}</label>
                 <p className="text-gray-900">
-                  {selectedWizyta.lekarz ? `${selectedWizyta.lekarz.imie} ${selectedWizyta.lekarz.nazwisko}` : '-'}
+                  {selectedWizyta.lekarzName || (selectedWizyta.lekarz ? `${selectedWizyta.lekarz.imie} ${selectedWizyta.lekarz.nazwisko}` : '-')}
                 </p>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-500">{t('dashboard.specialization')}</label>
-                <p className="text-gray-900">{selectedWizyta.lekarz?.specjalizacja || '-'}</p>
+                <p className="text-gray-900">{selectedWizyta.specjalizacja || selectedWizyta.lekarz?.specjalizacja || '-'}</p>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-500">{t('dashboard.facility')}</label>
