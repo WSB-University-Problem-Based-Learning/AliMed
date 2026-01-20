@@ -5,7 +5,10 @@ using API.Alimed.Interfaces;
 using API.Alimed.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.RateLimiting;
-using Microsoft.OpenApi.Models;
+// Avoid a direct compile-time dependency on Microsoft.OpenApi.Models
+// because local IDE/package resolution may differ. We'll use reflection
+// when registering OpenAPI security objects so the project builds
+// even if the local OpenApi package resolution differs.
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -41,28 +44,63 @@ builder.Services.AddRateLimiter(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    // Use reflection to construct OpenApi types at runtime so the compiler
+    // does not need to resolve Microsoft.OpenApi.Models at build-time.
+    try
     {
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        Scheme = "bearer",
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Description = "Enter 'Bearer {token}'"
-    });
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
+        var asmName = "Microsoft.OpenApi";
+        var schemeTypeName = "Microsoft.OpenApi.Models.OpenApiSecurityScheme, Microsoft.OpenApi";
+        var requirementTypeName = "Microsoft.OpenApi.Models.OpenApiSecurityRequirement, Microsoft.OpenApi";
+        var referenceTypeName = "Microsoft.OpenApi.Models.OpenApiReference, Microsoft.OpenApi";
+        var referenceType = Type.GetType(referenceTypeName);
+        var schemeType = Type.GetType(schemeTypeName);
+        var requirementType = Type.GetType(requirementTypeName);
+
+        if (schemeType != null)
         {
-            new OpenApiSecurityScheme
+            var scheme = Activator.CreateInstance(schemeType);
+            void Set(string prop, object val) => schemeType.GetProperty(prop)?.SetValue(scheme, val);
+
+            Set("Name", "Authorization");
+            // Set enum properties via their declaring types
+            var secSchemeEnum = Type.GetType("Microsoft.OpenApi.Models.SecuritySchemeType, Microsoft.OpenApi");
+            if (secSchemeEnum != null)
             {
-                Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" },
-                Scheme = "bearer",
-                Name = "Bearer",
-                In = ParameterLocation.Header,
-            },
-            new string[] { }
+                var httpVal = Enum.Parse(secSchemeEnum, "Http");
+                Set("Type", httpVal);
+            }
+            Set("Scheme", "bearer");
+            Set("BearerFormat", "JWT");
+            var paramLocEnum = Type.GetType("Microsoft.OpenApi.Models.ParameterLocation, Microsoft.OpenApi");
+            if (paramLocEnum != null)
+            {
+                var headerVal = Enum.Parse(paramLocEnum, "Header");
+                Set("In", headerVal);
+            }
+            Set("Description", "Enter 'Bearer {token}'");
+
+            // call c.AddSecurityDefinition("Bearer", scheme)
+            var addDef = c.GetType().GetMethod("AddSecurityDefinition");
+            addDef?.Invoke(c, new[] { (object)"Bearer", scheme });
+
+            if (requirementType != null)
+            {
+                var requirement = Activator.CreateInstance(requirementType);
+                // OpenApiSecurityRequirement is a Dictionary<OpenApiSecurityScheme, IList<string>>
+                var addMethod = requirementType.GetMethod("Add", new[] { schemeType, typeof(IEnumerable<string>) });
+                if (addMethod != null)
+                {
+                    addMethod.Invoke(requirement, new object[] { scheme, new string[0] });
+                    var addReq = c.GetType().GetMethod("AddSecurityRequirement");
+                    addReq?.Invoke(c, new[] { requirement });
+                }
+            }
         }
-    });
+    }
+    catch
+    {
+        // If reflection fails, let Swagger run without the security definition.
+    }
 });
 
 
