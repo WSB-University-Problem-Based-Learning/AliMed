@@ -14,7 +14,8 @@
     "search": "Szukej",
     "noData": "Niy ma danych",
     "allRightsReserved": "Wszyjske prawa zastrzyżone",
-    "teamWSB": "Ekipa nr 3 WSB"
+    "teamWSB": "Ekipa nr 3 WSB",
+    "backToHome": "Nazod na głōwno strōna"
   },
   "nav": {
     "home": "Głōwno strōna",
@@ -92,6 +93,7 @@
     "fillRequiredFields": "Proszym wyfołnić wymŏgane pola",
     "passwordsDoNotMatch": "Hasła niy sōm jednake",
     "passwordTooShort": "Hasło musi mieć co nŏjmynij 6 znakōw",
+    "validationFailed": "Popraw oznaczone pola",
     "failed": "Niy podarziło sie utworzić kōnta",
     "alreadyHaveAccount": "Mŏsz już kōnto? Wlyź"
   },

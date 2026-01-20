@@ -93,6 +93,7 @@
     "fillRequiredFields": "Proszę wypełnić wymagane pola",
     "passwordsDoNotMatch": "Hasła nie są identyczne",
     "passwordTooShort": "Hasło musi mieć co najmniej 6 znaków",
+    "validationFailed": "Popraw oznaczone pola",
     "failed": "Nie udało się utworzyć konta",
     "alreadyHaveAccount": "Masz już konto? Zaloguj się"
   },
