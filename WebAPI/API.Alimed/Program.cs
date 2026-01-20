@@ -5,10 +5,7 @@ using API.Alimed.Interfaces;
 using API.Alimed.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.RateLimiting;
-// Avoid a direct compile-time dependency on Microsoft.OpenApi.Models
-// because local IDE/package resolution may differ. We'll use reflection
-// when registering OpenAPI security objects so the project builds
-// even if the local OpenApi package resolution differs.
+using Microsoft.OpenApi.Models;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -44,68 +41,32 @@ builder.Services.AddRateLimiter(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    // Use reflection to construct OpenApi types at runtime so the compiler
-    // does not need to resolve Microsoft.OpenApi.Models at build-time.
-    try
-    {
-        var asmName = "Microsoft.OpenApi";
-        var schemeTypeName = "Microsoft.OpenApi.Models.OpenApiSecurityScheme, Microsoft.OpenApi";
-        var requirementTypeName = "Microsoft.OpenApi.Models.OpenApiSecurityRequirement, Microsoft.OpenApi";
-        var referenceTypeName = "Microsoft.OpenApi.Models.OpenApiReference, Microsoft.OpenApi";
-        var referenceType = Type.GetType(referenceTypeName);
-        var schemeType = Type.GetType(schemeTypeName);
-        var requirementType = Type.GetType(requirementTypeName);
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "AliMed API", Version = "v1" });
 
-        if (schemeType != null)
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
         {
-            var scheme = Activator.CreateInstance(schemeType);
-            void Set(string prop, object val) => schemeType.GetProperty(prop)?.SetValue(scheme, val);
-
-            Set("Name", "Authorization");
-            // Set enum properties via their declaring types
-            var secSchemeEnum = Type.GetType("Microsoft.OpenApi.Models.SecuritySchemeType, Microsoft.OpenApi");
-            if (secSchemeEnum != null)
+            new OpenApiSecurityScheme
             {
-                var httpVal = Enum.Parse(secSchemeEnum, "Http");
-                Set("Type", httpVal);
-            }
-            Set("Scheme", "bearer");
-            Set("BearerFormat", "JWT");
-            var paramLocEnum = Type.GetType("Microsoft.OpenApi.Models.ParameterLocation, Microsoft.OpenApi");
-            if (paramLocEnum != null)
-            {
-                var headerVal = Enum.Parse(paramLocEnum, "Header");
-                Set("In", headerVal);
-            }
-            Set("Description", "Enter 'Bearer {token}'");
-
-            // call c.AddSecurityDefinition("Bearer", scheme) using dynamic to avoid fragile MethodInfo lookup
-            try
-            {
-                dynamic dyn = c;
-                dyn.AddSecurityDefinition("Bearer", scheme);
-
-                if (requirementType != null)
+                Reference = new OpenApiReference
                 {
-                    var requirement = Activator.CreateInstance(requirementType);
-                    var addMethod = requirementType.GetMethod("Add", new[] { schemeType, typeof(IEnumerable<string>) });
-                    if (addMethod != null)
-                    {
-                        addMethod.Invoke(requirement, new object[] { scheme, new string[0] });
-                        dyn.AddSecurityRequirement(requirement);
-                    }
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
                 }
-            }
-            catch
-            {
-                // If dynamic invocation fails, don't break Swagger generation.
-            }
+            },
+            Array.Empty<string>()
         }
-    }
-    catch
-    {
-        // If reflection fails, let Swagger run without the security definition.
-    }
+    });
 });
 
 
