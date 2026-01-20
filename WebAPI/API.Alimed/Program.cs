@@ -79,7 +79,31 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+// NOTE: Swagger UI is enabled above only in Development environment.
+// To enable Swagger in Production temporarily or permanently, uncomment one
+// of the blocks below and redeploy/restart the application. Keep in mind
+// exposing Swagger in public production is a security consideration.
 
+/*
+// Option A: Enable only when a specific environment variable is set (safer)
+// if (Environment.GetEnvironmentVariable("ENABLE_SWAGGER_IN_PROD") == "true")
+// {
+//     app.UseSwagger();
+//     app.UseSwaggerUI(c =>
+//     {
+//         c.SwaggerEndpoint("/swagger/v1/swagger.json", "AliMed API v1");
+//         c.RoutePrefix = "swagger";
+//     });
+// }
+
+// Option B: Always enable Swagger (not recommended for public prod)
+// app.UseSwagger();
+// app.UseSwaggerUI(c =>
+// {
+//     c.SwaggerEndpoint("/swagger/v1/swagger.json", "AliMed API v1");
+//     c.RoutePrefix = "swagger";
+// });
+*/
 // app.UseHttpsRedirection();
 // CORS musi byc przed UseAuthentication bo sra bledami
 app.UseCors("AllowReactApp");
