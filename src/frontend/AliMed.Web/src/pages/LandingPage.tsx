@@ -71,7 +71,7 @@ const LandingPage: React.FC = () => {
             </p>
             <div className="flex gap-4">
               <Link 
-                to="/login" 
+                to="/register" 
                 className="bg-[#ACD045] text-white px-6 py-3 rounded-lg hover:bg-[#9bc03d] transition font-medium"
               >
                 {t('landing.register')}

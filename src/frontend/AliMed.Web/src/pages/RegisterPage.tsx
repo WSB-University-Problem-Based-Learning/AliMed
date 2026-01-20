@@ -28,12 +28,19 @@ const RegisterPage: React.FC = () => {
 
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1); // Multi-step form
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    setFieldErrors(prev => {
+      if (!prev[name]) return prev;
+      const next = { ...prev };
+      delete next[name];
+      return next;
+    });
   };
 
   const validateStep1 = (): boolean => {
@@ -52,8 +59,54 @@ const RegisterPage: React.FC = () => {
     return true;
   };
 
+  const getFieldError = (name: string) => fieldErrors[name]?.[0];
+
+  const getInputClass = (name: string) => (
+    `w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-alimed-light-blue focus:border-transparent transition ${
+      getFieldError(name) ? 'border-red-300 bg-red-50' : 'border-gray-200'
+    }`
+  );
+
+  const applyApiErrors = (message: string): boolean => {
+    try {
+      const parsed = JSON.parse(message);
+      if (!parsed || typeof parsed !== 'object' || !parsed.errors) {
+        return false;
+      }
+      const fieldMap: Record<string, string> = {
+        Email: 'email',
+        Username: 'username',
+        Password: 'password',
+        FirstName: 'firstName',
+        LastName: 'lastName',
+        Pesel: 'pesel',
+        DataUrodzenia: 'dataUrodzenia',
+        Ulica: 'ulica',
+        NumerDomu: 'numerDomu',
+        KodPocztowy: 'kodPocztowy',
+        Miasto: 'miasto',
+        Kraj: 'kraj',
+      };
+      const nextErrors: Record<string, string[]> = {};
+      Object.entries(parsed.errors as Record<string, string[] | string>).forEach(([key, value]) => {
+        const fieldName = fieldMap[key] || key;
+        const messages = Array.isArray(value) ? value : [String(value)];
+        nextErrors[fieldName] = messages;
+      });
+      if (Object.keys(nextErrors).length === 0) {
+        return false;
+      }
+      setFieldErrors(nextErrors);
+      setError(t('register.validationFailed'));
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   const handleNextStep = () => {
     setError('');
+    setFieldErrors({});
     if (validateStep1()) {
       setStep(2);
     }
@@ -61,12 +114,14 @@ const RegisterPage: React.FC = () => {
 
   const handlePrevStep = () => {
     setError('');
+    setFieldErrors({});
     setStep(1);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setFieldErrors({});
 
     try {
       setLoading(true);
@@ -85,6 +140,9 @@ const RegisterPage: React.FC = () => {
       navigate('/dashboard');
     } catch (err) {
       console.error('Registration error:', err);
+      if (err instanceof Error && applyApiErrors(err.message)) {
+        return;
+      }
       setError(err instanceof Error ? err.message : t('register.failed'));
     } finally {
       setLoading(false);
@@ -134,9 +192,12 @@ const RegisterPage: React.FC = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-alimed-light-blue focus:border-transparent transition"
+                  className={getInputClass('email')}
                   required
                 />
+                {getFieldError('email') && (
+                  <p className="mt-1 text-sm text-red-600">{getFieldError('email')}</p>
+                )}
               </div>
 
               <div>
@@ -148,9 +209,12 @@ const RegisterPage: React.FC = () => {
                   name="username"
                   value={formData.username}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-alimed-light-blue focus:border-transparent transition"
+                  className={getInputClass('username')}
                   required
                 />
+                {getFieldError('username') && (
+                  <p className="mt-1 text-sm text-red-600">{getFieldError('username')}</p>
+                )}
               </div>
 
               <div>
@@ -162,9 +226,12 @@ const RegisterPage: React.FC = () => {
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-alimed-light-blue focus:border-transparent transition"
+                  className={getInputClass('password')}
                   required
                 />
+                {getFieldError('password') && (
+                  <p className="mt-1 text-sm text-red-600">{getFieldError('password')}</p>
+                )}
               </div>
 
               <div>
@@ -200,56 +267,68 @@ const RegisterPage: React.FC = () => {
                     {t('register.firstName')}
                   </label>
                   <input
-                    type="text"
-                    name="firstName"
-                    value={formData.firstName}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-alimed-light-blue focus:border-transparent transition"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('register.lastName')}
-                  </label>
-                  <input
-                    type="text"
-                    name="lastName"
-                    value={formData.lastName}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-alimed-light-blue focus:border-transparent transition"
-                  />
-                </div>
+                  type="text"
+                  name="firstName"
+                  value={formData.firstName}
+                  onChange={handleChange}
+                  className={getInputClass('firstName')}
+                />
+                {getFieldError('firstName') && (
+                  <p className="mt-1 text-sm text-red-600">{getFieldError('firstName')}</p>
+                )}
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {t('register.lastName')}
+                  </label>
+                  <input
+                  type="text"
+                  name="lastName"
+                  value={formData.lastName}
+                  onChange={handleChange}
+                  className={getInputClass('lastName')}
+                />
+                {getFieldError('lastName') && (
+                  <p className="mt-1 text-sm text-red-600">{getFieldError('lastName')}</p>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     {t('register.pesel')}
                   </label>
                   <input
                     type="text"
-                    name="pesel"
-                    value={formData.pesel}
-                    onChange={handleChange}
-                    maxLength={11}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-alimed-light-blue focus:border-transparent transition"
-                  />
-                </div>
+                  name="pesel"
+                  value={formData.pesel}
+                  onChange={handleChange}
+                  maxLength={11}
+                  className={getInputClass('pesel')}
+                />
+                {getFieldError('pesel') && (
+                  <p className="mt-1 text-sm text-red-600">{getFieldError('pesel')}</p>
+                )}
+              </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('register.birthDate')}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {t('register.birthDate')}
                   </label>
                   <input
                     type="date"
-                    name="dataUrodzenia"
-                    value={formData.dataUrodzenia}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-alimed-light-blue focus:border-transparent transition"
-                  />
-                </div>
+                  name="dataUrodzenia"
+                  value={formData.dataUrodzenia}
+                  onChange={handleChange}
+                  className={getInputClass('dataUrodzenia')}
+                />
+                {getFieldError('dataUrodzenia') && (
+                  <p className="mt-1 text-sm text-red-600">{getFieldError('dataUrodzenia')}</p>
+                )}
               </div>
+            </div>
 
               <div className="border-t pt-4 mt-4">
                 <p className="text-sm font-medium text-gray-700 mb-3">{t('register.addressSection')}</p>
@@ -264,8 +343,11 @@ const RegisterPage: React.FC = () => {
                       name="ulica"
                       value={formData.ulica}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-alimed-light-blue focus:border-transparent transition"
+                      className={getInputClass('ulica')}
                     />
+                    {getFieldError('ulica') && (
+                      <p className="mt-1 text-sm text-red-600">{getFieldError('ulica')}</p>
+                    )}
                   </div>
 
                   <div>
@@ -277,8 +359,11 @@ const RegisterPage: React.FC = () => {
                       name="numerDomu"
                       value={formData.numerDomu}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-alimed-light-blue focus:border-transparent transition"
+                      className={getInputClass('numerDomu')}
                     />
+                    {getFieldError('numerDomu') && (
+                      <p className="mt-1 text-sm text-red-600">{getFieldError('numerDomu')}</p>
+                    )}
                   </div>
                 </div>
 
@@ -293,8 +378,11 @@ const RegisterPage: React.FC = () => {
                       value={formData.kodPocztowy}
                       onChange={handleChange}
                       placeholder="00-000"
-                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-alimed-light-blue focus:border-transparent transition"
+                      className={getInputClass('kodPocztowy')}
                     />
+                    {getFieldError('kodPocztowy') && (
+                      <p className="mt-1 text-sm text-red-600">{getFieldError('kodPocztowy')}</p>
+                    )}
                   </div>
 
                   <div>
@@ -306,8 +394,11 @@ const RegisterPage: React.FC = () => {
                       name="miasto"
                       value={formData.miasto}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-alimed-light-blue focus:border-transparent transition"
+                      className={getInputClass('miasto')}
                     />
+                    {getFieldError('miasto') && (
+                      <p className="mt-1 text-sm text-red-600">{getFieldError('miasto')}</p>
+                    )}
                   </div>
                 </div>
               </div>

@@ -72,7 +72,7 @@
   "register": {
     "title": "Załōż kōnto w AliMed",
     "step1Title": "Krok 1: Dane logowaniŏ",
-    "step2Title": "Krok 2: Dane perschnalne (niy musowo)",
+    "step2Title": "Krok 2: Dane perschnalne (musowo)",
     "email": "Adresa e-mail",
     "username": "Miano użytkownika",
     "password": "Hasło",
@@ -319,3 +319,4 @@
     "errorSaving": "Feler przi spamiyntowaniu danych"
   }
 }
+

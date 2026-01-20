@@ -72,7 +72,7 @@
   "register": {
     "title": "Załóż konto w AliMed",
     "step1Title": "Krok 1: Dane logowania",
-    "step2Title": "Krok 2: Dane osobowe (opcjonalne)",
+    "step2Title": "Krok 2: Dane osobowe (wymagane)",
     "email": "Adres e-mail",
     "username": "Nazwa użytkownika",
     "password": "Hasło",
@@ -319,3 +319,4 @@
     "errorSaving": "Błąd podczas zapisywania danych"
   }
 }
+
