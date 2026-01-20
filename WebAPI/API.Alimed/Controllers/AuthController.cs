@@ -1,9 +1,10 @@
-﻿using API.Alimed.Data;
+using API.Alimed.Data;
 using API.Alimed.Dtos;
 using API.Alimed.Interfaces;
 using API.Alimed.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System.Net.Http.Headers;
@@ -13,6 +14,7 @@ namespace API.Alimed.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [EnableRateLimiting("auth")]
     public class AuthController : ControllerBase
     {
         private readonly IHttpClientFactory _httpClientFactory;
@@ -77,7 +79,7 @@ namespace API.Alimed.Controllers
                     // errors
                     Console.WriteLine($"\n\"#########################################################\\");
                     Console.WriteLine($"Zwrotka z GITHUB (StatusCode: {tokenResponse.StatusCode})");
-                    Console.WriteLine($"Wysłany kod autoryzacji: {payload.Code}");
+                    Console.WriteLine($"Wyslany kod autoryzacji: {payload.Code}");
                     Console.WriteLine($"Error tresc GitHub: {errorContent}");
                     Console.WriteLine($"#########################################################\n");
 
@@ -86,11 +88,11 @@ namespace API.Alimed.Controllers
                 }
                 // =========================================================================
 
-                // sprawdzenie czy Kod Logowania Github Już użyto (1 na minute?)
+                // sprawdzenie czy Kod Logowania Github Juz uzyto (1 na minute?)
                 var tokenContent = await tokenResponse.Content.ReadAsStringAsync();
                 //if(tokenContent.Contains("bad_verification_code"))
                 //{
-                //    return BadRequest("Kod logowania GitHub został już wykorzystany - specyfikacja OAuth 2.0");
+                //    return BadRequest("Kod logowania GitHub zostal juz wykorzystany - specyfikacja OAuth 2.0");
                 //}
 
                 var tokenJson = JsonSerializer.Deserialize<Dictionary<string, object>>(tokenContent);
@@ -103,7 +105,7 @@ namespace API.Alimed.Controllers
 
                 if (!tokenJson.ContainsKey("access_token"))
                 {
-                    return BadRequest("GitHub nie zwrócił access_token.");
+                    return BadRequest("GitHub nie zwrocil access_token.");
                 }
 
 
@@ -112,13 +114,13 @@ namespace API.Alimed.Controllers
 
                 if (string.IsNullOrEmpty(githubAccessToken))
                 {
-                    Console.WriteLine("Błąd Github Sukces ale Token Pusty");
-                    return BadRequest("Nie udało się uzyskać tokena dostępu GitHub.");
+                    Console.WriteLine("Blad Github Sukces ale Token Pusty");
+                    return BadRequest("Nie udalo sie uzyskac tokena dostepu GitHub.");
                 }
 
                 // pobranie user info z github
                 httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("token", githubAccessToken);
-                httpClient.DefaultRequestHeaders.Add("User-Agent", "DotNetAuthApp"); // GitHub wymaga User-Agent dla zapytań API
+                httpClient.DefaultRequestHeaders.Add("User-Agent", "DotNetAuthApp"); // GitHub wymaga User-Agent dla zapytan API
 
                 // musi byc typ JsonElement
                 var userResponse = await httpClient.GetFromJsonAsync<JsonElement>("https://api.github.com/user");
@@ -158,7 +160,7 @@ namespace API.Alimed.Controllers
                     }
                 );
 
-                return Ok(new {token = jwtToken, refreshToken = refreshToken});
+                return Ok(new { token = jwtToken, refreshToken = refreshToken });
 
 
             }
@@ -170,7 +172,7 @@ namespace API.Alimed.Controllers
                 Console.WriteLine($"Wyjatek Exception: {ex.GetType().Name}");
                 Console.WriteLine($"Msg catch Exception: {ex.Message}");
 
-                if(ex.InnerException != null)
+                if (ex.InnerException != null)
                 {
                     Console.WriteLine($"Inner Exception: {ex.InnerException.GetType().Name}");
                     Console.WriteLine($"Inner Msg Exception: {ex.InnerException.Message}");
@@ -180,9 +182,9 @@ namespace API.Alimed.Controllers
                 Console.WriteLine($"\n\"#########################################################\\");
                 Console.WriteLine($"Api Error (Status 500)");
                 Console.WriteLine($"Wyjatek Exception: {ex.GetType().Name}");
-                Console.WriteLine($"Wiadomość catch Exception: {ex.Message}");
+                Console.WriteLine($"Wiadomosc catch Exception: {ex.Message}");
                 Console.WriteLine($"\"#########################################################\\\n");
-                return StatusCode(500, "Błąd serwera podczas przetwarzania logowania GitHub.");
+                return StatusCode(500, "Blad serwera podczas przetwarzania logowania GitHub.");
             }
         }
 
@@ -192,7 +194,7 @@ namespace API.Alimed.Controllers
         {
             var refreshToken = Request.Cookies["refresh_token"];
 
-            if(string.IsNullOrEmpty(refreshToken))
+            if (string.IsNullOrEmpty(refreshToken))
             {
                 return Unauthorized("Brak refresh tokenu");
             }
@@ -201,7 +203,7 @@ namespace API.Alimed.Controllers
                 .FirstOrDefaultAsync(t => t.Token == refreshToken);
 
             if (tokenInDb == null || tokenInDb.IsRevoked || tokenInDb.ExpiresOnUtc < DateTime.UtcNow)
-                return Unauthorized("Refresh token wygasł lub jest nieważny.");
+                return Unauthorized("Refresh token wygasl lub jest niewazny.");
 
             var user = await _db.Users
                 .FirstOrDefaultAsync(u => u.UserId == tokenInDb!.UserId);
@@ -216,11 +218,11 @@ namespace API.Alimed.Controllers
                 user.GithubName!,
                 user.Role.ToString()
                 );
-        
+
             tokenInDb.ExpiresOnUtc = DateTime.UtcNow.AddDays(7);
             await _db.SaveChangesAsync();
 
-            return Ok(new {accessToken = newAccessToken});
+            return Ok(new { accessToken = newAccessToken });
 
         }
 
@@ -228,27 +230,21 @@ namespace API.Alimed.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto dto)
         {
-            if (dto == null)
-                return BadRequest("Brak danych rejestracji.");
-
-            if (string.IsNullOrWhiteSpace(dto.Email))
-                return BadRequest("Email jest wymagany.");
-
-            if (string.IsNullOrWhiteSpace(dto.Username))
-                return BadRequest("Nazwa użytkownika jest wymagana.");
-
-            if (string.IsNullOrWhiteSpace(dto.Password))
-                return BadRequest("Hasło jest wymagane.");
-
-            if (dto.Password.Length < 6)
-                return BadRequest("Hasło musi mieć co najmniej 6 znaków.");
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
             // Czy email istnieje?
             var existing = await _userService.FindByEmailAsync(dto.Email);
             if (existing != null)
-                return BadRequest("Email jest już zajęty.");
+                return BadRequest("Email jest juz zajety.");
 
-            // Hashujemy hasło
+            var usernameExists = await _db.Users
+                .AnyAsync(u => u.Username != null && u.Username.ToLower() == dto.Username.ToLower());
+
+            if (usernameExists)
+                return BadRequest("Username jest juz zajety.");
+
+            // Hashujemy haslo
             var (hash, salt) = _passwordService
                 .HashPassword(dto.Password);
 
@@ -256,7 +252,7 @@ namespace API.Alimed.Controllers
             var user = await _userService
                 .CreateLocalUserAsync(dto.Email, dto.Username, hash, salt);
 
-            // 🔥 Teraz tworzymy pacjenta na podstawie danych z rejestracji
+            // Teraz tworzymy pacjenta na podstawie danych z rejestracji
             await _userService.CreatePacjentFromRegisterDtoAsync(user, dto);
 
             // Tworzymy access token
@@ -285,13 +281,17 @@ namespace API.Alimed.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
-            var user = await _userService.FindByEmailAsync(dto.Email);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var user = await _db.Users
+                .FirstOrDefaultAsync(u => u.Email == dto.Email || u.Username == dto.Email);
 
             if (user == null || user.PasswordHash == null || user.PasswordSalt == null)
-                return Unauthorized("Niepoprawny email lub hasło.");
+                return Unauthorized("Niepoprawny email lub haslo.");
 
             if (!_passwordService.Verify(dto.Password, user.PasswordHash, user.PasswordSalt))
-                return Unauthorized("Niepoprawny email lub hasło.");
+                return Unauthorized("Niepoprawny email lub haslo.");
 
             var jwtToken = _jwtService.GenerateToken(
                 user.UserId.ToString(),
@@ -329,7 +329,7 @@ namespace API.Alimed.Controllers
                 }
             }
 
-            // usuń cookie
+            // usun cookie
             Response.Cookies.Append("refresh_token", "", new CookieOptions
             {
                 Expires = DateTime.UtcNow.AddDays(-1),

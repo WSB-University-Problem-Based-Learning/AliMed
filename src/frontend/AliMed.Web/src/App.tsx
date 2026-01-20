@@ -20,6 +20,7 @@ import MojeDanePage from './pages/MojeDanePage';
 import Layout from './components/Layout';
 import LekarzePage from './pages/LekarzePage';
 import PlacowkiPage from './pages/PlacowkiPage';
+import AdminDashboardPage from './pages/AdminDashboardPage';
 
 // Placeholder component for visits page
 function VisitsPageContent() {
@@ -46,88 +47,95 @@ function App() {
             
             {/* Protected routes */}
             <Route path="/dashboard" element={
-              <ProtectedRoute>
+              <ProtectedRoute roles={[0]}>
                 <DashboardPage />
               </ProtectedRoute>
             } />
             <Route path="/panel-lekarza" element={
-              <ProtectedRoute>
+              <ProtectedRoute roles={[1]}>
                 <DoctorDashboardPage />
               </ProtectedRoute>
             } />
             <Route path="/wizyty-lekarza" element={
-              <ProtectedRoute>
+              <ProtectedRoute roles={[1]}>
                 <WizytyLekarzPage />
               </ProtectedRoute>
             } />
             <Route path="/pacjenci-lekarza" element={
-              <ProtectedRoute>
+              <ProtectedRoute roles={[1]}>
                 <PacjenciLekarzPage />
               </ProtectedRoute>
             } />
             <Route path="/dokumentacja-lekarza" element={
-              <ProtectedRoute>
+              <ProtectedRoute roles={[1]}>
                 <DokumentacjaLekarzPage />
               </ProtectedRoute>
             } />
             <Route path="/moje-dane-lekarza" element={
-              <ProtectedRoute>
+              <ProtectedRoute roles={[1]}>
                 <MojeDaneLekarzPage />
               </ProtectedRoute>
             } />
             
             {/* Admin/Staff routes */}
             <Route path="/pacjenci" element={
-              <ProtectedRoute>
+              <ProtectedRoute roles={[0, 2]}>
                 <Layout>
                   <PacjenciPage />
                 </Layout>
               </ProtectedRoute>
             } />
+            <Route path="/admin" element={
+              <ProtectedRoute roles={[2]}>
+                <Layout>
+                  <AdminDashboardPage />
+                </Layout>
+              </ProtectedRoute>
+            } />
             <Route path="/moje-wizyty" element={
-              <ProtectedRoute>
+              <ProtectedRoute roles={[0]}>
                 <Layout>
                   <MojeWizytyPage />
                 </Layout>
               </ProtectedRoute>
             } />
             <Route path="/umow-wizyte" element={
-              <ProtectedRoute>
+              <ProtectedRoute roles={[0]}>
                 <Layout>
                   <UmowWizytePage />
                 </Layout>
               </ProtectedRoute>
             } />
             <Route path="/dokumenty" element={
-              <ProtectedRoute>
+              <ProtectedRoute roles={[0]}>
                 <Layout>
                   <DokumentyPage />
                 </Layout>
               </ProtectedRoute>
             } />
             <Route path="/moje-dane" element={
-              <ProtectedRoute>
+              <ProtectedRoute roles={[0]}>
                 <Layout>
                   <MojeDanePage />
                 </Layout>
               </ProtectedRoute>
             } />
             <Route path="/lekarze" element={
-              <ProtectedRoute>
+              <ProtectedRoute roles={[0, 2]}>
                 <Layout>
                   <LekarzePage />
                 </Layout>
               </ProtectedRoute>
             } />
             <Route path="/placowki" element={
-              <ProtectedRoute>
+              <ProtectedRoute roles={[0, 2]}>
                 <Layout>
                   <PlacowkiPage />
                 </Layout>
               </ProtectedRoute>
             } />
             <Route path="/wizyty" element={
-              <ProtectedRoute>
+              <ProtectedRoute roles={[0]}>
                 <Layout>
                   <VisitsPageContent />
                 </Layout>

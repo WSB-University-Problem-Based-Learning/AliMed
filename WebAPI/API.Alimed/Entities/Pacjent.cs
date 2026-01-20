@@ -19,6 +19,8 @@
         // 1 pacjent wiele wizyt
         public ICollection<Wizyta>? Wizyty { get; set; }
 
+        public ICollection<Dokument>? Dokumenty { get; set; }
+
 
         public User? User { get; set; } = null!;
     }

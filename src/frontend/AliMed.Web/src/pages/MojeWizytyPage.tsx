@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { apiService } from '../services/api';
-import type { Wizyta } from '../types/api';
+import type { Dokument, Pacjent, Wizyta, WizytaDetail } from '../types/api';
 import Card from '../components/Card';
 import { useTranslation } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { CalendarIcon, UserIcon, ClockIcon, CheckCircleIcon, XCircleIcon, InformationCircleIcon } from '@heroicons/react/24/outline';
+import { openDocumentPdf } from '../utils/documentPdf';
 
 // Demo mode mock data
 const mockWizyty: Wizyta[] = [
@@ -43,6 +44,10 @@ const MojeWizytyPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'upcoming' | 'completed'>('all');
+  const [selectedWizyta, setSelectedWizyta] = useState<WizytaDetail | null>(null);
+  const [loadingDetails, setLoadingDetails] = useState(false);
+  const [detailsError, setDetailsError] = useState<string | null>(null);
+  const [pacjentCache, setPacjentCache] = useState<Pacjent | null>(null);
 
   useEffect(() => {
     const fetchWizyty = async () => {
@@ -93,14 +98,19 @@ const MojeWizytyPage: React.FC = () => {
     return [street, city, adres.kraj].filter(Boolean).join(', ');
   };
 
+  const isCompletedStatus = (status?: string) => {
+    const normalized = (status || '').toLowerCase();
+    return normalized === 'odbyta' || normalized === 'zrealizowana';
+  };
+
   const filterWizyty = (wizyty: Wizyta[]) => {
     const now = new Date();
     
     switch (filter) {
       case 'upcoming':
-        return wizyty.filter(w => !w.czyOdbyta && new Date(w.dataWizyty) >= now);
+        return wizyty.filter(w => !isCompletedStatus(w.status) && new Date(w.dataWizyty) >= now);
       case 'completed':
-        return wizyty.filter(w => w.czyOdbyta || new Date(w.dataWizyty) < now);
+        return wizyty.filter(w => isCompletedStatus(w.status) || new Date(w.dataWizyty) < now);
       default:
         return wizyty;
     }
@@ -109,6 +119,45 @@ const MojeWizytyPage: React.FC = () => {
   const sortedWizyty = [...filterWizyty(wizyty)].sort((a, b) => {
     return new Date(b.dataWizyty).getTime() - new Date(a.dataWizyty).getTime();
   });
+
+  const formatDocumentName = (name?: string) => {
+    if (!name) return '';
+    return name.endsWith('.txt') ? name.slice(0, -4) : name;
+  };
+
+  const handlePreview = async (dokument: Dokument) => {
+    const popup = window.open('', '_blank');
+    if (!popup) {
+      alert('Popup zablokowany. Zezwol na otwieranie okien.');
+      return;
+    }
+    try {
+      const pacjentPromise = pacjentCache
+        ? Promise.resolve(pacjentCache)
+        : apiService.getMojProfil().catch(() => undefined);
+      const trescPromise = apiService
+        .downloadDokument(dokument.dokumentId)
+        .then((blob) => blob.text())
+        .catch(() => undefined);
+
+      const [pacjent, tresc] = await Promise.all([pacjentPromise, trescPromise]);
+
+      if (pacjent && !pacjentCache) {
+        setPacjentCache(pacjent);
+      }
+
+      openDocumentPdf({
+        dokument,
+        pacjent: pacjent ?? undefined,
+        wizyta: selectedWizyta ?? undefined,
+        tresc,
+        targetWindow: popup,
+      });
+    } catch (err) {
+      popup.close();
+      alert(t('documents.errorDownloading'));
+    }
+  };
 
   if (loading) {
     return (
@@ -181,7 +230,7 @@ const MojeWizytyPage: React.FC = () => {
       <div className="space-y-4">
         {sortedWizyty.map((wizyta) => {
           const isPast = new Date(wizyta.dataWizyty) < new Date();
-          const isCompleted = wizyta.czyOdbyta;
+          const isCompleted = isCompletedStatus(wizyta.status);
           
           return (
             <Card key={wizyta.wizytaId}>
@@ -196,15 +245,15 @@ const MojeWizytyPage: React.FC = () => {
                   </div>
 
                   {/* Doctor */}
-                  {wizyta.lekarz && (
+                  {(wizyta.lekarz || wizyta.lekarzName) && (
                     <div className="flex items-center gap-2 text-gray-700">
                       <UserIcon className="h-5 w-5" />
                       <span className="font-medium">
-                        {t('myVisits.doctor')}: {wizyta.lekarz.imie} {wizyta.lekarz.nazwisko}
+                        {t('myVisits.doctor')}: {wizyta.lekarzName || `${wizyta.lekarz!.imie} ${wizyta.lekarz!.nazwisko}`}
                       </span>
-                      {wizyta.lekarz.specjalizacja && (
+                      {(wizyta.specjalizacja || wizyta.lekarzX.specjalizacja) && (
                         <span className="text-sm text-gray-500">
-                          ({wizyta.lekarz.specjalizacja})
+                          ({wizyta.specjalizacja || wizyta.lekarzX.specjalizacja})
                         </span>
                       )}
                     </div>
@@ -255,6 +304,23 @@ const MojeWizytyPage: React.FC = () => {
                       {t('myVisits.statusUpcoming')}
                     </span>
                   )}
+                  <button
+                    onClick={async () => {
+                      setDetailsError(null);
+                      setLoadingDetails(true);
+                      try {
+                        const details = await apiService.getWizytaById(wizyta.wizytaId);
+                        setSelectedWizyta(details);
+                      } catch (err) {
+                        setDetailsError(err instanceof Error ? err.message : t('common.error'));
+                      } finally {
+                        setLoadingDetails(false);
+                      }
+                    }}
+                    className="text-sm text-alimed-blue hover:underline"
+                  >
+                    Szczegoly wizyty
+                  </button>
                 </div>
               </div>
             </Card>
@@ -270,6 +336,109 @@ const MojeWizytyPage: React.FC = () => {
             <p className="text-gray-400 text-sm mt-2">{t('myVisits.noVisitsHint')}</p>
           </div>
         </Card>
+      )}
+
+      {selectedWizyta && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-xl max-w-3xl w-full mx-4 overflow-hidden">
+            <div className="px-6 py-5 border-b border-gray-100 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-full bg-alimed-blue/10 text-alimed-blue flex items-center justify-center">
+                  <CalendarIcon className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Szczegoly wizyty</h3>
+                  <p className="text-sm text-gray-500">
+                    Sprawdz informacje, dokumenty i pobierz PDF.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedWizyta(null)}
+                className="px-3 py-1.5 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
+              >
+                Zamknij
+              </button>
+            </div>
+            <div className="p-6 space-y-6">
+              {detailsError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded">
+                  {detailsError}
+                </div>
+              )}
+              {loadingDetails ? (
+                <div className="text-gray-500">Ladowanie...</div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="rounded-xl border border-gray-100 bg-gray-50 p-4 text-sm text-gray-700 space-y-2">
+                      <div className="text-xs uppercase tracking-wide text-gray-400">Termin wizyty</div>
+                      <div className="text-base font-semibold text-gray-900">
+                        {formatDate(selectedWizyta.dataWizyty)} · {formatTime(selectedWizyta.dataWizyty)}
+                      </div>
+                      <div><span className="text-gray-500">Status:</span> {selectedWizyta.status}</div>
+                      <div><span className="text-gray-500">Placowka:</span> {selectedWizyta.placowka}</div>
+                    </div>
+                    <div className="rounded-xl border border-gray-100 bg-white p-4 text-sm text-gray-700 space-y-2">
+                      <div className="text-xs uppercase tracking-wide text-gray-400">Lekarz</div>
+                      <div className="text-base font-semibold text-gray-900">
+                        {selectedWizyta.lekarz} ({selectedWizyta.specjalizacja})
+                      </div>
+                      {selectedWizyta.diagnoza ? (
+                        <div>
+                          <span className="text-gray-500">Diagnoza:</span> {selectedWizyta.diagnoza}
+                        </div>
+                      ) : (
+                        <div className="text-gray-400">Diagnoza nie zostala jeszcze uzupelniona.</div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl border border-gray-100 p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <h4 className="font-semibold text-gray-900">Dokumenty z wizyty</h4>
+                        <p className="text-sm text-gray-500">Kliknij, aby pobrac dokument w PDF.</p>
+                      </div>
+                      <span className="text-xs text-gray-400">
+                        {selectedWizyta.dokumenty.length} plikow
+                      </span>
+                    </div>
+                    {selectedWizyta.dokumenty.length > 0 ? (
+                      <div className="space-y-2">
+                        {selectedWizyta.dokumenty.map((d: Dokument) => (
+                          <div
+                            key={d.dokumentId}
+                            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 rounded-lg border border-gray-100 px-3 py-2"
+                          >
+                            <div className="text-sm text-gray-700">
+                              <div className="font-medium text-gray-900">
+                                {formatDocumentName(d.nazwaPliku) || `Dokument #${d.dokumentId}`}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                Typ: {d.typDokumentu || 'inne'}
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => handlePreview(d)}
+                              className="inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-alimed-blue bg-alimed-blue/10 rounded-lg hover:bg-alimed-blue/20 transition"
+                            >
+                              Pobierz jako PDF
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-sm text-gray-500">
+                        Brak dokumentow. Pojawia sie po zakonczonej wizycie.
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

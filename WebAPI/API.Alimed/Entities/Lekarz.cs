@@ -20,5 +20,7 @@
         // Relacja 1:N
         // 1 lekarz wiele wizyt
         public ICollection<Wizyta>? Wizyty { get; set; }
+
+        public ICollection<Dokument>? Dokumenty { get; set; }
     }
 }

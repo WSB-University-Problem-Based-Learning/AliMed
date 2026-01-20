@@ -4,6 +4,7 @@ using API.Alimed.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API.Alimed.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260119082401_AddDokumenty")]
+    partial class AddDokumenty
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -3242,10 +3245,7 @@ namespace API.Alimed.Migrations
                         new
                         {
                             UserId = new Guid("a0000000-0000-0000-0000-000000000001"),
-                            Email = "admin_alimed",
                             IsGithubUser = false,
-                            PasswordHash = "+vh4KTHWlJkQCfFV5mqYitJZMdjRN7NfLpQAksOX/Lw=",
-                            PasswordSalt = "j/mq42W01uUykBVkWe/PBw==",
                             Role = 2,
                             Username = "admin_alimed"
                         },

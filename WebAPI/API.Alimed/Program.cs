@@ -4,6 +4,7 @@ using API.Alimed.Extensions;
 using API.Alimed.Interfaces;
 using API.Alimed.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.RateLimiting;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,6 +26,15 @@ builder.Services.AddControllers(); // controller mapping
 builder.Services.AddHttpClient(); // http
 // builder.Services.AddOpenApi();
 
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddFixedWindowLimiter("auth", limiterOptions =>
+    {
+        limiterOptions.PermitLimit = 5;
+        limiterOptions.Window = TimeSpan.FromMinutes(1);
+        limiterOptions.QueueLimit = 0;
+    });
+});
 
 
 builder.Services.AddEndpointsApiExplorer();
@@ -74,6 +84,7 @@ if (app.Environment.IsDevelopment())
 // CORS musi byc przed UseAuthentication bo sra bledami
 app.UseCors("AllowReactApp");
 
+app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();

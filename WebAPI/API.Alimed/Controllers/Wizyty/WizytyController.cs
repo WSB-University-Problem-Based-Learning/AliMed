@@ -67,6 +67,50 @@ namespace API.Alimed.Controllers.Wizyty
             return Results.Ok(wizyty);
         }
 
+        [HttpGet("{id}")]
+        [Authorize(Roles = "User")]
+        public async Task<IResult> GetMojaWizyta(int id)
+        {
+            var userId = Guid.Parse(
+                User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value
+            );
+
+            var wizyta = await _db.Wizyty
+                .AsNoTracking()
+                .Include(w => w.Lekarz)
+                .Include(w => w.Placowka)
+                .FirstOrDefaultAsync(w => w.WizytaId == id && w.Pacjent!.UserId == userId);
+
+            if (wizyta == null)
+                return Results.NotFound("Wizyta nie istnieje.");
+
+            var dokumenty = await _db.Dokumenty
+                .AsNoTracking()
+                .Where(d => d.WizytaId == wizyta.WizytaId)
+                .OrderByDescending(d => d.DataUtworzenia)
+                .Select(d => new
+                {
+                    d.DokumentId,
+                    d.NazwaPliku,
+                    d.TypDokumentu,
+                    d.Opis,
+                    d.DataUtworzenia
+                })
+                .ToListAsync();
+
+            return Results.Ok(new
+            {
+                wizyta.WizytaId,
+                wizyta.DataWizyty,
+                wizyta.Status,
+                wizyta.Diagnoza,
+                Lekarz = $"{wizyta.Lekarz!.Imie} {wizyta.Lekarz!.Nazwisko}",
+                wizyta.Lekarz!.Specjalizacja,
+                Placowka = wizyta.Placowka!.Nazwa,
+                Dokumenty = dokumenty
+            });
+        }
+
 
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -303,7 +347,7 @@ namespace API.Alimed.Controllers.Wizyty
             if (wizyta.Status != StatusWizyty.Zaplanowana)
                 return Results.BadRequest("Tej wizyty nie można już anulować.");
 
-            if (wizyta.DataWizyty < DateTime.UtcNow.AddHours(24))
+            if (wizyta.DataWizyty < DateTime.Now.AddHours(24))
                 return Results.BadRequest("Wizytę można anulować najpóźniej 24h przed terminem.");
 
             wizyta.Status = StatusWizyty.Anulowana;

@@ -39,8 +39,17 @@ const LoginPage: React.FC = () => {
 
       const data = await response.json();
       login(data.token, data.refreshToken || '');
-      // Use window.location to force full page reload and proper auth state read
-      window.location.href = '/dashboard';
+      const payload = JSON.parse(atob(data.token.split('.')[1]));
+      const role =
+        payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] ||
+        payload.role;
+      if (role === 'Admin') {
+        window.location.href = '/admin';
+      } else if (role === 'Lekarz') {
+        window.location.href = '/panel-lekarza';
+      } else {
+        window.location.href = '/dashboard';
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Błąd logowania');
     } finally {
@@ -99,7 +108,7 @@ const LoginPage: React.FC = () => {
 
           <div>
             <input
-              type="email"
+              type="text"
               placeholder={t('login.email')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}

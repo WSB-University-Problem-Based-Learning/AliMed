@@ -12,6 +12,7 @@ namespace API.Alimed.Data
         public DbSet<Lekarz> Lekarze { get; set; }
         public DbSet<Pacjent> Pacjenci { get; set; }
         public DbSet<Wizyta> Wizyty { get; set; }
+        public DbSet<Dokument> Dokumenty { get; set; }
         public DbSet<RefreshToken> RefreshToken { get; set; } // ICollection<RefreshToken> w User
         public DbSet<User> Users { get; set; }
         public DbSet<GodzinyPracyLekarza> GodzinyPracyLekarzy { get; set; }
@@ -106,12 +107,33 @@ namespace API.Alimed.Data
                     //.OnDelete(DeleteBehavior.Restrict)
                     .IsRequired(false);
 
+            modelBuilder.Entity<Dokument>()
+                .HasOne(d => d.Wizyta)
+                .WithMany(w => w.Dokumenty)
+                .HasForeignKey(d => d.WizytaId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Dokument>()
+                .HasOne(d => d.Pacjent)
+                .WithMany(p => p.Dokumenty)
+                .HasForeignKey(d => d.PacjentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Dokument>()
+                .HasOne(d => d.Lekarz)
+                .WithMany(l => l.Dokumenty)
+                .HasForeignKey(d => d.LekarzId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             // ------------------ indeksy ------------------
             // wazne
             // unikalna wizyta dla danego lekarza w danym terminie w danej placówce
             modelBuilder.Entity<Wizyta>()
                 .HasIndex(w => new { w.LekarzId, w.PlacowkaId, w.DataWizyty })
                 .IsUnique();
+
+            modelBuilder.Entity<Dokument>()
+                .HasIndex(d => new { d.PacjentId, d.DataUtworzenia });
 
 
 
@@ -280,7 +302,10 @@ namespace API.Alimed.Data
                     Username = "admin_alimed",
                     Role = UserRole.Admin,
                     IsGithubUser = false,
-                    GithubId = (string?)null
+                    GithubId = (string?)null,
+                    Email = "admin_alimed",
+                    PasswordHash = "+vh4KTHWlJkQCfFV5mqYitJZMdjRN7NfLpQAksOX/Lw=",
+                    PasswordSalt = "j/mq42W01uUykBVkWe/PBw=="
                 },
                 new
                 {

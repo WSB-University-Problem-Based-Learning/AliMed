@@ -10,7 +10,8 @@ import {
   FunnelIcon,
 } from '@heroicons/react/24/outline';
 import { apiService } from '../services/api';
-import type { Dokument } from '../types/api';
+import type { Dokument, Pacjent, WizytaDetail } from '../types/api';
+import { openDocumentPdf } from '../utils/documentPdf';
 
 const DokumentyPage: React.FC = () => {
   const { t } = useTranslation();
@@ -20,6 +21,7 @@ const DokumentyPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'recepty' | 'wyniki' | 'skierowania' | 'inne'>('all');
   const [sortBy, setSortBy] = useState<'date' | 'name' | 'type'>('date');
+  const [pacjentCache, setPacjentCache] = useState<Pacjent | null>(null);
 
   useEffect(() => {
     const fetchDokumenty = async () => {
@@ -141,18 +143,48 @@ const DokumentyPage: React.FC = () => {
     return sorted;
   };
 
-  const handleDownload = async (dokument: Dokument) => {
+  const formatDocumentName = (name?: string) => {
+    if (!name) return '';
+    return name.endsWith('.txt') ? name.slice(0, -4) : name;
+  };
+
+  const handleDownloadPdf = async (dokument: Dokument) => {
+    const popup = window.open('', '_blank');
+    if (!popup) {
+      alert('Popup zablokowany. Zezwol na otwieranie okien.');
+      return;
+    }
     try {
-      const blob = await apiService.downloadDokument(dokument.dokumentId);
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = dokument.nazwaPliku || `dokument-${dokument.dokumentId}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      const pacjentPromise = pacjentCache
+        ? Promise.resolve(pacjentCache)
+        : apiService.getMojProfil().catch(() => undefined);
+      const wizytaPromise = dokument.wizytaId
+        ? apiService.getWizytaById(dokument.wizytaId).catch(() => undefined)
+        : Promise.resolve(undefined);
+      const trescPromise = apiService
+        .downloadDokument(dokument.dokumentId)
+        .then((blob) => blob.text())
+        .catch(() => undefined);
+
+      const [pacjent, wizyta, tresc] = await Promise.all([
+        pacjentPromise,
+        wizytaPromise,
+        trescPromise,
+      ]);
+
+      if (pacjent && !pacjentCache) {
+        setPacjentCache(pacjent);
+      }
+
+      openDocumentPdf({
+        dokument,
+        pacjent: pacjent ?? undefined,
+        wizyta: wizyta as WizytaDetail | undefined,
+        tresc,
+        targetWindow: popup,
+      });
     } catch (err) {
+      popup.close();
       alert(t('documents.errorDownloading'));
     }
   };
@@ -264,19 +296,19 @@ const DokumentyPage: React.FC = () => {
           <Card key={dokument.dokumentId}>
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div className="flex items-start gap-4 flex-1">
-                <div className="p-3 bg-alimed-blue bg-opacity-10 rounded-lg">
+                <div className="p-3 bg-alimed-blue/10 rounded-lg">
                   <DocumentTextIcon className="h-8 w-8 text-alimed-blue" />
                 </div>
                 
                 <div className="flex-1 space-y-2">
                   {/* Document Name */}
                   <h3 className="text-lg font-semibold text-gray-900">
-                    {dokument.nazwaPliku}
+                    {formatDocumentName(dokument.nazwaPliku)}
                   </h3>
 
                   {/* Document Type and Date */}
                   <div className="flex flex-wrap items-center gap-3 text-sm">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-alimed-blue bg-opacity-10 text-alimed-blue">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-alimed-blue/10 text-alimed-blue">
                       {getDocumentTypeLabel(dokument.typDokumentu || 'inne')}
                     </span>
                     <span className="flex items-center gap-1 text-gray-600">
@@ -306,11 +338,11 @@ const DokumentyPage: React.FC = () => {
 
               {/* Download Button */}
               <button
-                onClick={() => handleDownload(dokument)}
+                onClick={() => handleDownloadPdf(dokument)}
                 className="flex items-center gap-2 px-4 py-2 bg-alimed-blue text-white rounded-lg hover:bg-alimed-light-blue transition-colors"
               >
                 <ArrowDownTrayIcon className="h-5 w-5" />
-                {t('documents.download')}
+                Pobierz jako PDF
               </button>
             </div>
           </Card>

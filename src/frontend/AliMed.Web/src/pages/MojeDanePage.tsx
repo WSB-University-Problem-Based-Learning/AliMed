@@ -53,7 +53,7 @@ const MojeDanePage: React.FC = () => {
     miasto: '',
     pesel: '',
     dataUrodzenia: '',
-    kraj: '',
+    kraj: 'Polska',
   });
 
   useEffect(() => {
@@ -99,7 +99,7 @@ const MojeDanePage: React.FC = () => {
           setFormData({
             imie: pacjentData.imie || user?.firstName || '',
             nazwisko: pacjentData.nazwisko || user?.lastName || '',
-            email: user?.email || '',
+            email: pacjentData.email || user?.email || '',
             telefon: '',
             ulica: pacjentData.adresZamieszkania?.ulica || '',
             numerDomu: pacjentData.adresZamieszkania?.numerDomu || '',
@@ -107,7 +107,7 @@ const MojeDanePage: React.FC = () => {
             miasto: pacjentData.adresZamieszkania?.miasto || '',
             pesel: pacjentData.pesel || '',
             dataUrodzenia: pacjentData.dataUrodzenia || '',
-            kraj: pacjentData.adresZamieszkania?.kraj || '',
+            kraj: pacjentData.adresZamieszkania?.kraj || 'Polska',
           });
         }
       } catch (err) {
@@ -158,7 +158,7 @@ const MojeDanePage: React.FC = () => {
       setFormData({
         imie: refreshed.imie || '',
         nazwisko: refreshed.nazwisko || '',
-        email: formData.email, // email not persisted backend yet
+        email: refreshed.email || formData.email,
         telefon: formData.telefon,
         ulica: refreshed.adresZamieszkania?.ulica || '',
         numerDomu: refreshed.adresZamieszkania?.numerDomu || '',
@@ -166,7 +166,7 @@ const MojeDanePage: React.FC = () => {
         miasto: refreshed.adresZamieszkania?.miasto || '',
         pesel: refreshed.pesel || '',
         dataUrodzenia: refreshed.dataUrodzenia || '',
-        kraj: refreshed.adresZamieszkania?.kraj || '',
+        kraj: refreshed.adresZamieszkania?.kraj || 'Polska',
       });
 
       setSaveSuccess(true);
@@ -192,7 +192,7 @@ const MojeDanePage: React.FC = () => {
         miasto: pacjent.adresZamieszkania?.miasto || '',
         pesel: pacjent.pesel || '',
         dataUrodzenia: pacjent.dataUrodzenia || '',
-        kraj: pacjent.adresZamieszkania?.kraj || '',
+        kraj: pacjent.adresZamieszkania?.kraj || 'Polska',
       });
     }
     setIsEditing(false);

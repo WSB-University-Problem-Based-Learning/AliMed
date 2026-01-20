@@ -1,4 +1,4 @@
-import type { Pacjent, Lekarz, Wizyta, AuthResponse, Dokument, RegisterRequest, LoginRequest, WizytaCreateRequest, DostepneTerminyResponse, Placowka, UpdatePacjentProfileRequest } from '../types/api';
+import type { Pacjent, Lekarz, Wizyta, WizytaDetail, AuthResponse, Dokument, DokumentCreateRequest, RegisterRequest, LoginRequest, WizytaCreateRequest, DostepneTerminyResponse, Placowka, UpdatePacjentProfileRequest, AdminUserSummary, PromoteToDoctorRequest, LekarzWizytaSummary, AdminPacjentSummary, AdminLekarzSummary } from '../types/api';
 import { config } from '../config/env';
 
 const API_BASE_URL = config.apiBaseUrl;
@@ -22,6 +22,31 @@ const getHeaders = (includeAuth = false): Record<string, string> => {
   }
   
   return headers;
+};
+
+const normalizeStatus = (value: unknown): string | undefined => {
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (trimmed.toLowerCase() === 'odbyta') {
+      return 'Zrealizowana';
+    }
+    return trimmed;
+  }
+  if (typeof value === 'number') {
+    switch (value) {
+      case 0:
+        return 'Zaplanowana';
+      case 1:
+        return 'Zrealizowana';
+      case 2:
+        return 'Anulowana';
+      case 3:
+        return 'Nieobecnosc';
+      default:
+        return String(value);
+    }
+  }
+  return value != null ? String(value) : undefined;
 };
 
 export const apiService = {
@@ -125,16 +150,35 @@ export const apiService = {
       credentials: 'include',
     });
     if (!response.ok) throw new Error('Failed to fetch wizyty');
-    return response.json();
+    const data = await response.json();
+    return data.map((w: any) => ({
+      wizytaId: w.wizytaId,
+      dataWizyty: w.dataWizyty,
+      status: normalizeStatus(w.status),
+      czyOdbyta: normalizeStatus(w.status) === 'Zrealizowana',
+      lekarzName: w.lekarz,
+      specjalizacja: w.specjalizacja,
+      placowka: w.placowka,
+    }));
   },
 
-  async getWizytaById(id: number): Promise<Wizyta> {
+  async getWizytaById(id: number): Promise<WizytaDetail> {
     const response = await fetch(`${API_BASE_URL}/api/wizyty/${id}`, {
       headers: getHeaders(true),
       credentials: 'include',
     });
     if (!response.ok) throw new Error('Failed to fetch wizyta');
-    return response.json();
+    const data = await response.json();
+    return {
+      wizytaId: data.wizytaId,
+      dataWizyty: data.dataWizyty,
+      status: normalizeStatus(data.status),
+      diagnoza: data.diagnoza,
+      lekarz: data.lekarz,
+      specjalizacja: data.specjalizacja,
+      placowka: data.placowka,
+      dokumenty: data.dokumenty || [],
+    };
   },
 
   async createWizyta(wizyta: WizytaCreateRequest): Promise<{ message: string; wizytaId: number }> {
@@ -222,6 +266,42 @@ export const apiService = {
     return response.blob();
   },
 
+  async createDokument(data: DokumentCreateRequest): Promise<Dokument> {
+    const response = await fetch(`${API_BASE_URL}/api/dokumenty`, {
+      method: 'POST',
+      headers: getHeaders(true),
+      credentials: 'include',
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Failed to create dokument');
+    }
+    return response.json();
+  },
+
+  async oznaczWizyteOdbyta(id: number, diagnoza: string): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/api/wizyty/${id}/odbyta`, {
+      method: 'PUT',
+      headers: getHeaders(true),
+      credentials: 'include',
+      body: JSON.stringify(diagnoza),
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Failed to update visit status');
+    }
+  },
+
+  async getDokumentyWizytyLekarz(wizytaId: number): Promise<Dokument[]> {
+    const response = await fetch(`${API_BASE_URL}/api/dokumenty/wizyty/${wizytaId}/lekarz`, {
+      headers: getHeaders(true),
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to fetch visit documents');
+    return response.json();
+  },
+
   // Refresh token - call backend refresh endpoint
   async refreshToken(): Promise<{ accessToken: string }> {
     const response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
@@ -255,7 +335,23 @@ export const apiService = {
       credentials: 'include',
     });
     if (!response.ok) throw new Error('Failed to fetch patient profile');
-    return response.json();
+    const data = await response.json();
+    return {
+      pacjentId: data.pacjentId,
+      imie: data.imie,
+      nazwisko: data.nazwisko,
+      pesel: data.pesel,
+      dataUrodzenia: data.dataUrodzenia,
+      email: data.email,
+      adresZamieszkania: data.adres ? {
+        ulica: data.adres.ulica,
+        numerDomu: data.adres.numerDomu,
+        kodPocztowy: data.adres.kodPocztowy,
+        miasto: data.adres.miasto,
+        kraj: data.adres.kraj,
+      } : undefined,
+      userId: undefined,
+    };
   },
 
   // Update current user's patient profile
@@ -272,9 +368,18 @@ export const apiService = {
     }
   },
 
-  // Update current user's patient profile
-  async updateMojProfil(data: import('../types/api').UpdatePacjentProfileRequest): Promise<{ message: string }> {
-    const response = await fetch(`${API_BASE_URL}/api/pacjenci/moj-profil`, {
+  // Admin
+  async getAdminUsers(): Promise<AdminUserSummary[]> {
+    const response = await fetch(`${API_BASE_URL}/api/admin/users`, {
+      headers: getHeaders(true),
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to fetch admin users');
+    return response.json();
+  },
+
+  async promoteUserToDoctor(userId: string, data: PromoteToDoctorRequest): Promise<{ message: string }> {
+    const response = await fetch(`${API_BASE_URL}/api/admin/users/${userId}/promote-to-doctor`, {
       method: 'PUT',
       headers: getHeaders(true),
       credentials: 'include',
@@ -282,8 +387,91 @@ export const apiService = {
     });
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(errorText || 'Failed to update profile');
+      throw new Error(errorText || 'Failed to promote user');
     }
+    return response.json();
+  },
+
+  async getAdminPacjenci(): Promise<AdminPacjentSummary[]> {
+    const response = await fetch(`${API_BASE_URL}/api/admin/pacjenci`, {
+      headers: getHeaders(true),
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to fetch admin patients');
+    return response.json();
+  },
+
+  async getAdminLekarze(): Promise<AdminLekarzSummary[]> {
+    const response = await fetch(`${API_BASE_URL}/api/admin/lekarze`, {
+      headers: getHeaders(true),
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to fetch admin doctors');
+    return response.json();
+  },
+
+  // Lekarz
+  mapLekarzWizyta(data: any): LekarzWizytaSummary {
+    return {
+      wizytaId: data.wizytaId,
+      dataWizyty: data.dataWizyty,
+      status: normalizeStatus(data.status) || String(data.status ?? ''),
+      pacjentId: data.pacjentId,
+      pacjent: data.pacjent,
+      diagnoza: data.diagnoza,
+    };
+  },
+
+  async getLekarzWizytyDzien(date: string): Promise<LekarzWizytaSummary[]> {
+    const qs = new URLSearchParams({ date }).toString();
+    const response = await fetch(`${API_BASE_URL}/api/lekarze/moje-wizyty/dzien?${qs}`, {
+      headers: getHeaders(true),
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to fetch doctor day visits');
+    const data = await response.json();
+    return data.map((row: any) => this.mapLekarzWizyta(row));
+  },
+
+  async getLekarzWizytyTydzien(date: string): Promise<LekarzWizytaSummary[]> {
+    const qs = new URLSearchParams({ date }).toString();
+    const response = await fetch(`${API_BASE_URL}/api/lekarze/moje-wizyty/tydzien?${qs}`, {
+      headers: getHeaders(true),
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to fetch doctor week visits');
+    const data = await response.json();
+    return data.map((row: any) => this.mapLekarzWizyta(row));
+  },
+
+  async getLekarzWizytyMiesiac(date: string): Promise<LekarzWizytaSummary[]> {
+    const qs = new URLSearchParams({ date }).toString();
+    const response = await fetch(`${API_BASE_URL}/api/lekarze/moje-wizyty/miesiac?${qs}`, {
+      headers: getHeaders(true),
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to fetch doctor month visits');
+    const data = await response.json();
+    return data.map((row: any) => this.mapLekarzWizyta(row));
+  },
+
+  async getLekarzWizyty(): Promise<LekarzWizytaSummary[]> {
+    const response = await fetch(`${API_BASE_URL}/api/lekarze/moje-wizyty`, {
+      headers: getHeaders(true),
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to fetch doctor visits');
+    const data = await response.json();
+    return data.map((row: any) => this.mapLekarzWizyta(row));
+  },
+
+  async getLekarzPacjenci(query?: string): Promise<Pacjent[]> {
+    const qs = query ? `?${new URLSearchParams({ query }).toString()}` : '';
+    const response = await fetch(`${API_BASE_URL}/api/lekarze/pacjenci${qs}`, {
+      headers: getHeaders(true),
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to fetch doctor patients');
     return response.json();
   },
 };
