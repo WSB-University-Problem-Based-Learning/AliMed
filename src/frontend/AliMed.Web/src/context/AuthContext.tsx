@@ -1,15 +1,13 @@
 import React, { createContext, useContext, useState, type ReactNode } from 'react';
-import type { User } from '../types/api';
+import type { User, UserRole } from '../types/api';
 
 interface AuthContextType {
   user: User | null;
-  token: string | null;
-  refreshToken: string | null;
   isAuthenticated: boolean;
   isDemoMode: boolean;
-  login: (token: string, refreshToken: string) => void;
+  login: (_token: string, _refreshToken: string) => void;
   logout: () => void;
-  setUser: (user: User) => void;
+  setUser: (_user: User) => void;
   enableDemoMode: () => void;
   enableDemoModeAsDoctor: () => void;
 }
@@ -60,7 +58,7 @@ const getUserFromToken = (token: string): User | null => {
     userId,
     username: name || undefined,
     githubName: name || undefined,
-    role,
+    role: role as UserRole,
   };
 };
 
@@ -95,7 +93,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [user, setUserState] = useState<User | null>(storedUser);
   const [token, setToken] = useState<string | null>(storedToken);
   // RefreshToken is in HttpOnly cookie, managed by backend
-  const [refreshToken, setRefreshToken] = useState<string | null>(storedToken ? 'stored-in-cookie' : null);
+  const [, setRefreshToken] = useState<string | null>(storedToken ? 'stored-in-cookie' : null);
   const [isDemoMode, setIsDemoMode] = useState(storedDemoMode);
 
   const login = (newToken: string, newRefreshToken: string) => {
@@ -184,8 +182,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     <AuthContext.Provider
       value={{
         user,
-        token,
-        refreshToken,
         isAuthenticated: !!token,
         isDemoMode,
         login,

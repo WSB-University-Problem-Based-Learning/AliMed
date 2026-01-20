@@ -8,15 +8,15 @@ export type Language = 'pl' | 'szl';
 
 type TranslationValue = string | TranslationObject;
 interface TranslationObject {
-  [key: string]: TranslationValue;
+  [_key: string]: TranslationValue;
 }
 
 export type Translations = typeof plTranslations;
 
 interface LanguageContextType {
   language: Language;
-  setLanguage: (lang: Language) => void;
-  t: (key: string) => string;
+  setLanguage: (_lang: Language) => void;
+  t: (_key: string) => string;
   translations: Translations;
 }
 
@@ -40,8 +40,8 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
     document.documentElement.lang = language;
   }, [language]);
 
-  const setLanguage = (lang: Language) => {
-    setLanguageState(lang);
+  const setLanguage = (newLang: Language) => {
+    setLanguageState(newLang);
   };
 
   const t = (key: string): string => {

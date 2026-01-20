@@ -153,7 +153,7 @@ const MojeWizytyPage: React.FC = () => {
         tresc,
         targetWindow: popup,
       });
-    } catch (err) {
+    } catch {
       popup.close();
       alert(t('documents.errorDownloading'));
     }
@@ -251,9 +251,9 @@ const MojeWizytyPage: React.FC = () => {
                       <span className="font-medium">
                         {t('myVisits.doctor')}: {wizyta.lekarzName || `${wizyta.lekarz!.imie} ${wizyta.lekarz!.nazwisko}`}
                       </span>
-                      {(wizyta.specjalizacja || wizyta.lekarzX.specjalizacja) && (
+                      {(wizyta.specjalizacja || wizyta.lekarz?.specjalizacja) && (
                         <span className="text-sm text-gray-500">
-                          ({wizyta.specjalizacja || wizyta.lekarzX.specjalizacja})
+                          ({wizyta.specjalizacja || wizyta.lekarz?.specjalizacja})
                         </span>
                       )}
                     </div>
@@ -263,8 +263,8 @@ const MojeWizytyPage: React.FC = () => {
                   {wizyta.placowka && (
                     <div className="text-sm text-gray-700">
                       <span className="font-medium">{t('dashboard.facility')}:</span>{' '}
-                      {wizyta.placowka.nazwa || '-'}
-                      {wizyta.placowka.adresPlacowki && (
+                      {typeof wizyta.placowka === 'string' ? wizyta.placowka : wizyta.placowka.nazwa || '-'}
+                      {typeof wizyta.placowka !== 'string' && wizyta.placowka.adresPlacowki && (
                         <span className="text-gray-500"> — {formatAddress(wizyta.placowka.adresPlacowki)}</span>
                       )}
                     </div>

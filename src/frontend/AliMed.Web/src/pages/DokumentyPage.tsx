@@ -28,7 +28,7 @@ const DokumentyPage: React.FC = () => {
       try {
         const data = await apiService.getDokumenty();
         setDokumenty(data);
-      } catch (err) {
+      } catch {
         // API nie istnieje - użyj mock data dla demo
         console.warn('Dokumenty API not available, using mock data');
         const mockDokumenty: Dokument[] = [
@@ -183,7 +183,7 @@ const DokumentyPage: React.FC = () => {
         tresc,
         targetWindow: popup,
       });
-    } catch (err) {
+    } catch {
       popup.close();
       alert(t('documents.errorDownloading'));
     }

@@ -243,7 +243,7 @@ const DashboardPage: React.FC = () => {
                       {wizyta.lekarz?.specjalizacja || '-'}
                     </td>
                     <td className="py-4 text-gray-600">
-                      {wizyta.placowka?.nazwa || '-'}
+                      {typeof wizyta.placowka === 'string' ? wizyta.placowka : wizyta.placowka?.nazwa || '-'}
                     </td>
                     <td className="py-4">
                       <button 
@@ -294,7 +294,11 @@ const DashboardPage: React.FC = () => {
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-500">{t('dashboard.facility')}</label>
-                <p className="text-gray-900">{selectedWizyta.placowka?.nazwa || '-'}</p>
+                <p className="text-gray-900">
+                  {typeof selectedWizyta.placowka === 'string' 
+                    ? selectedWizyta.placowka 
+                    : selectedWizyta.placowka?.nazwa || '-'}
+                </p>
               </div>
             </div>
             

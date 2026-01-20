@@ -92,6 +92,9 @@ const MojeDanePage: React.FC = () => {
             numerDomu: mockPacjent.adresZamieszkania?.numerDomu || '',
             kodPocztowy: mockPacjent.adresZamieszkania?.kodPocztowy || '',
             miasto: mockPacjent.adresZamieszkania?.miasto || '',
+            pesel: mockPacjent.pesel || '',
+            dataUrodzenia: mockPacjent.dataUrodzenia || '',
+            kraj: mockPacjent.adresZamieszkania?.kraj || 'Polska',
           });
         } else {
           const pacjentData = await apiService.getMojProfil();
