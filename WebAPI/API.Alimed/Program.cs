@@ -79,21 +79,26 @@ builder.Services.AddSwaggerGen(c =>
             }
             Set("Description", "Enter 'Bearer {token}'");
 
-            // call c.AddSecurityDefinition("Bearer", scheme)
-            var addDef = c.GetType().GetMethod("AddSecurityDefinition");
-            addDef?.Invoke(c, new[] { (object)"Bearer", scheme });
-
-            if (requirementType != null)
+            // call c.AddSecurityDefinition("Bearer", scheme) using dynamic to avoid fragile MethodInfo lookup
+            try
             {
-                var requirement = Activator.CreateInstance(requirementType);
-                // OpenApiSecurityRequirement is a Dictionary<OpenApiSecurityScheme, IList<string>>
-                var addMethod = requirementType.GetMethod("Add", new[] { schemeType, typeof(IEnumerable<string>) });
-                if (addMethod != null)
+                dynamic dyn = c;
+                dyn.AddSecurityDefinition("Bearer", scheme);
+
+                if (requirementType != null)
                 {
-                    addMethod.Invoke(requirement, new object[] { scheme, new string[0] });
-                    var addReq = c.GetType().GetMethod("AddSecurityRequirement");
-                    addReq?.Invoke(c, new[] { requirement });
+                    var requirement = Activator.CreateInstance(requirementType);
+                    var addMethod = requirementType.GetMethod("Add", new[] { schemeType, typeof(IEnumerable<string>) });
+                    if (addMethod != null)
+                    {
+                        addMethod.Invoke(requirement, new object[] { scheme, new string[0] });
+                        dyn.AddSecurityRequirement(requirement);
+                    }
                 }
+            }
+            catch
+            {
+                // If dynamic invocation fails, don't break Swagger generation.
             }
         }
     }
