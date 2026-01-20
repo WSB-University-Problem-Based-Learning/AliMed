@@ -25,7 +25,7 @@ namespace API.Alimed.Data
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
             optionsBuilder.UseMySql(
                 connectionString,
-                new MySqlServerVersion(new Version(9,5,2))
+                ServerVersion.AutoDetect(connectionString)
             );
 
             return new AppDbContext(optionsBuilder.Options);
