@@ -23,9 +23,13 @@ namespace API.Alimed.Data
                 configuration.GetConnectionString("MySqlConnection");
 
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
+            // During design-time (ef migrations bundle) ServerVersion.AutoDetect may attempt
+            // to connect to the database which is not always possible from CI/build agents.
+            // Use an explicit server version here to allow design-time tools to run without
+            // contacting the DB. Revert to AutoDetect after bundle creation if desired.
             optionsBuilder.UseMySql(
                 connectionString,
-                ServerVersion.AutoDetect(connectionString)
+                new MySqlServerVersion(new Version(9,5,2))
             );
 
             return new AppDbContext(optionsBuilder.Options);
