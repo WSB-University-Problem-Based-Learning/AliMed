@@ -1,11 +1,15 @@
 using System;
+using System;
+using API.Alimed.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace API.Alimed.Migrations
 {
-    [DbContext(typeof(API.Alimed.Data.AppDbContext))]
+    [DbContext(typeof(AppDbContext))]
     [Migration("20260120123000_AddZawartoscToDokumenty")]
     public partial class AddZawartoscToDokumenty : Migration
     {
