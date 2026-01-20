@@ -49,6 +49,18 @@ const normalizeStatus = (value: unknown): string | undefined => {
   return value != null ? String(value) : undefined;
 };
 
+const normalizeLekarzName = (value: unknown): string | undefined => {
+  if (typeof value === 'string') {
+    return value.trim() || undefined;
+  }
+  if (value && typeof value === 'object') {
+    const lekarz = value as { imie?: string; nazwisko?: string };
+    const fullName = [lekarz.imie, lekarz.nazwisko].filter(Boolean).join(' ');
+    return fullName || undefined;
+  }
+  return value != null ? String(value) : undefined;
+};
+
 export const apiService = {
   // Authentication - GitHub OAuth
   async loginWithGithub(code: string): Promise<AuthResponse> {
@@ -156,8 +168,8 @@ export const apiService = {
       dataWizyty: w.dataWizyty,
       status: normalizeStatus(w.status),
       czyOdbyta: normalizeStatus(w.status) === 'Zrealizowana',
-      lekarzName: w.lekarz,
-      specjalizacja: w.specjalizacja,
+      lekarzName: normalizeLekarzName(w.lekarz),
+      specjalizacja: w.specjalizacja ?? w.lekarz?.specjalizacja,
       placowka: w.placowka,
     }));
   },
@@ -174,8 +186,8 @@ export const apiService = {
       dataWizyty: data.dataWizyty,
       status: normalizeStatus(data.status),
       diagnoza: data.diagnoza,
-      lekarz: data.lekarz,
-      specjalizacja: data.specjalizacja,
+      lekarz: normalizeLekarzName(data.lekarz),
+      specjalizacja: data.specjalizacja ?? data.lekarz?.specjalizacja,
       placowka: data.placowka,
       dokumenty: data.dokumenty || [],
     };
