@@ -64,7 +64,7 @@ const normalizeLekarzName = (value: unknown): string | undefined => {
 export const apiService = {
   // Authentication - GitHub OAuth
   async loginWithGithub(code: string): Promise<AuthResponse> {
-    const response = await fetch(`${API_BASE_URL}/api/auth/github`, {
+    const response = await fetch(`${API_BASE_URL}/api/Auth/github`, {
       method: 'POST',
       headers: getHeaders(),
       body: JSON.stringify({ code }),
@@ -81,7 +81,7 @@ export const apiService = {
 
   // Authentication - Local login (email + password)
   async loginLocal(credentials: LoginRequest): Promise<AuthResponse> {
-    const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+    const response = await fetch(`${API_BASE_URL}/api/Auth/login`, {
       method: 'POST',
       headers: getHeaders(),
       body: JSON.stringify(credentials),
@@ -100,7 +100,7 @@ export const apiService = {
 
   // Authentication - Register new user
   async register(data: RegisterRequest): Promise<AuthResponse> {
-    const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+    const response = await fetch(`${API_BASE_URL}/api/Auth/register`, {
       method: 'POST',
       headers: getHeaders(),
       body: JSON.stringify(data),
@@ -119,7 +119,7 @@ export const apiService = {
 
   // Pacjenci (requires User role)
   async getPacjenci(): Promise<Pacjent[]> {
-    const response = await fetch(`${API_BASE_URL}/api/authorizedendpoint/pacjenci`, {
+    const response = await fetch(`${API_BASE_URL}/api/AuthorizedEndpoint/pacjenci`, {
       headers: getHeaders(true),
       credentials: 'include',
     });
@@ -128,7 +128,7 @@ export const apiService = {
   },
 
   async getPacjentById(id: number): Promise<Pacjent> {
-    const response = await fetch(`${API_BASE_URL}/api/authorizedendpoint/pacjenci/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/AuthorizedEndpoint/pacjenci/${id}`, {
       headers: getHeaders(true),
       credentials: 'include',
     });
@@ -138,7 +138,7 @@ export const apiService = {
 
   // Lekarze (requires User role)
   async getLekarze(): Promise<Lekarz[]> {
-    const response = await fetch(`${API_BASE_URL}/api/authorizedendpoint/lekarze`, {
+    const response = await fetch(`${API_BASE_URL}/api/AuthorizedEndpoint/lekarze`, {
       headers: getHeaders(true),
       credentials: 'include',
     });
@@ -147,7 +147,7 @@ export const apiService = {
   },
 
   async getLekarzById(id: number): Promise<Lekarz> {
-    const response = await fetch(`${API_BASE_URL}/api/authorizedendpoint/lekarze/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/AuthorizedEndpoint/lekarze/${id}`, {
       headers: getHeaders(true),
       credentials: 'include',
     });
@@ -157,7 +157,7 @@ export const apiService = {
 
   // Wizyty - Use dedicated WizytyController endpoints
   async getWizyty(): Promise<Wizyta[]> {
-    const response = await fetch(`${API_BASE_URL}/api/wizyty/moje-wizyty`, {
+    const response = await fetch(`${API_BASE_URL}/api/Wizyty/moje-wizyty`, {
       headers: getHeaders(true),
       credentials: 'include',
     });
@@ -175,7 +175,7 @@ export const apiService = {
   },
 
   async getWizytaById(id: number): Promise<WizytaDetail> {
-    const response = await fetch(`${API_BASE_URL}/api/wizyty/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/Wizyty/${id}`, {
       headers: getHeaders(true),
       credentials: 'include',
     });
@@ -194,7 +194,7 @@ export const apiService = {
   },
 
   async createWizyta(wizyta: WizytaCreateRequest): Promise<{ message: string; wizytaId: number }> {
-    const response = await fetch(`${API_BASE_URL}/api/wizyty/umow-wizyte`, {
+    const response = await fetch(`${API_BASE_URL}/api/Wizyty/umow-wizyte`, {
       method: 'POST',
       headers: getHeaders(true),
       credentials: 'include',
@@ -220,7 +220,7 @@ export const apiService = {
       from,
       to,
     }).toString();
-    const response = await fetch(`${API_BASE_URL}/api/wizyty/dostepne-terminy?${qs}`, {
+    const response = await fetch(`${API_BASE_URL}/api/Wizyty/dostepne-terminy?${qs}`, {
       headers: getHeaders(true),
       credentials: 'include',
     });
@@ -233,7 +233,7 @@ export const apiService = {
 
   // Placówki
   async getPlacowki(): Promise<Placowka[]> {
-    const response = await fetch(`${API_BASE_URL}/api/placowki`, {
+    const response = await fetch(`${API_BASE_URL}/api/Placowki`, {
       headers: getHeaders(true),
       credentials: 'include',
     });
@@ -252,7 +252,7 @@ export const apiService = {
 
   // Dokumenty
   async getDokumenty(): Promise<Dokument[]> {
-    const response = await fetch(`${API_BASE_URL}/api/dokumenty`, {
+    const response = await fetch(`${API_BASE_URL}/api/Dokumenty`, {
       headers: getHeaders(true),
       credentials: 'include',
     });
@@ -261,7 +261,7 @@ export const apiService = {
   },
 
   async getDokumentById(id: number): Promise<Dokument> {
-    const response = await fetch(`${API_BASE_URL}/api/dokumenty/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/Dokumenty/${id}`, {
       headers: getHeaders(true),
       credentials: 'include',
     });
@@ -270,7 +270,7 @@ export const apiService = {
   },
 
   async downloadDokument(id: number): Promise<Blob> {
-    const response = await fetch(`${API_BASE_URL}/api/dokumenty/${id}/download`, {
+    const response = await fetch(`${API_BASE_URL}/api/Dokumenty/${id}/download`, {
       headers: getHeaders(true),
       credentials: 'include',
     });
@@ -279,7 +279,7 @@ export const apiService = {
   },
 
   async createDokument(data: DokumentCreateRequest): Promise<Dokument> {
-    const response = await fetch(`${API_BASE_URL}/api/dokumenty`, {
+    const response = await fetch(`${API_BASE_URL}/api/Dokumenty`, {
       method: 'POST',
       headers: getHeaders(true),
       credentials: 'include',
@@ -293,7 +293,7 @@ export const apiService = {
   },
 
   async oznaczWizyteOdbyta(id: number, diagnoza: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/api/wizyty/${id}/odbyta`, {
+    const response = await fetch(`${API_BASE_URL}/api/Wizyty/${id}/odbyta`, {
       method: 'PUT',
       headers: getHeaders(true),
       credentials: 'include',
@@ -306,7 +306,7 @@ export const apiService = {
   },
 
   async getDokumentyWizytyLekarz(wizytaId: number): Promise<Dokument[]> {
-    const response = await fetch(`${API_BASE_URL}/api/dokumenty/wizyty/${wizytaId}/lekarz`, {
+    const response = await fetch(`${API_BASE_URL}/api/Dokumenty/wizyty/${wizytaId}/lekarz`, {
       headers: getHeaders(true),
       credentials: 'include',
     });
@@ -316,7 +316,7 @@ export const apiService = {
 
   // Refresh token - call backend refresh endpoint
   async refreshToken(): Promise<{ accessToken: string }> {
-    const response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
+    const response = await fetch(`${API_BASE_URL}/api/Auth/refresh`, {
       method: 'POST',
       credentials: 'include', // Send HttpOnly cookie
     });
@@ -327,7 +327,7 @@ export const apiService = {
   // Logout - revoke refresh token on backend
   async logout(): Promise<void> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/logout`, {
+      const response = await fetch(`${API_BASE_URL}/api/Auth/logout`, {
         method: 'POST',
         headers: getHeaders(true),
         credentials: 'include', // Send HttpOnly cookie to revoke it
@@ -342,7 +342,7 @@ export const apiService = {
 
   // Get current user's patient profile
   async getMojProfil(): Promise<Pacjent> {
-    const response = await fetch(`${API_BASE_URL}/api/pacjenci/moj-profil`, {
+    const response = await fetch(`${API_BASE_URL}/api/Pacjenci/moj-profil`, {
       headers: getHeaders(true),
       credentials: 'include',
     });
@@ -368,7 +368,7 @@ export const apiService = {
 
   // Update current user's patient profile
   async updateMojProfil(payload: UpdatePacjentProfileRequest): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/api/pacjenci/moj-profil`, {
+    const response = await fetch(`${API_BASE_URL}/api/Pacjenci/moj-profil`, {
       method: 'PUT',
       headers: getHeaders(true),
       credentials: 'include',
@@ -382,7 +382,7 @@ export const apiService = {
 
   // Admin
   async getAdminUsers(): Promise<AdminUserSummary[]> {
-    const response = await fetch(`${API_BASE_URL}/api/admin/users`, {
+    const response = await fetch(`${API_BASE_URL}/api/Admin/users`, {
       headers: getHeaders(true),
       credentials: 'include',
     });
@@ -391,7 +391,7 @@ export const apiService = {
   },
 
   async promoteUserToDoctor(userId: string, data: PromoteToDoctorRequest): Promise<{ message: string }> {
-    const response = await fetch(`${API_BASE_URL}/api/admin/users/${userId}/promote-to-doctor`, {
+    const response = await fetch(`${API_BASE_URL}/api/Admin/users/${userId}/promote-to-doctor`, {
       method: 'PUT',
       headers: getHeaders(true),
       credentials: 'include',
@@ -405,7 +405,7 @@ export const apiService = {
   },
 
   async getAdminPacjenci(): Promise<AdminPacjentSummary[]> {
-    const response = await fetch(`${API_BASE_URL}/api/admin/pacjenci`, {
+    const response = await fetch(`${API_BASE_URL}/api/Admin/pacjenci`, {
       headers: getHeaders(true),
       credentials: 'include',
     });
@@ -414,7 +414,7 @@ export const apiService = {
   },
 
   async getAdminLekarze(): Promise<AdminLekarzSummary[]> {
-    const response = await fetch(`${API_BASE_URL}/api/admin/lekarze`, {
+    const response = await fetch(`${API_BASE_URL}/api/Admin/lekarze`, {
       headers: getHeaders(true),
       credentials: 'include',
     });
@@ -436,7 +436,7 @@ export const apiService = {
 
   async getLekarzWizytyDzien(date: string): Promise<LekarzWizytaSummary[]> {
     const qs = new URLSearchParams({ date }).toString();
-    const response = await fetch(`${API_BASE_URL}/api/lekarze/moje-wizyty/dzien?${qs}`, {
+    const response = await fetch(`${API_BASE_URL}/api/Lekarze/moje-wizyty/dzien?${qs}`, {
       headers: getHeaders(true),
       credentials: 'include',
     });
@@ -447,7 +447,7 @@ export const apiService = {
 
   async getLekarzWizytyTydzien(date: string): Promise<LekarzWizytaSummary[]> {
     const qs = new URLSearchParams({ date }).toString();
-    const response = await fetch(`${API_BASE_URL}/api/lekarze/moje-wizyty/tydzien?${qs}`, {
+    const response = await fetch(`${API_BASE_URL}/api/Lekarze/moje-wizyty/tydzien?${qs}`, {
       headers: getHeaders(true),
       credentials: 'include',
     });
@@ -458,7 +458,7 @@ export const apiService = {
 
   async getLekarzWizytyMiesiac(date: string): Promise<LekarzWizytaSummary[]> {
     const qs = new URLSearchParams({ date }).toString();
-    const response = await fetch(`${API_BASE_URL}/api/lekarze/moje-wizyty/miesiac?${qs}`, {
+    const response = await fetch(`${API_BASE_URL}/api/Lekarze/moje-wizyty/miesiac?${qs}`, {
       headers: getHeaders(true),
       credentials: 'include',
     });
@@ -468,14 +468,18 @@ export const apiService = {
   },
 
   async getLekarzWizyty(): Promise<LekarzWizytaSummary[]> {
-    // Endpoint /api/lekarze/moje-wizyty zwraca 404, więc używamy widoku miesiąca jako domyślnego
-    const today = new Date().toISOString();
-    return this.getLekarzWizytyMiesiac(today);
+    const response = await fetch(`${API_BASE_URL}/api/Lekarze/moje-wizyty`, {
+      headers: getHeaders(true),
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to fetch doctor visits');
+    const data = await response.json();
+    return data.map((row: any) => this.mapLekarzWizyta(row));
   },
 
   async getLekarzPacjenci(query?: string): Promise<Pacjent[]> {
     const qs = query ? `?${new URLSearchParams({ query }).toString()}` : '';
-    const response = await fetch(`${API_BASE_URL}/api/lekarze/pacjenci${qs}`, {
+    const response = await fetch(`${API_BASE_URL}/api/Lekarze/pacjenci${qs}`, {
       headers: getHeaders(true),
       credentials: 'include',
     });
