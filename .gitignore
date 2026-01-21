@@ -10,6 +10,7 @@
 
 # testing
 /coverage
+/test/
 test-results/
 playwright-report/
 

@@ -62,6 +62,6 @@ sudo systemctl restart nginx
 ## 🔐 Configuration Management
 Configuration is managed via files on the server that are **NOT** in the repository.
 - **Backend**: `/opt/alimed/api/appsettings.Production.json` (Database connection, etc.)
-- **Nginx**: `/etc/nginx/sites-enabled/default` (or similar config file)
+- **Nginx**: `/etc/nginx/conf.d/alimed.conf` (Main site configuration)
 
 **Do not overwrite these files during deployment.** The deployment script only updates the application binaries.
