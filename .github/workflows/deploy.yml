@@ -2,9 +2,6 @@
 name: Deploy to Server
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
   workflow_run:
     workflows:
@@ -15,7 +12,11 @@ on:
 jobs:
   deploy-frontend:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    if: |
+      github.event_name == 'workflow_dispatch' || 
+      (github.event_name == 'workflow_run' && 
+       github.event.workflow_run.conclusion == 'success' && 
+       github.event.workflow_run.head_branch == 'main')
     environment: production
     steps:
       - name: Download frontend build artifact (from triggering run)
@@ -25,7 +26,7 @@ jobs:
           name: frontend-dist
           path: dist/
           run-id: ${{ github.event.workflow_run.id }}
-          repository: ${{ github.repository }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Download frontend build artifact (current run)
         if: ${{ github.event_name != 'workflow_run' }}

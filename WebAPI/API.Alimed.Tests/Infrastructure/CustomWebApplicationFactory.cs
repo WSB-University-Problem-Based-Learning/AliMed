@@ -49,7 +49,34 @@ public class CustomWebApplicationFactory
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        var contentRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "API.Alimed"));
+        var baseDir = AppContext.BaseDirectory;
+        var projectDir = new DirectoryInfo(baseDir);
+        
+        // Szukaj katalogu WebAPI lub AliMed (katalogu nadrzędnego projektów)
+        while (projectDir != null && projectDir.Name != "WebAPI" && projectDir.Name != "AliMed")
+        {
+            projectDir = projectDir.Parent;
+        }
+
+        string? contentRoot = null;
+        if (projectDir != null)
+        {
+            if (projectDir.Name == "WebAPI")
+            {
+                contentRoot = Path.Combine(projectDir.FullName, "API.Alimed");
+            }
+            else if (projectDir.Name == "AliMed")
+            {
+                contentRoot = Path.Combine(projectDir.FullName, "WebAPI", "API.Alimed");
+            }
+        }
+
+        if (contentRoot == null || !Directory.Exists(contentRoot))
+        {
+            // Fallback do starej metody z poprawką na poziom zagłębienia
+            contentRoot = Path.GetFullPath(Path.Combine(baseDir, "..", "..", "..", "..", "API.Alimed"));
+        }
+
         builder.UseContentRoot(contentRoot);
         builder.ConfigureServices(services =>
         {
