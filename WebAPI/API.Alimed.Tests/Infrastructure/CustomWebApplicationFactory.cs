@@ -5,6 +5,8 @@ using Microsoft.Extensions.DependencyInjection;
 using API.Alimed.Data;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.VisualStudio.TestPlatform.TestHost;
+using System;
+using System.IO;
 
 namespace API.Alimed.Tests.Infrastructure;
 
@@ -47,6 +49,8 @@ public class CustomWebApplicationFactory
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        var contentRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "API.Alimed"));
+        builder.UseContentRoot(contentRoot);
         builder.ConfigureServices(services =>
         {
             // Usuń prawdziwą bazę
