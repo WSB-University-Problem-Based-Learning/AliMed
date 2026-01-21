@@ -39,7 +39,7 @@ jobs:
           name: frontend-dist
           path: dist/
 
-      - name: Deploy to Server
+      - name: Deploy Frontend
         uses: easingthemes/ssh-deploy@v5.1.0
         with:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -50,7 +50,40 @@ jobs:
           EXCLUDE: "/node_modules/"
           SCRIPT_BEFORE: |
             whoami
-            ls -al
           SCRIPT_AFTER: |
-            echo "Deployment completed successfully"
+            echo "Frontend Deployment completed successfully"
             ls -al ${{ secrets.REMOTE_TARGET }}
+
+  deploy-backend:
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'workflow_dispatch' || 
+      (github.event_name == 'workflow_run' && 
+       github.event.workflow_run.conclusion == 'success' && 
+       github.event.workflow_run.head_branch == 'main' &&
+       github.event.workflow.name == 'Backend CI')
+    environment: production
+    steps:
+      - name: Download backend artifact (from triggering run)
+        if: ${{ github.event_name == 'workflow_run' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-publish
+          path: backend-publish/
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Deploy Backend
+        uses: easingthemes/ssh-deploy@v5.1.0
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_USER: ${{ secrets.REMOTE_USER }}
+          SOURCE: "backend-publish/"
+          TARGET: ${{ secrets.REMOTE_TARGET_BACKEND }}
+          SCRIPT_BEFORE: |
+            sudo systemctl stop alimed-api
+          SCRIPT_AFTER: |
+            sudo systemctl start alimed-api
+            echo "Backend Deployment completed successfully"
+            systemctl status alimed-api --no-pager

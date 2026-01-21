@@ -74,8 +74,12 @@ jobs:
         working-directory: WebAPI/API.Alimed.Tests
         run: dotnet test --configuration Release --verbosity normal
 
-      - name: Upload test results
+      - name: Publish
+        working-directory: WebAPI
+        run: dotnet publish API.Alimed/API.Alimed.csproj -c Release -o ./publish
+
+      - name: Upload publish artifact
         uses: actions/upload-artifact@v4
         with:
-          name: backend-test-results
-          path: WebAPI/API.Alimed.Tests/TestResults/
+          name: backend-publish
+          path: WebAPI/publish/
