@@ -12,9 +12,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // mysql conn
+// mysql conn
 var mysqlConn = builder.Configuration.GetConnectionString("MySqlConnection");
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySql(mysqlConn, new MySqlServerVersion(new Version(8, 0, 0))));
+if (!string.IsNullOrEmpty(mysqlConn))
+{
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseMySql(mysqlConn, new MySqlServerVersion(new Version(8, 0, 0))));
+}
 
 // Dodanie konfiguracji JWT
 builder.Services.AddScoped<IJwtService, JwtService>();

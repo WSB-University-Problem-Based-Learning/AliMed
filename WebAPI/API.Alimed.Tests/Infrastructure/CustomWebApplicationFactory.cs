@@ -7,45 +7,21 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.VisualStudio.TestPlatform.TestHost;
 using System;
 using System.IO;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.Data.Sqlite;
+using System.Data.Common;
 
 namespace API.Alimed.Tests.Infrastructure;
 
 public class CustomWebApplicationFactory
     : WebApplicationFactory<Program>
 {
-    // protected override void ConfigureWebHost(IWebHostBuilder builder)
-    // {
-    //     builder.ConfigureServices(services =>
-    //     {
-    //         var descriptor = services.SingleOrDefault(
-    //             d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
+    public CustomWebApplicationFactory()
+    {
+        Environment.SetEnvironmentVariable("ConnectionStrings__MySqlConnection", "");
+    }
 
-    //         if (descriptor != null)
-    //             services.Remove(descriptor);
 
-    //         services.AddDbContext<AppDbContext>(options =>
-    //         {
-    //             options.UseSqlite("DataSource=:memory:");
-    //         });
-
-    //         services.AddAuthentication("Test")
-    //             .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(
-    //                 "Test", _ => { });
-
-    //         services.AddAuthentication(TestAuthHandler.SchemeName)
-    // .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(
-    //     TestAuthHandler.SchemeName, _ => { });
-
-        
-    //         var sp = services.BuildServiceProvider();
-
-    //         using var scope = sp.CreateScope();
-    //         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
-    //         db.Database.OpenConnection();
-    //         db.Database.EnsureCreated();
-    //     });
-    // }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -81,16 +57,35 @@ public class CustomWebApplicationFactory
         builder.ConfigureServices(services =>
         {
             // Usuń prawdziwą bazę
-            var dbDescriptor = services.SingleOrDefault(
-                d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
+            var descriptors = services.Where(
+                d => d.ServiceType == typeof(DbContextOptions<AppDbContext>) ||
+                     d.ServiceType == typeof(DbContextOptions) ||
+                     d.ServiceType == typeof(AppDbContext)).ToList();
+            
+            foreach (var d in descriptors)
+            {
+                services.Remove(d);
+            }
 
-            if (dbDescriptor != null)
-                services.Remove(dbDescriptor);
+            // SQLite InMemory persistent
+            var connection = new SqliteConnection("DataSource=:memory:");
+            connection.Open();
+            services.AddSingleton<DbConnection>(connection);
 
-            // SQLite InMemory
             services.AddDbContext<AppDbContext>(options =>
             {
-                options.UseSqlite("DataSource=:memory:");
+                options.UseSqlite(connection);
+            });
+
+            // Auth
+            services.AddAuthentication("Test")
+                .AddScheme<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions, TestAuthHandler>(
+                    "Test", _ => { });
+
+            services.PostConfigure<AuthenticationOptions>(options => 
+            {
+                options.DefaultAuthenticateScheme = "Test";
+                options.DefaultChallengeScheme = "Test";
             });
 
             var sp = services.BuildServiceProvider();
@@ -101,5 +96,6 @@ public class CustomWebApplicationFactory
             db.Database.OpenConnection();
             db.Database.EnsureCreated();
         });
+
     }
 }
