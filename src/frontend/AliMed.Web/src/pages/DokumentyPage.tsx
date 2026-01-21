@@ -151,7 +151,7 @@ const DokumentyPage: React.FC = () => {
   const handleDownloadPdf = async (dokument: Dokument) => {
     const popup = window.open('', '_blank');
     if (!popup) {
-      alert('Popup zablokowany. Zezwol na otwieranie okien.');
+      alert(t('visitDetails.popupBlocked'));
       return;
     }
     try {
@@ -299,7 +299,7 @@ const DokumentyPage: React.FC = () => {
                 <div className="p-3 bg-alimed-blue/10 rounded-lg">
                   <DocumentTextIcon className="h-8 w-8 text-alimed-blue" />
                 </div>
-                
+
                 <div className="flex-1 space-y-2">
                   {/* Document Name */}
                   <h3 className="text-lg font-semibold text-gray-900">
@@ -342,7 +342,7 @@ const DokumentyPage: React.FC = () => {
                 className="flex items-center gap-2 px-4 py-2 bg-alimed-blue text-white rounded-lg hover:bg-alimed-light-blue transition-colors"
               >
                 <ArrowDownTrayIcon className="h-5 w-5" />
-                Pobierz jako PDF
+                {t('visitDetails.downloadPdf')}
               </button>
             </div>
           </Card>

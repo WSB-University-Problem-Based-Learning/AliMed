@@ -68,7 +68,10 @@
     "error": "Błąd",
     "redirecting": "Przekierowywanie...",
     "noAccount": "Nie masz konta?",
-    "registerLink": "Zarejestruj się"
+    "registerLink": "Zarejestruj się",
+    "invalidCredentials": "Nieprawidłowy adres email lub hasło",
+    "loginError": "Błąd logowania",
+    "loggingIn": "Logowanie..."
   },
   "register": {
     "title": "Załóż konto w AliMed",
@@ -134,7 +137,8 @@
     "subtitle": "Przeglądaj listę lekarzy w naszych placówkach",
     "errorLoading": "Błąd podczas wczytywania listy lekarzy",
     "noDoctors": "Brak lekarzy spełniających kryteria",
-    "totalDoctors": "Liczba lekarzy"
+    "totalDoctors": "Liczba lekarzy",
+    "doctorPrefix": "dr"
   },
   "facilities": {
     "title": "Placówki",
@@ -254,7 +258,11 @@
     "reject": "Odrzuć",
     "noUpcomingVisits": "Brak nadchodzących wizyt",
     "noPendingConfirmations": "Brak oczekujących potwierdzeń",
-    "tryDemoDoctor": "Wypróbuj jako lekarz"
+    "tryDemoDoctor": "Wypróbuj jako lekarz",
+    "weeklyVisits": "Wizyty w tym tygodniu",
+    "noWeeklyVisits": "Brak wizyt w tym tygodniu.",
+    "errorLoading": "Błąd ładowania",
+    "statusLabel": "Status"
   },
   "doctorVisits": {
     "title": "Wizyty",
@@ -303,7 +311,8 @@
     "actions": "Akcje",
     "view": "Zobacz",
     "edit": "Edytuj",
-    "noPatients": "Brak pacjentów"
+    "noPatients": "Brak pacjentów",
+    "peselLabel": "PESEL"
   },
   "doctorDocumentation": {
     "title": "Dokumentacja medyczna",
@@ -325,7 +334,13 @@
     "typeRecepta": "Recepta",
     "typeOpis": "Opis",
     "typeSkierowanie": "Skierowanie",
-    "noDocuments": "Brak dokumentów"
+    "noDocuments": "Brak dokumentów",
+    "errorLoadingVisits": "Błąd ładowania wizyt",
+    "errorLoadingDocuments": "Błąd ładowania dokumentów",
+    "selectVisitAndType": "Wybierz wizytę i typ dokumentu.",
+    "documentSaved": "Dokument został zapisany.",
+    "documentSaveError": "Błąd zapisu dokumentu",
+    "selectVisit": "Wybierz wizytę"
   },
   "doctorMyData": {
     "title": "Moje dane",
@@ -339,6 +354,24 @@
     "save": "zapisz",
     "saveSuccess": "Dane zostały pomyślnie zapisane",
     "errorSaving": "Błąd podczas zapisywania danych"
+  },
+  "visitDetails": {
+    "title": "Szczegóły wizyty",
+    "checkInfo": "Sprawdź informacje, dokumenty i pobierz PDF.",
+    "close": "Zamknij",
+    "visitDate": "Termin wizyty",
+    "status": "Status",
+    "facility": "Placówka",
+    "doctor": "Lekarz",
+    "diagnosis": "Diagnoza",
+    "noDiagnosis": "Diagnoza nie została jeszcze uzupełniona.",
+    "documents": "Dokumenty z wizyty",
+    "clickToDownload": "Kliknij, aby pobrać dokument w PDF.",
+    "files": "plików",
+    "type": "Typ",
+    "downloadPdf": "Pobierz jako PDF",
+    "noDocuments": "Brak dokumentów. Pojawią się po zakończonej wizycie.",
+    "popupBlocked": "Popup zablokowany. Zezwól na otwieranie okien."
   },
   "adminDashboard": {
     "title": "Panel admina",

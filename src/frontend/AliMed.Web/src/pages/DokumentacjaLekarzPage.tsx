@@ -98,16 +98,12 @@ const DokumentacjaLekarzPage: React.FC = () => {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('pl-PL', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-    });
+    return date.toLocaleDateString();
   };
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleTimeString('pl-PL', {
+    return date.toLocaleTimeString([], {
       hour: '2-digit',
       minute: '2-digit',
     });
@@ -124,7 +120,7 @@ const DokumentacjaLekarzPage: React.FC = () => {
         const data = await apiService.getLekarzWizyty();
         setWizyty(data);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Blad ladowania wizyt');
+        setError(err instanceof Error ? err.message : t('doctorDocumentation.errorLoadingVisits'));
       } finally {
         setLoading(false);
       }
@@ -175,7 +171,7 @@ const DokumentacjaLekarzPage: React.FC = () => {
         setDokumenty(docs);
         setStatystyki(prev => ({ ...prev, dokumentacja: docs.length }));
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Blad ladowania dokumentow');
+        setError(err instanceof Error ? err.message : t('doctorDocumentation.errorLoadingDocuments'));
       } finally {
         setLoadingDokumenty(false);
       }
@@ -205,7 +201,7 @@ const DokumentacjaLekarzPage: React.FC = () => {
     setSubmitSuccess(null);
 
     if (!nowyDokument.wizytaId || !nowyDokument.typDokumentu) {
-      setSubmitError('Wybierz wizyte i typ dokumentu.');
+      setSubmitError(t('doctorDocumentation.selectVisitAndType'));
       return;
     }
 
@@ -238,9 +234,9 @@ const DokumentacjaLekarzPage: React.FC = () => {
         typDokumentu: '',
         tresc: '',
       }));
-      setSubmitSuccess('Dokument zostal zapisany.');
+      setSubmitSuccess(t('doctorDocumentation.documentSaved'));
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : 'Blad zapisu dokumentu');
+      setSubmitError(err instanceof Error ? err.message : t('doctorDocumentation.documentSaveError'));
     }
   };
 
@@ -381,9 +377,8 @@ const DokumentacjaLekarzPage: React.FC = () => {
             <div
               key={card.id}
               onClick={card.onClick}
-              className={`bg-white rounded-xl p-6 shadow-sm cursor-pointer transition-all duration-200 hover:shadow-md ${
-                activeCard === card.id ? `border-2 ${card.borderColor}` : 'border-2 border-transparent'
-              }`}
+              className={`bg-white rounded-xl p-6 shadow-sm cursor-pointer transition-all duration-200 hover:shadow-md ${activeCard === card.id ? `border-2 ${card.borderColor}` : 'border-2 border-transparent'
+                }`}
             >
               <div className="flex flex-col items-center text-center">
                 <div className={`w-14 h-14 rounded-full ${card.color} flex items-center justify-center mb-4`}>
@@ -501,7 +496,7 @@ const DokumentacjaLekarzPage: React.FC = () => {
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-alimed-blue focus:border-alimed-blue transition-colors"
                 >
-                  <option value="">Wybierz wizyte</option>
+                  <option value="">{t('doctorDocumentation.selectVisit')}</option>
                   {wizyty.map(w => (
                     <option key={w.wizytaId} value={w.wizytaId}>
                       {w.pacjent} • {formatDate(w.dataWizyty)} {formatTime(w.dataWizyty)}

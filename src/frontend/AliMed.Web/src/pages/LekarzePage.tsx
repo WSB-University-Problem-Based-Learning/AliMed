@@ -97,7 +97,7 @@ const LekarzePage: React.FC = () => {
                 </div>
                 <div className="flex-1">
                   <h3 className="font-semibold text-gray-900 text-lg">
-                    dr {lekarz.imie} {lekarz.nazwisko}
+                    {t('doctors.doctorPrefix')} {lekarz.imie} {lekarz.nazwisko}
                   </h3>
                   {lekarz.specjalizacja && (
                     <div className="flex items-center gap-1 text-gray-600 mt-1">

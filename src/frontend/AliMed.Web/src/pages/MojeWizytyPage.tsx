@@ -105,7 +105,7 @@ const MojeWizytyPage: React.FC = () => {
 
   const filterWizyty = (wizyty: Wizyta[]) => {
     const now = new Date();
-    
+
     switch (filter) {
       case 'upcoming':
         return wizyty.filter(w => !isCompletedStatus(w.status) && new Date(w.dataWizyty) >= now);
@@ -128,7 +128,7 @@ const MojeWizytyPage: React.FC = () => {
   const handlePreview = async (dokument: Dokument) => {
     const popup = window.open('', '_blank');
     if (!popup) {
-      alert('Popup zablokowany. Zezwol na otwieranie okien.');
+      alert(t('visitDetails.popupBlocked'));
       return;
     }
     try {
@@ -179,7 +179,7 @@ const MojeWizytyPage: React.FC = () => {
     <div>
       <div className="mb-6">
         <h2 className="text-3xl font-bold text-alimed-blue mb-4">{t('myVisits.title')}</h2>
-        
+
         {/* Demo mode notice */}
         {isDemoMode && (
           <div className="mb-4 bg-gradient-to-r from-purple-50 to-blue-50 border-l-4 border-purple-500 p-4 rounded-lg shadow-sm">
@@ -191,36 +191,33 @@ const MojeWizytyPage: React.FC = () => {
             </div>
           </div>
         )}
-        
+
         {/* Filter buttons */}
         <div className="flex gap-2 flex-wrap">
           <button
             onClick={() => setFilter('all')}
-            className={`px-4 py-2 rounded-lg transition-colors ${
-              filter === 'all'
+            className={`px-4 py-2 rounded-lg transition-colors ${filter === 'all'
                 ? 'bg-alimed-blue text-white'
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
+              }`}
           >
             {t('myVisits.all')}
           </button>
           <button
             onClick={() => setFilter('upcoming')}
-            className={`px-4 py-2 rounded-lg transition-colors ${
-              filter === 'upcoming'
+            className={`px-4 py-2 rounded-lg transition-colors ${filter === 'upcoming'
                 ? 'bg-alimed-blue text-white'
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
+              }`}
           >
             {t('myVisits.upcoming')}
           </button>
           <button
             onClick={() => setFilter('completed')}
-            className={`px-4 py-2 rounded-lg transition-colors ${
-              filter === 'completed'
+            className={`px-4 py-2 rounded-lg transition-colors ${filter === 'completed'
                 ? 'bg-alimed-blue text-white'
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
+              }`}
           >
             {t('myVisits.completed')}
           </button>
@@ -231,7 +228,7 @@ const MojeWizytyPage: React.FC = () => {
         {sortedWizyty.map((wizyta) => {
           const isPast = new Date(wizyta.dataWizyty) < new Date();
           const isCompleted = isCompletedStatus(wizyta.status);
-          
+
           return (
             <Card key={wizyta.wizytaId}>
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -319,7 +316,7 @@ const MojeWizytyPage: React.FC = () => {
                     }}
                     className="text-sm text-alimed-blue hover:underline"
                   >
-                    Szczegoly wizyty
+                    {t('visitDetails.title')}
                   </button>
                 </div>
               </div>
@@ -347,9 +344,9 @@ const MojeWizytyPage: React.FC = () => {
                   <CalendarIcon className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Szczegoly wizyty</h3>
+                  <h3 className="text-lg font-semibold text-gray-900">{t('visitDetails.title')}</h3>
                   <p className="text-sm text-gray-500">
-                    Sprawdz informacje, dokumenty i pobierz PDF.
+                    {t('visitDetails.checkInfo')}
                   </p>
                 </div>
               </div>
@@ -357,7 +354,7 @@ const MojeWizytyPage: React.FC = () => {
                 onClick={() => setSelectedWizyta(null)}
                 className="px-3 py-1.5 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
               >
-                Zamknij
+                {t('visitDetails.close')}
               </button>
             </div>
             <div className="p-6 space-y-6">
@@ -367,29 +364,29 @@ const MojeWizytyPage: React.FC = () => {
                 </div>
               )}
               {loadingDetails ? (
-                <div className="text-gray-500">Ladowanie...</div>
+                <div className="text-gray-500">{t('common.loading')}</div>
               ) : (
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="rounded-xl border border-gray-100 bg-gray-50 p-4 text-sm text-gray-700 space-y-2">
-                      <div className="text-xs uppercase tracking-wide text-gray-400">Termin wizyty</div>
+                      <div className="text-xs uppercase tracking-wide text-gray-400">{t('visitDetails.visitDate')}</div>
                       <div className="text-base font-semibold text-gray-900">
                         {formatDate(selectedWizyta.dataWizyty)} · {formatTime(selectedWizyta.dataWizyty)}
                       </div>
-                      <div><span className="text-gray-500">Status:</span> {selectedWizyta.status}</div>
-                      <div><span className="text-gray-500">Placowka:</span> {selectedWizyta.placowka}</div>
+                      <div><span className="text-gray-500">{t('visitDetails.status')}:</span> {selectedWizyta.status}</div>
+                      <div><span className="text-gray-500">{t('visitDetails.facility')}:</span> {selectedWizyta.placowka}</div>
                     </div>
                     <div className="rounded-xl border border-gray-100 bg-white p-4 text-sm text-gray-700 space-y-2">
-                      <div className="text-xs uppercase tracking-wide text-gray-400">Lekarz</div>
+                      <div className="text-xs uppercase tracking-wide text-gray-400">{t('visitDetails.doctor')}</div>
                       <div className="text-base font-semibold text-gray-900">
                         {selectedWizyta.lekarz} ({selectedWizyta.specjalizacja})
                       </div>
                       {selectedWizyta.diagnoza ? (
                         <div>
-                          <span className="text-gray-500">Diagnoza:</span> {selectedWizyta.diagnoza}
+                          <span className="text-gray-500">{t('visitDetails.diagnosis')}:</span> {selectedWizyta.diagnoza}
                         </div>
                       ) : (
-                        <div className="text-gray-400">Diagnoza nie zostala jeszcze uzupelniona.</div>
+                        <div className="text-gray-400">{t('visitDetails.noDiagnosis')}</div>
                       )}
                     </div>
                   </div>
@@ -397,11 +394,11 @@ const MojeWizytyPage: React.FC = () => {
                   <div className="rounded-xl border border-gray-100 p-4">
                     <div className="flex items-center justify-between mb-3">
                       <div>
-                        <h4 className="font-semibold text-gray-900">Dokumenty z wizyty</h4>
-                        <p className="text-sm text-gray-500">Kliknij, aby pobrac dokument w PDF.</p>
+                        <h4 className="font-semibold text-gray-900">{t('visitDetails.documents')}</h4>
+                        <p className="text-sm text-gray-500">{t('visitDetails.clickToDownload')}</p>
                       </div>
                       <span className="text-xs text-gray-400">
-                        {selectedWizyta.dokumenty.length} plikow
+                        {selectedWizyta.dokumenty.length} {t('visitDetails.files')}
                       </span>
                     </div>
                     {selectedWizyta.dokumenty.length > 0 ? (
@@ -416,21 +413,21 @@ const MojeWizytyPage: React.FC = () => {
                                 {formatDocumentName(d.nazwaPliku) || `Dokument #${d.dokumentId}`}
                               </div>
                               <div className="text-xs text-gray-500">
-                                Typ: {d.typDokumentu || 'inne'}
+                                {t('visitDetails.type')}: {d.typDokumentu || 'inne'}
                               </div>
                             </div>
                             <button
                               onClick={() => handlePreview(d)}
                               className="inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-alimed-blue bg-alimed-blue/10 rounded-lg hover:bg-alimed-blue/20 transition"
                             >
-                              Pobierz jako PDF
+                              {t('visitDetails.downloadPdf')}
                             </button>
                           </div>
                         ))}
                       </div>
                     ) : (
                       <div className="text-sm text-gray-500">
-                        Brak dokumentow. Pojawia sie po zakonczonej wizycie.
+                        {t('visitDetails.noDocuments')}
                       </div>
                     )}
                   </div>

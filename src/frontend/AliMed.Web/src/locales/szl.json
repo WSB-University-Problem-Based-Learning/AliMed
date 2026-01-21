@@ -68,7 +68,10 @@
     "error": "Feler",
     "redirecting": "Przekierowanie...",
     "noAccount": "Niy mŏsz kōnta?",
-    "registerLink": "Zarejestruj sie"
+    "registerLink": "Zarejestruj sie",
+    "invalidCredentials": "Felerne miano abo hasło",
+    "loginError": "Feler logowanio",
+    "loggingIn": "Logowanie..."
   },
   "register": {
     "title": "Załōż kōnto w AliMed",
@@ -134,7 +137,8 @@
     "subtitle": "Poglynd na lista dochtoroń w naszych placŏwkach",
     "errorLoading": "Feler przi ladowaniu listy dochtoroń",
     "noDoctors": "Niy ma dochtoroń spełniających kryteria",
-    "totalDoctors": "Liczba dochtoroń"
+    "totalDoctors": "Liczba dochtoroń",
+    "doctorPrefix": "dochtōr"
   },
   "facilities": {
     "title": "Placŏwki",
@@ -254,7 +258,11 @@
     "reject": "Ôdciep",
     "noUpcomingVisits": "Niy ma nadchodzōncych wizyt",
     "noPendingConfirmations": "Niy ma czekajōncych potwierdzyń",
-    "tryDemoDoctor": "Sprōbuj jako dochtōr"
+    "tryDemoDoctor": "Sprōbuj jako dochtōr",
+    "weeklyVisits": "Wizyty w tym tygodniu",
+    "noWeeklyVisits": "Brak wizyt w tym tygodniu.",
+    "errorLoading": "Błąd ładowania",
+    "statusLabel": "Status"
   },
   "doctorVisits": {
     "title": "Wizyty",
@@ -303,7 +311,8 @@
     "actions": "Akcyje",
     "view": "Podziywej",
     "edit": "Poedytuj",
-    "noPatients": "Niy ma pacjyntów"
+    "noPatients": "Niy ma pacjyntów",
+    "peselLabel": "PESEL"
   },
   "doctorDocumentation": {
     "title": "Dokumyntacyjo medyczno",
@@ -325,7 +334,13 @@
     "typeRecepta": "Recepta",
     "typeOpis": "Opis",
     "typeSkierowanie": "Skiyrowanie",
-    "noDocuments": "Niy ma dokumyntów"
+    "noDocuments": "Niy ma dokumyntów",
+    "errorLoadingVisits": "Błąd ładowania wizyt",
+    "errorLoadingDocuments": "Błąd ładowania dokumentów",
+    "selectVisitAndType": "Wybierz wizytę i typ dokumentu.",
+    "documentSaved": "Dokument został zapisany.",
+    "documentSaveError": "Błąd zapisu dokumentu",
+    "selectVisit": "Wybierz wizytę"
   },
   "doctorMyData": {
     "title": "Moje dane",
@@ -339,6 +354,24 @@
     "save": "spamiyntej",
     "saveSuccess": "Dane były pomyślnie spamiyntane",
     "errorSaving": "Feler przi spamiyntowaniu danych"
+  },
+  "visitDetails": {
+    "title": "Szczegóły wizyty",
+    "checkInfo": "Sprawdź informacje, dokumenty i pobierz PDF.",
+    "close": "Zamknij",
+    "visitDate": "Termin wizyty",
+    "status": "Status",
+    "facility": "Placówka",
+    "doctor": "Lekarz",
+    "diagnosis": "Diagnoza",
+    "noDiagnosis": "Diagnoza nie została jeszcze uzupełniona.",
+    "documents": "Dokumenty z wizyty",
+    "clickToDownload": "Kliknij, aby pobrać dokument w PDF.",
+    "files": "plików",
+    "type": "Typ",
+    "downloadPdf": "Pobierz jako PDF",
+    "noDocuments": "Brak dokumentów. Pojawią się po zakończonej wizycie.",
+    "popupBlocked": "Popup zablokowany. Zezwól na otwieranie okien."
   },
   "adminDashboard": {
     "title": "Panel admina",

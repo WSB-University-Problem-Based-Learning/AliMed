@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  CalendarDaysIcon, 
-  PlusCircleIcon, 
-  DocumentTextIcon, 
+import {
+  CalendarDaysIcon,
+  PlusCircleIcon,
+  DocumentTextIcon,
   UserCircleIcon,
-  XMarkIcon 
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 import { useTranslation } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
@@ -16,8 +16,8 @@ import { apiService } from '../services/api';
 const DashboardPage: React.FC = () => {
   const { t, language } = useTranslation();
   const { user: authUser, logout, isDemoMode } = useAuth();
-    const [wizyty, setWizyty] = useState<Wizyta[]>([]);
-    const [loading, setLoading] = useState(true);
+  const [wizyty, setWizyty] = useState<Wizyta[]>([]);
+  const [loading, setLoading] = useState(true);
   const [user] = useState<User | null>(() => {
     if (authUser) return authUser;
     const userData = localStorage.getItem('alimed_user');
@@ -48,7 +48,7 @@ const DashboardPage: React.FC = () => {
 
   useEffect(() => {
     const token = localStorage.getItem('alimed_token');
-    
+
     // Only redirect if there's no token at all
     if (!token) {
       navigate('/login');
@@ -61,7 +61,7 @@ const DashboardPage: React.FC = () => {
         const data = await apiService.getWizyty();
         // Filter only upcoming visits
         const now = new Date();
-        const upcomingWizyty = data.filter(w => 
+        const upcomingWizyty = data.filter(w =>
           !w.czyOdbyta && new Date(w.dataWizyty) >= now
         );
         setWizyty(upcomingWizyty);
@@ -110,31 +110,31 @@ const DashboardPage: React.FC = () => {
   }
 
   const quickActions = [
-    { 
-      icon: CalendarDaysIcon, 
-      title: t('dashboard.myVisits'), 
-      subtitle: t('dashboard.myVisitsDesc'), 
+    {
+      icon: CalendarDaysIcon,
+      title: t('dashboard.myVisits'),
+      subtitle: t('dashboard.myVisitsDesc'),
       color: 'bg-emerald-100 text-emerald-600',
       onClick: () => navigate('/moje-wizyty')
     },
-    { 
-      icon: PlusCircleIcon, 
-      title: t('dashboard.bookVisit'), 
-      subtitle: t('dashboard.bookVisitDesc'), 
+    {
+      icon: PlusCircleIcon,
+      title: t('dashboard.bookVisit'),
+      subtitle: t('dashboard.bookVisitDesc'),
       color: 'bg-purple-100 text-purple-600',
       onClick: () => navigate('/umow-wizyte')
     },
-    { 
-      icon: DocumentTextIcon, 
-      title: t('dashboard.documents'), 
-      subtitle: t('dashboard.documentsDesc'), 
+    {
+      icon: DocumentTextIcon,
+      title: t('dashboard.documents'),
+      subtitle: t('dashboard.documentsDesc'),
       color: 'bg-amber-100 text-amber-600',
       onClick: () => navigate('/dokumenty')
     },
-    { 
-      icon: UserCircleIcon, 
-      title: t('dashboard.myData'), 
-      subtitle: t('dashboard.myDataDesc'), 
+    {
+      icon: UserCircleIcon,
+      title: t('dashboard.myData'),
+      subtitle: t('dashboard.myDataDesc'),
       color: 'bg-rose-100 text-rose-600',
       onClick: () => navigate('/moje-dane')
     },
@@ -160,7 +160,7 @@ const DashboardPage: React.FC = () => {
               <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm">
                 {t('nav.myAccount')}
               </button>
-              <button 
+              <button
                 onClick={handleLogout}
                 className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition text-sm"
               >
@@ -211,7 +211,7 @@ const DashboardPage: React.FC = () => {
         {/* Upcoming visits */}
         <div className="bg-white rounded-xl shadow-sm p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('dashboard.upcomingVisits')}</h2>
-          
+
           {loading ? (
             <div className="text-center py-8 text-gray-500">{t('common.loading')}</div>
           ) : wizyty.length === 0 ? (
@@ -220,44 +220,44 @@ const DashboardPage: React.FC = () => {
             </div>
           ) : (
             <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="text-left text-sm text-gray-500 border-b">
-                  <th className="pb-3 font-medium">{t('dashboard.dateTime')}</th>
-                  <th className="pb-3 font-medium">{t('dashboard.doctor')}</th>
-                  <th className="pb-3 font-medium">{t('dashboard.specialization')}</th>
-                  <th className="pb-3 font-medium">{t('dashboard.facility')}</th>
-                  <th className="pb-3 font-medium">{t('common.actions')}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {wizyty.map((wizyta) => (
-                  <tr key={wizyta.wizytaId} className="text-sm">
-                    <td className="py-4 text-gray-900">
-                      {formatDate(wizyta.dataWizyty)} {formatTime(wizyta.dataWizyty)}
-                    </td>
-                    <td className="py-4 text-gray-900">
-                      {wizyta.lekarz ? `${wizyta.lekarz.imie} ${wizyta.lekarz.nazwisko}` : '-'}
-                    </td>
-                    <td className="py-4 text-gray-600">
-                      {wizyta.lekarz?.specjalizacja || '-'}
-                    </td>
-                    <td className="py-4 text-gray-600">
-                      {typeof wizyta.placowka === 'string' ? wizyta.placowka : wizyta.placowka?.nazwa || '-'}
-                    </td>
-                    <td className="py-4">
-                      <button 
-                        onClick={() => setSelectedWizyta(wizyta)}
-                        className="text-alimed-blue hover:underline text-sm"
-                      >
-                        {t('common.details')}
-                      </button>
-                    </td>
+              <table className="w-full">
+                <thead>
+                  <tr className="text-left text-sm text-gray-500 border-b">
+                    <th className="pb-3 font-medium">{t('dashboard.dateTime')}</th>
+                    <th className="pb-3 font-medium">{t('dashboard.doctor')}</th>
+                    <th className="pb-3 font-medium">{t('dashboard.specialization')}</th>
+                    <th className="pb-3 font-medium">{t('dashboard.facility')}</th>
+                    <th className="pb-3 font-medium">{t('common.actions')}</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {wizyty.map((wizyta) => (
+                    <tr key={wizyta.wizytaId} className="text-sm">
+                      <td className="py-4 text-gray-900">
+                        {formatDate(wizyta.dataWizyty)} {formatTime(wizyta.dataWizyty)}
+                      </td>
+                      <td className="py-4 text-gray-900">
+                        {wizyta.lekarz ? `${wizyta.lekarz.imie} ${wizyta.lekarz.nazwisko}` : '-'}
+                      </td>
+                      <td className="py-4 text-gray-600">
+                        {wizyta.lekarz?.specjalizacja || '-'}
+                      </td>
+                      <td className="py-4 text-gray-600">
+                        {typeof wizyta.placowka === 'string' ? wizyta.placowka : wizyta.placowka?.nazwa || '-'}
+                      </td>
+                      <td className="py-4">
+                        <button
+                          onClick={() => setSelectedWizyta(wizyta)}
+                          className="text-alimed-blue hover:underline text-sm"
+                        >
+                          {t('common.details')}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       </main>
@@ -272,18 +272,18 @@ const DashboardPage: React.FC = () => {
             >
               <XMarkIcon className="w-6 h-6" />
             </button>
-            
-            <h3 className="text-xl font-bold text-gray-900 mb-4">{t('dashboard.visitDetails')}</h3>
-            
+
+            <h3 className="text-xl font-bold text-gray-900 mb-4">{t('visitDetails.title')}</h3>
+
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-gray-500">{t('dashboard.dateTime')}</label>
+                <label className="text-sm font-medium text-gray-500">{t('visitDetails.visitDate')}</label>
                 <p className="text-gray-900">
                   {formatDate(selectedWizyta.dataWizyty)} {formatTime(selectedWizyta.dataWizyty)}
                 </p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">{t('dashboard.doctor')}</label>
+                <label className="text-sm font-medium text-gray-500">{t('visitDetails.doctor')}</label>
                 <p className="text-gray-900">
                   {selectedWizyta.lekarz ? `${selectedWizyta.lekarz.imie} ${selectedWizyta.lekarz.nazwisko}` : '-'}
                 </p>
@@ -293,21 +293,21 @@ const DashboardPage: React.FC = () => {
                 <p className="text-gray-900">{selectedWizyta.lekarz?.specjalizacja || '-'}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-500">{t('dashboard.facility')}</label>
+                <label className="text-sm font-medium text-gray-500">{t('visitDetails.facility')}</label>
                 <p className="text-gray-900">
-                  {typeof selectedWizyta.placowka === 'string' 
-                    ? selectedWizyta.placowka 
+                  {typeof selectedWizyta.placowka === 'string'
+                    ? selectedWizyta.placowka
                     : selectedWizyta.placowka?.nazwa || '-'}
                 </p>
               </div>
             </div>
-            
+
             <div className="mt-6 flex gap-3">
               <button
                 onClick={() => setSelectedWizyta(null)}
                 className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition"
               >
-                {t('common.cancel')}
+                {t('common.close')}
               </button>
               <button
                 onClick={() => {

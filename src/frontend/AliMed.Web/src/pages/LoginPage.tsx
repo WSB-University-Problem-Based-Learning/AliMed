@@ -34,7 +34,7 @@ const LoginPage: React.FC = () => {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.message || 'Nieprawidłowy email lub hasło');
+        throw new Error(errorData?.message || t('login.invalidCredentials'));
       }
 
       const data = await response.json();
@@ -51,7 +51,7 @@ const LoginPage: React.FC = () => {
         window.location.href = '/dashboard';
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Błąd logowania');
+      setError(err instanceof Error ? err.message : t('login.loginError'));
     } finally {
       setIsLoading(false);
     }
@@ -134,7 +134,7 @@ const LoginPage: React.FC = () => {
             disabled={isLoading}
             className="w-full bg-alimed-light-blue hover:bg-alimed-blue text-white font-medium py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? 'Logowanie...' : t('login.submit')}
+            {isLoading ? t('login.loggingIn') : t('login.submit')}
           </button>
         </form>
 
