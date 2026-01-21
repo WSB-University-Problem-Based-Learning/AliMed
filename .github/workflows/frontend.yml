@@ -1,10 +1,23 @@
+
 name: Frontend CI
 
 on:
   push:
     branches: [ main, feature/frontend ]
+    paths:
+      - 'src/frontend/**'
+      - 'test/e2e/**'
+      - '.github/workflows/frontend.yml'
+      - 'package.json'
+      - 'package-lock.json'
   pull_request:
     branches: [ main ]
+    paths:
+      - 'src/frontend/**'
+      - 'test/e2e/**'
+      - '.github/workflows/frontend.yml'
+      - 'package.json'
+      - 'package-lock.json'
 
 jobs:
   build:
@@ -13,12 +26,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Cache node modules
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('src/frontend/AliMed.Web/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: src/frontend/AliMed.Web/package-lock.json
 
       - name: Install dependencies
         working-directory: src/frontend/AliMed.Web
@@ -27,8 +46,13 @@ jobs:
       - name: Lint
         working-directory: src/frontend/AliMed.Web
         run: npm run lint
-        continue-on-error: true
 
       - name: Build
         working-directory: src/frontend/AliMed.Web
         run: npm run build
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: src/frontend/AliMed.Web/dist/

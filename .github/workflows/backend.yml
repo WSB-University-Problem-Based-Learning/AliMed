@@ -1,10 +1,23 @@
+
 name: Backend CI
 
 on:
   push:
     branches: [ main, feature/backend ]
+    paths:
+      - 'WebAPI/**'
+      - '.github/workflows/backend.yml'
+      - 'src/backend/**'
+      - '**/*.csproj'
+      - '**/*.sln'
   pull_request:
     branches: [ main ]
+    paths:
+      - 'WebAPI/**'
+      - '.github/workflows/backend.yml'
+      - 'src/backend/**'
+      - '**/*.csproj'
+      - '**/*.sln'
 
 jobs:
   build-and-test:
@@ -12,6 +25,14 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('WebAPI/API.Alimed/API.Alimed.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -33,4 +54,9 @@ jobs:
       - name: Run tests
         working-directory: WebAPI/API.Alimed.Tests
         run: dotnet test --configuration Release --no-build --verbosity normal
-        continue-on-error: true
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-results
+          path: WebAPI/API.Alimed.Tests/TestResults/
