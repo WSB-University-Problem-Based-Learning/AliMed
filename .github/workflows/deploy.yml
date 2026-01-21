@@ -9,6 +9,10 @@ on:
     types:
       - completed
 
+permissions:
+  actions: read
+  contents: read
+
 jobs:
   deploy-frontend:
     runs-on: ubuntu-latest
