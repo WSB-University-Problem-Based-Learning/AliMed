@@ -6,6 +6,7 @@ on:
   workflow_run:
     workflows:
       - Frontend CI
+      - Backend CI
     types:
       - completed
 
