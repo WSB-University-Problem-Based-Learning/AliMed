@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   CalendarDaysIcon,
@@ -9,38 +9,63 @@ import {
 import { useTranslation } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import LanguageSwitcher from '../components/LanguageSwitcher';
-
-interface PacjentLekarza {
-  id: number;
-  imie: string;
-  nazwisko: string;
-  pesel: string;
-  typWizyty: string;
-}
-
-// Mock data - w przyszłości z API
-const mockPacjenci: PacjentLekarza[] = [
-  { id: 1, imie: 'Maria', nazwisko: 'Nowak', pesel: '85031234567', typWizyty: 'Konsultacja' },
-  { id: 2, imie: 'Jan', nazwisko: 'Kowalski', pesel: '78012345678', typWizyty: 'Kontrola' },
-  { id: 3, imie: 'Anna', nazwisko: 'Wiśniewska', pesel: '92040987654', typWizyty: 'Pierwsza wizyta' },
-  { id: 4, imie: 'Piotr', nazwisko: 'Zieliński', pesel: '65081234567', typWizyty: 'Konsultacja' },
-  { id: 5, imie: 'Katarzyna', nazwisko: 'Lewandowska', pesel: '88120987654', typWizyty: 'Kontrola' },
-];
-
-const mockStatystyki = {
-  wizyty: 12,
-  pacjenci: 248,
-  dokumentacja: 34,
-};
+import { apiService } from '../services/api';
+import type { Pacjent } from '../types/api';
 
 const PacjenciLekarzPage: React.FC = () => {
   const { t } = useTranslation();
   const { user, logout, isDemoMode } = useAuth();
   const navigate = useNavigate();
 
-  const [pacjenci] = useState<PacjentLekarza[]>(mockPacjenci);
-  const [statystyki] = useState(mockStatystyki);
+  const [pacjenci, setPacjenci] = useState<Pacjent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [stats, setStats] = useState({
+    wizyty: 0,
+    pacjenci: 0,
+    dokumentacja: 0,
+  });
   const [activeCard, setActiveCard] = useState<string>('pacjenci');
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        if (isDemoMode) {
+          // Mock data for demo mode
+          const mockData: Pacjent[] = [
+            { pacjentId: 1, imie: 'Maria', nazwisko: 'Nowak', pesel: '85031234567', dataUrodzenia: '1985-03-12', email: 'maria.nowak@example.com' },
+            { pacjentId: 2, imie: 'Jan', nazwisko: 'Kowalski', pesel: '78012345678', dataUrodzenia: '1978-01-23', email: 'jan.kowalski@example.com' },
+          ];
+          setPacjenci(mockData);
+          setStats({ wizyty: 12, pacjenci: 2, dokumentacja: 5 });
+        } else {
+          try {
+            const [patientsData, visitsData] = await Promise.all([
+              apiService.getLekarzPacjenci(),
+              apiService.getLekarzWizyty()
+            ]);
+            setPacjenci(patientsData);
+            setStats({
+              wizyty: visitsData.length,
+              pacjenci: patientsData.length,
+              dokumentacja: 0 // Placeholder as we don't have a direct endpoint for total docs count yet
+            });
+          } catch (err) {
+            console.error('Error details:', err);
+            throw err;
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching doctor data:', err);
+        setError(t('error.errorOccurred'));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [isDemoMode, t]);
 
   const handleLogout = () => {
     logout();
@@ -49,12 +74,12 @@ const PacjenciLekarzPage: React.FC = () => {
 
   const handleViewPatient = (id: number) => {
     console.log('Zobacz pacjenta:', id);
-    // W przyszłości nawigacja do szczegółów pacjenta
+    // TODO: Navigate to patient details
   };
 
   const handleEditPatient = (id: number) => {
     console.log('Edytuj pacjenta:', id);
-    // W przyszłości nawigacja do edycji pacjenta
+    // TODO: Navigate to edit patient
   };
 
   const userName = user?.firstName && user?.lastName
@@ -66,7 +91,7 @@ const PacjenciLekarzPage: React.FC = () => {
       id: 'wizyty',
       icon: CalendarDaysIcon,
       title: t('doctorDashboard.visits'),
-      value: statystyki.wizyty,
+      value: stats.wizyty,
       color: 'bg-blue-100 text-blue-600',
       borderColor: 'border-alimed-blue',
       onClick: () => navigate('/wizyty-lekarza')
@@ -75,7 +100,7 @@ const PacjenciLekarzPage: React.FC = () => {
       id: 'pacjenci',
       icon: UsersIcon,
       title: t('doctorDashboard.patients'),
-      value: statystyki.pacjenci,
+      value: stats.pacjenci,
       color: 'bg-green-100 text-green-600',
       borderColor: 'border-green-500',
       onClick: () => setActiveCard('pacjenci')
@@ -84,7 +109,7 @@ const PacjenciLekarzPage: React.FC = () => {
       id: 'dokumentacja',
       icon: DocumentTextIcon,
       title: t('doctorDashboard.documentation'),
-      value: statystyki.dokumentacja,
+      value: stats.dokumentacja,
       color: 'bg-purple-100 text-purple-600',
       borderColor: 'border-purple-500',
       onClick: () => navigate('/dokumentacja-lekarza')
@@ -178,62 +203,73 @@ const PacjenciLekarzPage: React.FC = () => {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('doctorPatients.patient')}
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('doctorPatients.visitType')}
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {t('doctorPatients.actions')}
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {pacjenci.map((pacjent) => (
-                  <tr
-                    key={pacjent.id}
-                    className="hover:bg-gray-50 transition-colors"
-                  >
-                    <td className="px-6 py-4">
-                      <div>
-                        <p className="font-medium text-gray-900">
-                          {pacjent.imie} {pacjent.nazwisko}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          {t('doctorPatients.peselLabel')}: {pacjent.pesel}
-                        </p>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
-                      {pacjent.typWizyty}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex space-x-4">
-                        <button
-                          onClick={() => handleViewPatient(pacjent.id)}
-                          className="text-alimed-blue hover:text-blue-700 text-sm font-medium hover:underline"
-                        >
-                          {t('doctorPatients.view')}
-                        </button>
-                        <button
-                          onClick={() => handleEditPatient(pacjent.id)}
-                          className="text-gray-600 hover:text-gray-800 text-sm font-medium hover:underline"
-                        >
-                          {t('doctorPatients.edit')}
-                        </button>
-                      </div>
-                    </td>
+            {loading ? (
+              <div className="p-8 text-center text-gray-500">
+                {t('common.loading')}
+              </div>
+            ) : error ? (
+              <div className="p-8 text-center text-red-500">
+                {error}
+              </div>
+            ) : (
+              <table className="w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {t('doctorPatients.patient')}
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {t('login.email')}
+                      {/* Using static string for 'Email' or adding key, but for now Email is universal or I can look for a key */}
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {t('doctorPatients.actions')}
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {pacjenci.map((pacjent) => (
+                    <tr
+                      key={pacjent.pacjentId}
+                      className="hover:bg-gray-50 transition-colors"
+                    >
+                      <td className="px-6 py-4">
+                        <div>
+                          <p className="font-medium text-gray-900">
+                            {pacjent.imie} {pacjent.nazwisko}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            {t('doctorPatients.peselLabel')}: {pacjent.pesel}
+                          </p>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-600">
+                        {pacjent.email || '-'}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex space-x-4">
+                          <button
+                            onClick={() => handleViewPatient(pacjent.pacjentId)}
+                            className="text-alimed-blue hover:text-blue-700 text-sm font-medium hover:underline"
+                          >
+                            {t('doctorPatients.view')}
+                          </button>
+                          <button
+                            onClick={() => handleEditPatient(pacjent.pacjentId)}
+                            className="text-gray-600 hover:text-gray-800 text-sm font-medium hover:underline"
+                          >
+                            {t('doctorPatients.edit')}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
 
-          {pacjenci.length === 0 && (
+          {!loading && !error && pacjenci.length === 0 && (
             <div className="px-6 py-12 text-center text-gray-500">
               {t('doctorPatients.noPatients')}
             </div>
