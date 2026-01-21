@@ -13,14 +13,14 @@ const getHeaders = (includeAuth = false): Record<string, string> => {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
   };
-  
+
   if (includeAuth) {
     const token = getAuthToken();
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
   }
-  
+
   return headers;
 };
 
@@ -468,13 +468,9 @@ export const apiService = {
   },
 
   async getLekarzWizyty(): Promise<LekarzWizytaSummary[]> {
-    const response = await fetch(`${API_BASE_URL}/api/lekarze/moje-wizyty`, {
-      headers: getHeaders(true),
-      credentials: 'include',
-    });
-    if (!response.ok) throw new Error('Failed to fetch doctor visits');
-    const data = await response.json();
-    return data.map((row: any) => this.mapLekarzWizyta(row));
+    // Endpoint /api/lekarze/moje-wizyty zwraca 404, więc używamy widoku miesiąca jako domyślnego
+    const today = new Date().toISOString();
+    return this.getLekarzWizytyMiesiac(today);
   },
 
   async getLekarzPacjenci(query?: string): Promise<Pacjent[]> {
