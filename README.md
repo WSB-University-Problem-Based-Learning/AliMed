@@ -17,27 +17,17 @@
 
 ```
 AliMed/
-├── .build/
-├── .config/
-├── dep/
-├── doc/
-│   └── brand-guidelines.md
-├── res/
-│   └── images/
-│       ├── logo-vector-full.ai
-│       ├── logo-vector-full.png
-│       ├── logo-vector-full.svg
-│       ├── logo-vector.svg
-│       └── logo.png
-├── samples/
-├── src/
-├── test/
-├── tools/
+├── WebAPI/              # Backend .NET 9.0
+├── deploy/              # Skrypty i konfiguracje wdrożeniowe
+├── doc/                 # Dokumentacja projektu
+├── res/                 # Zasoby statyczne (logo, grafiki)
+├── src/                 # Kod źródłowy (Frontend React)
+├── test/                # Testy (E2E, SQL)
 ├── LICENSE
 └── README.md
 ```
 
-Kod źródłowy i testy znajdują się odpowiednio w `src/` oraz `test/`. Konfiguracje lokalne umieszczamy w `.config/`, skrypty budujące w `.build/`, a zależności zewnętrzne w `dep/`. Zasoby statyczne, w tym logo projektu, trafiają do katalogu `res/` w celu łatwego odnajdywania i dalszego wykorzystania w materiałach projektowych. Przykładowe fragmenty kodu pomocniczego można umieszczać w `samples/`, a automatyzację zadań w `tools/`.
+Kod źródłowy podzielony jest na `WebAPI/` (Backend) oraz `src/` (Frontend React). Wszystkie skrypty i pliki konfiguracyjne niezbędne do wdrożenia na serwerze znajdują się w `deploy/`. Zasoby statyczne, w tym logo projektu, trafiają do katalogu `res/`. Dokumentacja techniczna i wytyczne marki znajdują się w `doc/`.
 
 -----
 
@@ -81,213 +71,102 @@ System został wdrożony w środowisku produkcyjnym **Oracle Cloud Infrastructur
 
 -----
 
-## 🛠️ Architektura i Stos technologiczny
+## 🏗️ Architektura Systemu
 
-Poniższy diagram przedstawia architekturę systemu opartą o usługi Oracle Cloud Infrastructure.
+AliMed to nowoczesna platforma medyczna zbudowana w architekturze klient-serwer, w pełni zoptymalizowana pod środowisko chmurowe **Oracle Cloud Infrastructure (OCI)**.
 
 ```mermaid
-flowchart TD
-    subgraph User["Użytkownicy"]
-        direction LR
-        Patient["Pacjent"]
-        Staff["Personel Medyczny"]
+graph TD
+    User([User Browser]) <--> |HTTPS / WSS| Nginx[Nginx Reverse Proxy]
+    
+    subgraph OCI ["Oracle Cloud Infrastructure (Always Free)"]
+        Nginx <--> |Port 5056| API[".NET 9 Web API Service"]
+        Nginx <--> |Static Files| WebDir["/home/ubuntu/www (React App)"]
+        
+        API <--> |MySQL Prot.| DB[(MySQL HeatWave DB)]
+        API <--> |Local Storage| Files["Block Volume (Storage)"]
     end
 
-    subgraph AliMedApp["Aplikacja AliMed"]
-        direction LR
-        Frontend["Frontend (React + Vite)"]
-        Backend["Backend (.NET 9 Web API)"]
+    subgraph Automation ["CI/CD Pipeline"]
+        GH[GitHub Repository] -->|Action: Deploy| VM[OCI Ubuntu VM]
     end
-
-    subgraph OracleCloud [Oracle Cloud Infrastructure Always Free]
-        direction LR
-        VM["VM.Standard.E2.1.Micro"]
-        DB[("MySQL 8.0")]
-        BlockStorage[("Block Volume Storage")]
-    end
-
-    User --> Frontend
-    Frontend --> Backend
-    Backend -- Hostowany na --> VM
-    VM -- Zapisuje/Odczytuje dane --> DB
-    VM -- Zapisuje/Odczytuje pliki --> BlockStorage
 ```
 
-**Kluczowe komponenty:**
+---
 
-  * **Backend:** .NET 9.0 Web API z Entity Framework Core
-  * **Frontend:** React 19 + Vite + TypeScript + TailwindCSS
-  * **Hosting:** Oracle Cloud Infrastructure VM (Ubuntu 24.04 LTS, 2 vCPU, 1GB RAM)
-  * **Baza danych:** MySQL 8.0 (przechowywanie danych o pacjentach, wizytach, zaleceniach)
-  * **Przechowywanie plików:** Block Volume Storage (45GB SSD)
-  * **Autentykacja:** JWT + GitHub OAuth
-  * **Domena:** alimed.com.pl (HTTPS via nginx)
+## 💻 Stos Technologiczny
 
------
+### 🔹 Frontend
+- **Framework**: [React 19](https://react.dev/) + [Vite](https://vitejs.dev/)
+- **Język**: TypeScript
+- **Stylizacja**: TailwindCSS + Framer Motion (animacje)
+- **Ikony/UI**: Lucide React + Headless UI
+- **Internacjonalizacja**: i18next (obsługa PL/EN)
+- **Komunikacja**: Axios z interceptorami dla JWT
 
-## � Szybki start
-> 📘 **Szczegółowy przewodnik:** Sprawdź [QUICKSTART.md](doc/QUICKSTART.md) dla pełnych instrukcji uruchomienia projektu!
-### Wymagania wstępne
+### 🔹 Backend
+- **Framework**: [.NET 9.0 Web API](https://dotnet.microsoft.com/en-us/apps/aspnet/apis)
+- **ORM**: Entity Framework Core (Pomelo MySQL)
+- **Bezpieczeństwo**: JWT Bearer Authentication + GitHub OAuth 2.0
+- **Logika**: Serwisy domenowe, DTOs, Custom Middleware
+- **Haszowanie**: PBKDF2 (Password-Based Key Derivation Function 2)
 
-- **Node.js** 20+ i npm
-- **.NET 9.0 SDK**
-- **MySQL 8.0+** lub Docker
-- **Git**
+### 🔹 Infrastruktura & Baza Danych
+- **Serwer**: OCI VM.Standard.E2.1.Micro (Ubuntu 24.04.3 LTS)
+- **Baza Danych**: **MySQL HeatWave** (Managed instance w OCI)
+- **Web Server**: Nginx (SSL via Certbot/Let's Encrypt)
+- **Process Manager**: Systemd (zarządzanie usługą API)
 
-### Uruchomienie lokalne
+---
 
-#### 1. Backend (.NET Web API)
+## 🚀 CI/CD & Deployment
 
-```bash
-# Przejdź do katalogu backendu
-cd WebAPI/API.Alimed
+Projekt wykorzystuje **GitHub Actions** do pełnej automatyzacji procesów budowania i wdrażania:
 
-# Przywróć zależności
-dotnet restore
+1.  **Frontend Pipeline** (`frontend.yml`):
+    - Automatyczne budowanie przy każdym pushu do gałęzi `main`.
+    - Synchronizacja zoptymalizowanych plików `dist/` przez `rsync` do `/home/ubuntu/www`.
+2.  **Backend Pipeline** (`backend.yml`):
+    - Kompilacja i publikacja paczki `.dotnet publish`.
+    - Deploy na VM i restart usługi `alimed-api` przez SSH.
+3.  **Deploy Orchestration** (`deploy.yml`):
+    - Zarządzanie sekretami i kluczami SSL w środowisku produkcyjnym.
 
-# Skonfiguruj connection string (utwórz appsettings.Development.json)
-# Skopiuj appsettings.json i zmień Pwd na swoje hasło MySQL
+---
 
-# Uruchom migracje (jeśli są dostępne)
-dotnet ef database update
+## 🛠️ Instrukcja Deweloperska
 
-# Uruchom API
-dotnet run
-# API będzie dostępne na: http://localhost:5056
-# Swagger: http://localhost:5056/swagger
-```
+### Wymagania
+- Node.js 20+
+- .NET 9.0 SDK
+- MySQL 8.0 lub dostęp do VPN/OCI
 
-#### 2. Frontend (React + Vite)
+### Szybki start (Local)
 
-```bash
-# Przejdź do katalogu frontendu
-cd src/frontend/AliMed.Web
+1.  **Repozytorium**: `git clone https://github.com/WSB-University-Problem-Based-Learning/AliMed.git`
+2.  **Konfiguracja**:
+    - Uzupełnij `WebAPI/API.Alimed/appsettings.Development.json` danymi bazy.
+    - Uzupełnij `src/frontend/AliMed.Web/.env` adresem lokalnego API.
+3.  **Uruchomienie**:
+    - Backend: `dotnet run --project WebAPI/API.Alimed`
+    - Frontend: `npm install && npm run dev` (w `src/frontend/AliMed.Web`)
 
-# Zainstaluj zależności
-npm install
+---
 
-# Utwórz plik .env (skopiuj z .env.example i uzupełnij)
-cp .env.example .env
+## 📊 Monitoring i Administracja
 
-# Uruchom dev server
-npm run dev
-# Frontend będzie dostępny na: http://localhost:5173
-```
+- **Dashboard Produkcyjny**: [alimed.com.pl](https://alimed.com.pl)
+- **Dokumentacja API (Swagger)**: [alimed.com.pl/api/swagger](https://alimed.com.pl/api/swagger)
+- **Schemat Bazy Danych**: [doc/database-schema.html](doc/database-schema.html)
+- **Przewodnik Wdrożeniowy**: [deploy/DEPLOYMENT.md](deploy/DEPLOYMENT.md)
 
-### 🔑 Konfiguracja zmiennych środowiskowych
+---
 
-**Backend:** Utwórz `WebAPI/API.Alimed/appsettings.Development.json`:
-```json
-{
-  "ConnectionStrings": {
-    "MySqlConnection": "Server=localhost;Port=3306;Database=alimed;Uid=root;Pwd=TwojeHaslo"
-  },
-  "JwtSettings": {
-    "SecretKey": "TwojSuperTajnyKluczJWT",
-    "Issuer": "AliMed",
-    "Audience": "AliMed-Users"
-  }
-}
-```
+## 🚀 Production Links
 
-**Frontend:** Utwórz `src/frontend/AliMed.Web/.env`:
-```env
-VITE_API_BASE_URL=http://localhost:5056
-VITE_GITHUB_CLIENT_ID=twoj_github_client_id
-VITE_GITHUB_REDIRECT_URI=http://localhost:5173/auth/github/callback
-```
+- **Main URL**: [https://alimed.com.pl](https://alimed.com.pl)
+- **Production API**: [https://alimed.com.pl/api/](https://alimed.com.pl/api/)
+- **Health Check**: `sudo systemctl status alimed-api`
 
------
-
-## 🧪 Testowanie
-
-```bash
-# Backend - uruchom testy jednostkowe
-cd WebAPI/API.Alimed.Tests
-dotnet test
-
-# Frontend - uruchom linter
-cd src/frontend/AliMed.Web
-npm run lint
-```
-
------
-
-## 📁 Struktura projektu
-
-```
-AliMed/
-├── WebAPI/                      # Backend .NET 9.0
-│   ├── API.Alimed/              # Główna aplikacja API
-│   │   ├── Controllers/         # Kontrolery REST API
-│   │   ├── Data/                # DbContext i konfiguracja EF Core
-│   │   ├── DTOs/                # Data Transfer Objects
-│   │   ├── Entities/            # Modele bazy danych
-│   │   ├── Services/            # Logika biznesowa
-│   │   └── Extensions/          # Rozszerzenia i helpery
-│   └── API.Alimed.Tests/        # Testy jednostkowe i integracyjne
-├── src/frontend/AliMed.Web/     # Frontend React + TypeScript
-│   ├── src/
-│   │   ├── components/          # Komponenty React
-│   │   ├── pages/               # Strony aplikacji
-│   │   ├── services/            # API client
-│   │   ├── context/             # Context API (Auth, Language)
-│   │   ├── locales/             # Tłumaczenia i18n
-│   │   └── types/               # Definicje TypeScript
-│   └── public/                  # Assety statyczne
-├── doc/                         # Dokumentacja projektu
-├── res/                         # Zasoby (logo, grafiki)
-└── test/                        # Dodatkowe testy
-```
-
------
-
-## 🚧 Status projektu
-
-### ✅ Ukończone
-
-- ✅ System autentykacji JWT + GitHub OAuth
-- ✅ Endpointy CRUD dla Pacjentów, Lekarzy, Wizyt
-- ✅ Panel pacjenta z zarządzaniem wizytami
-- ✅ Panel lekarza z listą pacjentów i wizyt
-- ✅ Internacjonalizacja (PL/EN)
-- ✅ Responsywny design z TailwindCSS
-- ✅ Testy jednostkowe backendu
-
-### 🔄 W trakcie
-
-- 🔄 Rozbudowa panelu lekarza
-- 🔄 System dokumentów medycznych
-- 🔄 Setup CI/CD pipeline
-
-### 📋 Planowane
-
-- 📋 Przechowywanie dokumentów medycznych w Object Storage
-- 📋 System powiadomień email/SMS
-- 📋 Kalendarz dostępności lekarzy
-- 📋 Historia zmian w dokumentacji medycznej
-
------
-
-## 🚧 Aktualne zadania (To-Do)
-
-### Rozbudowa funkcjonalności systemu
-
-## 🚀 Production Deployment
-
-Aplikacja jest wdrożona na serwerze produkcyjnym:
-
-- **Domain**: https://alimed.com.pl
-- **Frontend**: https://alimed.com.pl
-- **API**: https://alimed.com.pl/api/
-
-Szczegóły wdrożenia i instrukcje znajdują się w [deploy/DEPLOYMENT.md](deploy/DEPLOYMENT.md).
-
-### Quick Deploy
-
-```powershell
-cd deploy
-.\deploy-windows.ps1
-```
-
-Więcej informacji: [deploy/README.md](deploy/README.md)
+---
+*Grupowy projekt AliMed - 2026*
