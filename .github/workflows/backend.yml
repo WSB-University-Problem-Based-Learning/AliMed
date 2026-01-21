@@ -51,9 +51,18 @@ jobs:
         working-directory: WebAPI
         run: dotnet build API.Alimed.Tests/API.Alimed.Tests.csproj --configuration Release --no-restore
 
+      - name: Copy deps.json to test output
+        working-directory: WebAPI
+        run: |
+          set -e
+          SRC_DIR="API.Alimed/bin/Release/net9.0"
+          DST_DIR="API.Alimed.Tests/bin/Release/net9.0"
+          mkdir -p "$DST_DIR"
+          cp "$SRC_DIR"/*.deps.json "$DST_DIR"/ || true
+
       - name: Run tests
         working-directory: WebAPI/API.Alimed.Tests
-        run: dotnet test --configuration Release --no-build --verbosity normal
+        run: dotnet test --configuration Release --verbosity normal
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
