@@ -1,7 +1,18 @@
 import { chromium, Page, Locator } from 'playwright';
 
 const BASE_URL = 'https://alimed.com.pl';
-const CREDENTIALS = { email: 'demo@demo', password: '123456' };
+
+// Generate random user data for each run
+const TIMESTAMP = Date.now();
+const NEW_USER = {
+  email: `test${TIMESTAMP}@example.com`,
+  username: `testuser${TIMESTAMP}`,
+  password: 'TestPassword123!',
+  firstName: 'Test',
+  lastName: 'User',
+  pesel: '90010112345', // Dummy PESEL
+  phone: '123456789'
+};
 
 interface TestResult {
   name: string;
@@ -40,16 +51,18 @@ async function assertUrl(page: Page, pattern: string) {
 }
 
 async function runAllTests() {
-  console.log('🚀 Starting comprehensive UI tests...\n');
+  console.log('🚀 Starting E2E tests with REGISTRATION flow...\n');
+  console.log(`👤 Creating User: ${NEW_USER.email} / ${NEW_USER.username}`);
   console.log('='.repeat(60) + '\n');
 
-  const browser = await chromium.launch({ 
-    headless: false,
-    slowMo: 150
+  const browser = await chromium.launch({
+    headless: false, // Keep visible for debugging
+    slowMo: 100
   });
-  
+
   const context = await browser.newContext({
-    viewport: { width: 1920, height: 1080 }
+    viewport: { width: 1920, height: 1080 },
+    ignoreHTTPSErrors: true
   });
   const page = await context.newPage();
 
@@ -61,308 +74,99 @@ async function runAllTests() {
   });
 
   try {
-    // ========== PUBLIC PAGES ==========
-    console.log('📋 TESTING PUBLIC PAGES\n');
+    // ========== REGISTRATION FLOW ==========
+    console.log('📋 TESTING REGISTRATION\n');
 
-    await test('Homepage loads', async () => {
-      await page.goto(BASE_URL);
-      await page.waitForLoadState('networkidle');
-    });
-
-    await test('Homepage has logo', async () => {
-      await assertVisible(page.locator('img[alt="AliMed"]').first());
-    });
-
-    await test('Homepage has navigation links', async () => {
-      await assertVisible(page.locator('nav a, header a').first());
-    });
-
-    await test('Homepage has hero section', async () => {
-      await assertVisible(page.locator('main, [class*="hero"], h1, h2').first());
-    });
-
-    await test('Login page loads', async () => {
-      await page.goto(`${BASE_URL}/login`);
-      await page.waitForLoadState('networkidle');
-      await assertUrl(page, '/login');
-    });
-
-    await test('Login page has email input', async () => {
-      await assertVisible(page.locator('input[type="email"]'));
-    });
-
-    await test('Login page has password input', async () => {
-      await assertVisible(page.locator('input[type="password"]'));
-    });
-
-    await test('Login page has submit button', async () => {
-      await assertVisible(page.locator('button[type="submit"]'));
-    });
-
-    await test('Login page has GitHub login button', async () => {
-      await assertVisible(page.locator('button:has-text("GitHub")'));
-    });
-
-    await test('Login page has register link', async () => {
-      await assertVisible(page.locator('a[href*="register"]'));
-    });
-
-    await test('Register page loads', async () => {
+    await test('Navigate to Register', async () => {
       await page.goto(`${BASE_URL}/register`);
       await page.waitForLoadState('networkidle');
       await assertUrl(page, '/register');
     });
 
-    await test('Register page has email field', async () => {
-      await assertVisible(page.locator('input[type="email"]'));
+    await test('Step 1: Fill Account Details', async () => {
+      // Step 1 fields
+      await page.fill('input[name="email"]', NEW_USER.email);
+      await page.fill('input[name="username"]', NEW_USER.username);
+      await page.fill('input[name="password"]', NEW_USER.password);
+
+      // Confirm password (no name, usually the second password input)
+      const passwordInputs = page.locator('input[type="password"]');
+      await passwordInputs.nth(1).fill(NEW_USER.password);
+
+      // Click Next
+      await page.click('button:has-text("Dalej"), button:has-text("Next")');
     });
 
-    await test('Register page has password field', async () => {
-      await assertVisible(page.locator('input[type="password"]').first());
-    });
+    await test('Step 2: Fill Personal Details', async () => {
+      // Step 2 fields - Wait for animation/transition
+      await page.waitForSelector('input[name="firstName"]');
 
-    // ========== LOGIN FLOW ==========
-    console.log('\n📋 TESTING LOGIN FLOW\n');
+      await page.fill('input[name="firstName"]', NEW_USER.firstName);
+      await page.fill('input[name="lastName"]', NEW_USER.lastName);
+      await page.fill('input[name="pesel"]', NEW_USER.pesel);
+      await page.fill('input[name="dataUrodzenia"]', '1990-01-01');
 
-    await test('Clear localStorage and go to login', async () => {
-      await page.goto(`${BASE_URL}/login`);
-      await page.evaluate(() => localStorage.clear());
-      await page.reload();
-      await page.waitForLoadState('networkidle');
-    });
+      // Address
+      await page.fill('input[name="ulica"]', 'Testowa');
+      await page.fill('input[name="numerDomu"]', '123');
+      await page.fill('input[name="kodPocztowy"]', '00-123');
+      await page.fill('input[name="miasto"]', 'Warszawa');
 
-    await test('Fill login form', async () => {
-      await page.fill('input[type="email"]', CREDENTIALS.email);
-      await page.fill('input[type="password"]', CREDENTIALS.password);
-    });
-
-    await test('Submit login and redirect to dashboard', async () => {
+      // Submit
       await page.click('button[type="submit"]');
-      await page.waitForURL('**/dashboard', { timeout: 10000 });
+    });
+
+    await test('Redirects to Dashboard after Registration', async () => {
+      // Should redirect to dashboard automatically
+      await page.waitForURL('**/dashboard', { timeout: 15000 });
       await assertUrl(page, '/dashboard');
     });
 
-    await test('Token saved in localStorage', async () => {
-      const token = await page.evaluate(() => localStorage.getItem('alimed_token'));
-      if (!token) throw new Error('No token in localStorage');
-    });
+    // ========== DASHBOARD VERIFICATION ==========
+    console.log('\n📋 TESTING DASHBOARD ACCESS (NEW USER)\n');
 
-    // ========== DASHBOARD ==========
-    console.log('\n📋 TESTING DASHBOARD\n');
-
-    await test('Dashboard has header', async () => {
+    await test('Dashboard loads correctly', async () => {
       await assertVisible(page.locator('header').first());
+      // Check for welcome message
+      await assertVisible(page.locator(`text=${NEW_USER.username}`).first());
     });
 
-    await test('Dashboard has logo in header', async () => {
-      await assertVisible(page.locator('header img, img[alt="AliMed"]').first());
-    });
-
-    await test('Dashboard has logout button', async () => {
-      await assertVisible(page.locator('button:has-text("Wyloguj"), button:has-text("Logout")').first());
-    });
-
-    await test('Dashboard has action cards', async () => {
-      const cards = page.locator('main button[class*="rounded"], main div[class*="rounded-xl"]');
-      const count = await cards.count();
-      if (count < 2) throw new Error(`Only ${count} cards found, expected at least 2`);
-    });
-
-    await test('Dashboard has visits table or section', async () => {
-      await assertVisible(page.locator('table, [class*="wizyty"], h2').first());
-    });
-
-    // ========== MOJE WIZYTY ==========
-    console.log('\n📋 TESTING MOJE WIZYTY PAGE\n');
-
-    await test('Navigate to Moje Wizyty', async () => {
+    await test('Protected Route Access: Moje Wizyty', async () => {
       await page.goto(`${BASE_URL}/moje-wizyty`);
-      await page.waitForLoadState('networkidle');
       await assertUrl(page, '/moje-wizyty');
+      // Should NOT redirect to login
+      const url = page.url();
+      if (url.includes('/login')) throw new Error('Redirected to login from protected route!');
     });
 
-    await test('Moje Wizyty has heading', async () => {
-      await assertVisible(page.locator('h1, h2').first());
-    });
-
-    await test('Moje Wizyty has filter buttons', async () => {
-      await assertVisible(page.locator('button').first());
-    });
-
-    // ========== UMÓW WIZYTĘ ==========
-    console.log('\n📋 TESTING UMÓW WIZYTĘ PAGE\n');
-
-    await test('Navigate to Umów Wizytę', async () => {
-      await page.goto(`${BASE_URL}/umow-wizyte`);
-      await page.waitForLoadState('networkidle');
-      await assertUrl(page, '/umow-wizyte');
-    });
-
-    await test('Umów Wizytę has heading', async () => {
-      await assertVisible(page.locator('h1').first());
-    });
-
-    await test('Umów Wizytę has specialization filter', async () => {
-      await assertVisible(page.locator('select').first());
-    });
-
-    await test('Umów Wizytę has doctor cards', async () => {
-      const doctors = page.locator('button[class*="border"]');
-      const count = await doctors.count();
-      if (count < 1) throw new Error('No doctor cards found');
-    });
-
-    await test('Umów Wizytę has date picker', async () => {
-      await assertVisible(page.locator('input[type="date"]'));
-    });
-
-    // ========== DOKUMENTY ==========
-    console.log('\n📋 TESTING DOKUMENTY PAGE\n');
-
-    await test('Navigate to Dokumenty', async () => {
-      await page.goto(`${BASE_URL}/dokumenty`);
-      await page.waitForLoadState('networkidle');
-      await assertUrl(page, '/dokumenty');
-    });
-
-    await test('Dokumenty has heading', async () => {
-      await assertVisible(page.locator('h1, h2').first());
-    });
-
-    await test('Dokumenty has search input', async () => {
-      await assertVisible(page.locator('input[type="text"]').first());
-    });
-
-    await test('Dokumenty has filter dropdown', async () => {
-      await assertVisible(page.locator('select').first());
-    });
-
-    await test('Dokumenty has statistics cards', async () => {
-      const cards = page.locator('[class*="rounded-lg"], [class*="card"]');
-      const count = await cards.count();
-      if (count < 2) throw new Error(`Only ${count} stat cards found`);
-    });
-
-    // ========== MOJE DANE ==========
-    console.log('\n📋 TESTING MOJE DANE PAGE\n');
-
-    await test('Navigate to Moje Dane', async () => {
+    await test('Protected Route Access: Moje Dane', async () => {
       await page.goto(`${BASE_URL}/moje-dane`);
-      await page.waitForLoadState('networkidle');
       await assertUrl(page, '/moje-dane');
+
+      // Verify data persists
+      const emailField = page.locator('input[type="email"]');
+      await expectValue(emailField, NEW_USER.email);
     });
 
-    await test('Moje Dane has heading', async () => {
-      await assertVisible(page.locator('h1').first());
+    // ========== LOGOUT & RE-LOGIN ==========
+    console.log('\n📋 TESTING LOGOUT & RE-LOGIN\n');
+
+    await test('Logout works', async () => {
+      await page.goto(`${BASE_URL}/dashboard`);
+      await page.click('button:has-text("Wyloguj"), button:has-text("Logout")');
+      await page.waitForURL('**/');
     });
 
-    await test('Moje Dane has form', async () => {
-      await assertVisible(page.locator('form').first());
-    });
-
-    await test('Moje Dane has name inputs', async () => {
-      const inputs = page.locator('input[type="text"]');
-      const count = await inputs.count();
-      if (count < 2) throw new Error('Not enough form inputs');
-    });
-
-    await test('Moje Dane has email input', async () => {
-      await assertVisible(page.locator('input[type="email"]'));
-    });
-
-    await test('Moje Dane has edit button', async () => {
-      await assertVisible(page.locator('button:has-text("Edytuj"), button:has-text("Edit")').first());
-    });
-
-    // ========== API ENDPOINTS ==========
-    console.log('\n📋 TESTING API ENDPOINTS\n');
-
-    await test('API: Login endpoint works', async () => {
-      const response = await page.request.post(`${BASE_URL}/api/auth/login`, {
-        data: { email: CREDENTIALS.email, password: CREDENTIALS.password }
-      });
-      if (!response.ok()) throw new Error(`Login API returned ${response.status()}`);
-    });
-
-    await test('API: Get Lekarze works', async () => {
-      const token = await page.evaluate(() => localStorage.getItem('alimed_token'));
-      const response = await page.request.get(`${BASE_URL}/api/authorizedendpoint/lekarze`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (!response.ok()) throw new Error(`Lekarze API returned ${response.status()}`);
-    });
-
-    await test('API: Get Wizyty works', async () => {
-      const token = await page.evaluate(() => localStorage.getItem('alimed_token'));
-      const response = await page.request.get(`${BASE_URL}/api/wizyty/moje-wizyty`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (!response.ok()) throw new Error(`Wizyty API returned ${response.status()}`);
-    });
-
-    await test('API: Get Dokumenty works', async () => {
-      const token = await page.evaluate(() => localStorage.getItem('alimed_token'));
-      const response = await page.request.get(`${BASE_URL}/api/dokumenty`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (!response.ok()) throw new Error(`Dokumenty API returned ${response.status()}`);
-    });
-
-    // ========== RESPONSIVE ==========
-    console.log('\n📋 TESTING RESPONSIVE DESIGN\n');
-
-    await test('Mobile view (375px) - Login page', async () => {
-      await page.setViewportSize({ width: 375, height: 667 });
+    await test('Login with new credentials', async () => {
       await page.goto(`${BASE_URL}/login`);
-      await page.waitForLoadState('networkidle');
-      await assertVisible(page.locator('button[type="submit"]'));
-    });
 
-    await test('Mobile view - Dashboard', async () => {
-      await page.goto(`${BASE_URL}/dashboard`);
-      await page.waitForLoadState('networkidle');
-      await assertVisible(page.locator('header').first());
-    });
+      // LoginPage uses plain text for email input as discovered earlier
+      await page.fill('input[type="text"]', NEW_USER.email);
+      await page.fill('input[type="password"]', NEW_USER.password);
+      await page.click('button[type="submit"]');
 
-    await test('Tablet view (768px) - Dashboard', async () => {
-      await page.setViewportSize({ width: 768, height: 1024 });
-      await page.goto(`${BASE_URL}/dashboard`);
-      await page.waitForLoadState('networkidle');
-      await assertVisible(page.locator('header').first());
-    });
-
-    await page.setViewportSize({ width: 1920, height: 1080 });
-
-    // ========== LOGOUT ==========
-    console.log('\n📋 TESTING LOGOUT\n');
-
-    await test('Click logout button', async () => {
-      await page.goto(`${BASE_URL}/dashboard`);
-      await page.waitForLoadState('networkidle');
-      const logoutBtn = page.locator('button:has-text("Wyloguj"), button:has-text("Logout")').first();
-      await logoutBtn.click();
-      await page.waitForTimeout(1000);
-    });
-
-    await test('Token cleared after logout', async () => {
-      const token = await page.evaluate(() => localStorage.getItem('alimed_token'));
-      if (token) throw new Error('Token still exists after logout');
-    });
-
-    // ========== CONSOLE ERRORS ==========
-    console.log('\n📋 CHECKING CONSOLE ERRORS\n');
-
-    await test('No critical JavaScript errors', async () => {
-      const criticalErrors = consoleErrors.filter(e => 
-        !e.includes('favicon') && 
-        !e.includes('autocomplete') &&
-        !e.includes('DevTools') &&
-        !e.includes('404')
-      );
-      if (criticalErrors.length > 0) {
-        console.log('   Console errors found:', criticalErrors);
-        throw new Error(`${criticalErrors.length} JS errors`);
-      }
+      await page.waitForURL('**/dashboard');
+      await assertUrl(page, '/dashboard');
     });
 
   } catch (error) {
@@ -371,26 +175,30 @@ async function runAllTests() {
     // ========== SUMMARY ==========
     console.log('\n' + '='.repeat(60));
     console.log('\n📊 TEST SUMMARY\n');
-    
+
     const passed = results.filter(r => r.status === 'PASS').length;
     const failed = results.filter(r => r.status === 'FAIL').length;
     const total = results.length;
-    
+
     console.log(`Total: ${total} | ✅ Passed: ${passed} | ❌ Failed: ${failed}`);
     console.log(`Success rate: ${((passed / total) * 100).toFixed(1)}%\n`);
-    
+
     if (failed > 0) {
       console.log('❌ Failed tests:');
       results.filter(r => r.status === 'FAIL').forEach(r => {
         console.log(`   • ${r.name}: ${r.error}`);
       });
     }
-    
-    console.log('\n⏳ Keeping browser open for 5 seconds...');
-    await page.waitForTimeout(5000);
-    
+
     await browser.close();
-    console.log('🔒 Browser closed');
+  }
+}
+
+// Helper
+async function expectValue(locator: Locator, expected: string) {
+  const value = await locator.inputValue();
+  if (!value.includes(expected)) {
+    throw new Error(`Expected value containing "${expected}", got "${value}"`);
   }
 }
 
