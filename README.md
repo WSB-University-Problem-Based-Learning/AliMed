@@ -126,7 +126,7 @@ flowchart TD
 -----
 
 ## � Szybki start
-> 📘 **Szczegółowy przewodnik:** Sprawdź [QUICKSTART.md](QUICKSTART.md) dla pełnych instrukcji uruchomienia projektu!
+> 📘 **Szczegółowy przewodnik:** Sprawdź [QUICKSTART.md](doc/QUICKSTART.md) dla pełnych instrukcji uruchomienia projektu!
 ### Wymagania wstępne
 
 - **Node.js** 20+ i npm
