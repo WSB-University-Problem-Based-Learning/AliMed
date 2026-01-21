@@ -1,8 +1,8 @@
 # 🚀 AliMed Production Deployment Guide
 
 ## Server Information
-- **IP**: 130.162.222.70
-- **SSH**: `ssh -i ~/.ssh/alimed.key ubuntu@130.162.222.70`
+- **IP**: <SERVER_IP>
+- **SSH**: `ssh -i ~/.ssh/alimed.key ubuntu@<SERVER_IP>`
 - **OS**: Ubuntu (latest)
 
 ## 📋 Quick Deployment
@@ -13,13 +13,13 @@ From your local machine:
 
 ```powershell
 # Upload deployment scripts
-scp -i ~/.ssh/alimed.key -r deploy ubuntu@130.162.222.70:~/
+scp -i ~/.ssh/alimed.key -r deploy ubuntu@<SERVER_IP>:~/
 ```
 
 ### Step 2: Connect to server
 
 ```powershell
-ssh -i ~/.ssh/alimed.key ubuntu@130.162.222.70
+ssh -i ~/.ssh/alimed.key ubuntu@<SERVER_IP>
 ```
 
 ### Step 3: Run deployment scripts (in order)
@@ -32,7 +32,7 @@ chmod +x *.sh
 
 # Logout and login again to apply Docker group changes
 exit
-ssh -i ~/.ssh/alimed.key ubuntu@130.162.222.70
+ssh -i ~/.ssh/alimed.key ubuntu@<SERVER_IP>
 
 # 2. Deploy backend
 cd ~/deploy
@@ -104,23 +104,23 @@ sudo tail -f /var/log/nginx/error.log
 
 ```bash
 # Health check
-curl http://130.162.222.70/health
+curl http://<SERVER_IP>/health
 
 # API health
-curl http://130.162.222.70/api/health
+curl http://<SERVER_IP>/api/health
 
 # Get facilities
-curl http://130.162.222.70/api/Placowki
+curl http://<SERVER_IP>/api/Placowki
 
 # Get doctors
-curl http://130.162.222.70/api/Lekarze
+curl http://<SERVER_IP>/api/Lekarze
 ```
 
 ## 🌐 Access Application
 
-- **Frontend**: http://130.162.222.70
-- **API Swagger**: http://130.162.222.70:5056/swagger
-- **API Base**: http://130.162.222.70/api/
+- **Frontend**: http://<SERVER_IP>
+- **API Swagger**: http://<SERVER_IP>:5056/swagger
+- **API Base**: http://<SERVER_IP>/api/
 
 ## 🔐 GitHub OAuth Configuration
 
@@ -129,7 +129,7 @@ Update your GitHub OAuth App settings:
 1. Go to: https://github.com/settings/developers
 2. Select your OAuth App
 3. Update **Authorization callback URL** to:
-   - `http://130.162.222.70/auth/callback`
+   - `http://<SERVER_IP>/auth/callback`
    - (Or your domain if you set one up)
 
 ## 🔄 Updating Application
@@ -221,7 +221,7 @@ sudo ufw enable
 ### Setup SSL with Let's Encrypt (requires domain)
 
 ```bash
-# First, point a domain to 130.162.222.70
+# First, point a domain to <SERVER_IP>
 # Then run:
 sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
 ```
