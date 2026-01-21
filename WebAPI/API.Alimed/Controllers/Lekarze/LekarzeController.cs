@@ -11,7 +11,7 @@ namespace API.Alimed.Controllers.Lekarze
     [ApiController]
     [Route("api/[controller]")]
 
-    // Trigger deployment v2
+    // Trigger deployment v3 (test automation)
     public class LekarzeController : ControllerBase
     {
         private readonly AppDbContext _db;
