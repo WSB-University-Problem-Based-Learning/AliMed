@@ -94,43 +94,22 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+// Enable Swagger
+app.UseSwagger(c =>
 {
-    app.UseCors("AllowReactApp");
-    // app.MapOpenApi();
-
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "AliMed API v1");
-        c.RoutePrefix = "swagger";
-    });
-}
-
-// NOTE: Swagger UI is enabled above only in Development environment.
-// To enable Swagger in Production temporarily or permanently, uncomment one
-// of the blocks below and redeploy/restart the application. Keep in mind
-// exposing Swagger in public production is a security consideration.
-
-// Option A: Enable only when a specific environment variable is set (safer)
-// if (Environment.GetEnvironmentVariable("ENABLE_SWAGGER_IN_PROD") == "true")
-// {
-//     app.UseSwagger();
-//     app.UseSwaggerUI(c =>
-//     {
-//         c.SwaggerEndpoint("/swagger/v1/swagger.json", "AliMed API v1");
-//         c.RoutePrefix = "swagger";
-//     });
-// }
-
-// Option B: Always enable Swagger (not recommended for public prod)
-app.UseSwagger();
+    c.RouteTemplate = "swagger/{documentName}/swagger.json";
+});
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "AliMed API v1");
     c.RoutePrefix = "swagger";
 });
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.UseCors("AllowReactApp");
+}
  
 // app.UseHttpsRedirection();
 // CORS musi byc przed UseAuthentication bo sra bledami
