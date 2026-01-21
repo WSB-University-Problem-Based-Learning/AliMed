@@ -11,10 +11,12 @@ import {
 } from '@heroicons/react/24/outline';
 import { apiService } from '../services/api';
 import type { Dokument, Pacjent, WizytaDetail } from '../types/api';
+import { useAuth } from '../context/AuthContext';
 import { openDocumentPdf } from '../utils/documentPdf';
 
 const DokumentyPage: React.FC = () => {
   const { t } = useTranslation();
+  const { isDemoMode } = useAuth();
   const [dokumenty, setDokumenty] = useState<Dokument[]>([]);
   const [loading, setLoading] = useState(true);
   const [error] = useState<string | null>(null);
@@ -23,64 +25,71 @@ const DokumentyPage: React.FC = () => {
   const [sortBy, setSortBy] = useState<'date' | 'name' | 'type'>('date');
   const [pacjentCache, setPacjentCache] = useState<Pacjent | null>(null);
 
+
+
   useEffect(() => {
     const fetchDokumenty = async () => {
+      setLoading(true);
       try {
-        const data = await apiService.getDokumenty();
-        setDokumenty(data);
-      } catch {
-        // API nie istnieje - użyj mock data dla demo
-        console.warn('Dokumenty API not available, using mock data');
-        const mockDokumenty: Dokument[] = [
-          {
-            dokumentId: 1,
-            nazwaPliku: 'Wyniki_badania_krwi.pdf',
-            typDokumentu: 'wynik',
-            opis: 'Morfologia krwi - badanie okresowe',
-            dataUtworzenia: '2025-01-15T10:30:00',
-            rozmiarPliku: 245760,
-          },
-          {
-            dokumentId: 2,
-            nazwaPliku: 'Recepta_20250110.pdf',
-            typDokumentu: 'recepta',
-            opis: 'Recepta na leki kardiologiczne',
-            dataUtworzenia: '2025-01-10T14:20:00',
-            rozmiarPliku: 128000,
-          },
-          {
-            dokumentId: 3,
-            nazwaPliku: 'Skierowanie_kardiolog.pdf',
-            typDokumentu: 'skierowanie',
-            opis: 'Skierowanie do kardiologa',
-            dataUtworzenia: '2025-01-05T09:15:00',
-            rozmiarPliku: 98304,
-          },
-          {
-            dokumentId: 4,
-            nazwaPliku: 'RTG_klatki_piersiowej.pdf',
-            typDokumentu: 'wynik',
-            opis: 'Zdjęcie RTG klatki piersiowej',
-            dataUtworzenia: '2024-12-20T11:45:00',
-            rozmiarPliku: 1536000,
-          },
-          {
-            dokumentId: 5,
-            nazwaPliku: 'Zaswiadczenie_lekarskie.pdf',
-            typDokumentu: 'inne',
-            opis: 'Zaświadczenie o stanie zdrowia',
-            dataUtworzenia: '2024-12-15T16:00:00',
-            rozmiarPliku: 76800,
-          },
-        ];
-        setDokumenty(mockDokumenty);
+        if (isDemoMode) {
+          console.warn('Demo mode: using mock documents');
+          const mockDokumenty: Dokument[] = [
+            {
+              dokumentId: 1,
+              nazwaPliku: 'Wyniki_badania_krwi.pdf',
+              typDokumentu: 'wynik',
+              opis: 'Morfologia krwi - badanie okresowe',
+              dataUtworzenia: '2025-01-15T10:30:00',
+              rozmiarPliku: 245760,
+            },
+            {
+              dokumentId: 2,
+              nazwaPliku: 'Recepta_20250110.pdf',
+              typDokumentu: 'recepta',
+              opis: 'Recepta na leki kardiologiczne',
+              dataUtworzenia: '2025-01-10T14:20:00',
+              rozmiarPliku: 128000,
+            },
+            {
+              dokumentId: 3,
+              nazwaPliku: 'Skierowanie_kardiolog.pdf',
+              typDokumentu: 'skierowanie',
+              opis: 'Skierowanie do kardiologa',
+              dataUtworzenia: '2025-01-05T09:15:00',
+              rozmiarPliku: 98304,
+            },
+            {
+              dokumentId: 4,
+              nazwaPliku: 'RTG_klatki_piersiowej.pdf',
+              typDokumentu: 'wynik',
+              opis: 'Zdjęcie RTG klatki piersiowej',
+              dataUtworzenia: '2024-12-20T11:45:00',
+              rozmiarPliku: 1536000,
+            },
+            {
+              dokumentId: 5,
+              nazwaPliku: 'Zaswiadczenie_lekarskie.pdf',
+              typDokumentu: 'inne',
+              opis: 'Zaświadczenie o stanie zdrowia',
+              dataUtworzenia: '2024-12-15T16:00:00',
+              rozmiarPliku: 76800,
+            },
+          ];
+          setDokumenty(mockDokumenty);
+        } else {
+          const data = await apiService.getDokumenty();
+          setDokumenty(data);
+        }
+      } catch (err) {
+        console.error(err);
+        // Handle error appropriately
       } finally {
         setLoading(false);
       }
     };
 
     fetchDokumenty();
-  }, [t]);
+  }, [t, isDemoMode]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);

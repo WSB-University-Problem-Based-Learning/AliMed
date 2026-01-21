@@ -1,4 +1,4 @@
-import type { Pacjent, Lekarz, Wizyta, WizytaDetail, AuthResponse, Dokument, DokumentCreateRequest, RegisterRequest, LoginRequest, WizytaCreateRequest, DostepneTerminyResponse, Placowka, UpdatePacjentProfileRequest, AdminUserSummary, PromoteToDoctorRequest, LekarzWizytaSummary, AdminPacjentSummary, AdminLekarzSummary } from '../types/api';
+import type { Pacjent, Lekarz, Wizyta, WizytaDetail, AuthResponse, Dokument, DokumentCreateRequest, DokumentUpdateDto, RegisterRequest, LoginRequest, WizytaCreateRequest, DostepneTerminyResponse, Placowka, UpdatePacjentProfileRequest, AdminUserSummary, PromoteToDoctorRequest, LekarzWizytaSummary, AdminPacjentSummary, AdminLekarzSummary } from '../types/api';
 import { config } from '../config/env';
 
 const API_BASE_URL = config.apiBaseUrl;
@@ -305,12 +305,59 @@ export const apiService = {
     }
   },
 
+  async cancelWizyta(id: number): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/api/Wizyty/${id}/anuluj`, {
+      method: 'PUT',
+      headers: getHeaders(true),
+      credentials: 'include',
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Failed to cancel visit');
+    }
+  },
+
+  async markWizytaNieobecnosc(id: number): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/api/Wizyty/${id}/nieobecnosc`, {
+      method: 'PUT',
+      headers: getHeaders(true),
+      credentials: 'include',
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Failed to mark absence');
+    }
+  },
+
+  async getDokumentyWizyty(wizytaId: number): Promise<Dokument[]> {
+    const response = await fetch(`${API_BASE_URL}/api/Dokumenty/wizyty/${wizytaId}`, {
+      headers: getHeaders(true),
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to fetch visit documents');
+    return response.json();
+  },
+
   async getDokumentyWizytyLekarz(wizytaId: number): Promise<Dokument[]> {
     const response = await fetch(`${API_BASE_URL}/api/Dokumenty/wizyty/${wizytaId}/lekarz`, {
       headers: getHeaders(true),
       credentials: 'include',
     });
     if (!response.ok) throw new Error('Failed to fetch visit documents');
+    return response.json();
+  },
+
+  async updateDokument(id: number, data: DokumentUpdateDto): Promise<Dokument> {
+    const response = await fetch(`${API_BASE_URL}/api/Dokumenty/${id}`, {
+      method: 'PUT',
+      headers: getHeaders(true),
+      credentials: 'include',
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Failed to update document');
+    }
     return response.json();
   },
 

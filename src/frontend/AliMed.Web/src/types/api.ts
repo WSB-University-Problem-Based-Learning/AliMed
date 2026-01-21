@@ -109,6 +109,13 @@ export interface DokumentCreateRequest {
   tresc?: string;
 }
 
+export interface DokumentUpdateDto {
+  typDokumentu: string;
+  nazwaPliku?: string;
+  opis?: string;
+  tresc?: string;
+}
+
 // Request DTOs matching backend
 export interface RegisterRequest {
   email: string;

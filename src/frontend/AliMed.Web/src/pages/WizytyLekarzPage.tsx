@@ -417,8 +417,8 @@ const WizytyLekarzPage: React.FC = () => {
                   type="button"
                   onClick={() => setRange('day')}
                   className={`px-3 py-2 rounded-lg text-sm font-medium ${range === 'day'
-                      ? 'bg-alimed-blue text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    ? 'bg-alimed-blue text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                 >
                   {t('doctorVisits.day')}
@@ -427,8 +427,8 @@ const WizytyLekarzPage: React.FC = () => {
                   type="button"
                   onClick={() => setRange('week')}
                   className={`px-3 py-2 rounded-lg text-sm font-medium ${range === 'week'
-                      ? 'bg-alimed-blue text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    ? 'bg-alimed-blue text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                 >
                   {t('doctorVisits.week')}
@@ -437,8 +437,8 @@ const WizytyLekarzPage: React.FC = () => {
                   type="button"
                   onClick={() => setRange('month')}
                   className={`px-3 py-2 rounded-lg text-sm font-medium ${range === 'month'
-                      ? 'bg-alimed-blue text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    ? 'bg-alimed-blue text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                 >
                   {t('doctorVisits.month')}
@@ -598,6 +598,31 @@ const WizytyLekarzPage: React.FC = () => {
                     <PencilSquareIcon className="w-5 h-5" />
                     {statusSaving ? t('doctorVisits.saving') : t('doctorVisits.markAsCompleted')}
                   </button>
+                  <button
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors font-medium disabled:opacity-50"
+                    onClick={async () => {
+                      if (!window.confirm('Czy na pewno oznaczyć nieobecność pacjenta?')) return;
+                      setStatusSaving(true);
+                      try {
+                        await apiService.markWizytaNieobecnosc(selectedWizyta.wizytaId);
+                        setStatusMessage('Oznaczono nieobecność.');
+                        await reloadWizyty(true);
+                        closeModal();
+                      } catch (err) {
+                        setStatusError(err instanceof Error ? err.message : t('common.error'));
+                      } finally {
+                        setStatusSaving(false);
+                      }
+                    }}
+                    disabled={
+                      statusSaving ||
+                      isDemoMode ||
+                      isWizytaZrealizowana(selectedWizyta.status)
+                    }
+                  >
+                    <XMarkIcon className="w-5 h-5" />
+                    Pacjent nie stawił się
+                  </button>
                 </div>
 
                 <div className="border-t border-gray-100 pt-4 space-y-4">
@@ -678,9 +703,10 @@ const WizytyLekarzPage: React.FC = () => {
               </div>
             </div>
           </div>
-        )}
-      </main>
-    </div>
+        )
+        }
+      </main >
+    </div >
   );
 };
 
