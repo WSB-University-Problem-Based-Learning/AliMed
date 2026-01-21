@@ -124,3 +124,6 @@ Console.WriteLine($"ENV: {app.Environment.EnvironmentName}");
 
 app.MapControllers();
 app.Run();
+
+
+public partial class Program { }
