@@ -2,10 +2,12 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { apiService } from '../services/api';
 import type { AdminUserSummary, AdminPacjentSummary, AdminLekarzSummary, Placowka, PromoteToDoctorRequest } from '../types/api';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation } from '../context/LanguageContext';
 import Card from '../components/Card';
 
 const AdminDashboardPage: React.FC = () => {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [users, setUsers] = useState<AdminUserSummary[]>([]);
   const [pacjenci, setPacjenci] = useState<AdminPacjentSummary[]>([]);
   const [lekarze, setLekarze] = useState<AdminLekarzSummary[]>([]);
@@ -63,7 +65,7 @@ const AdminDashboardPage: React.FC = () => {
         setPacjenci(pacjenciData);
         setLekarze(lekarzeData);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Blad ladowania danych');
+        setError(err instanceof Error ? err.message : t('adminDashboard.errorLoading'));
       } finally {
         setLoading(false);
       }
@@ -89,12 +91,12 @@ const AdminDashboardPage: React.FC = () => {
     setError(null);
 
     if (!selectedUserId) {
-      setError('Wybierz usera do zmiany.');
+      setError(t('adminDashboard.selectUserError'));
       return;
     }
 
     if (!form.specjalizacja || !form.placowkaId) {
-      setError('Uzupelnij wszystkie pola.');
+      setError(t('adminDashboard.fillAllFieldsError'));
       return;
     }
 
@@ -111,7 +113,7 @@ const AdminDashboardPage: React.FC = () => {
       setSelectedUserId('');
       setForm({ specjalizacja: '', placowkaId: 0 });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Blad zapisu');
+      setError(err instanceof Error ? err.message : t('adminDashboard.saveError'));
     }
   };
 
@@ -128,7 +130,7 @@ const AdminDashboardPage: React.FC = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="text-alimed-blue text-xl">Ladowanie...</div>
+        <div className="text-alimed-blue text-xl">{t('adminDashboard.loading')}</div>
       </div>
     );
   }
@@ -136,14 +138,14 @@ const AdminDashboardPage: React.FC = () => {
   if (!isAdmin) {
     return (
       <div className="text-center text-gray-600">
-        Brak dostepu do panelu admina.
+        {t('adminDashboard.accessDenied')}
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <h2 className="text-3xl font-bold text-alimed-blue">Panel admina</h2>
+      <h2 className="text-3xl font-bold text-alimed-blue">{t('adminDashboard.title')}</h2>
 
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
@@ -152,14 +154,14 @@ const AdminDashboardPage: React.FC = () => {
       )}
 
       <Card>
-        <h3 className="text-xl font-semibold text-gray-900 mb-4">Zmien role na Lekarz</h3>
+        <h3 className="text-xl font-semibold text-gray-900 mb-4">{t('adminDashboard.changeRoleToDoctor')}</h3>
         <form onSubmit={handlePromote} className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <select
             value={selectedUserId}
             onChange={(e) => setSelectedUserId(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg"
           >
-            <option value="">Wybierz usera</option>
+            <option value="">{t('adminDashboard.selectUser')}</option>
             {userOptions.map(u => (
               <option key={u.userId} value={u.userId}>
                 {u.username || u.email || u.userId}
@@ -173,7 +175,7 @@ const AdminDashboardPage: React.FC = () => {
             onChange={handleChange}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg"
           >
-            <option value="">Placowka</option>
+            <option value="">{t('adminDashboard.selectFacility')}</option>
             {placowki.map(p => (
               <option key={p.placowkaId} value={p.placowkaId}>
                 {p.nazwa || `Placowka ${p.placowkaId}`}
@@ -187,7 +189,7 @@ const AdminDashboardPage: React.FC = () => {
             onChange={handleChange}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg"
           >
-            <option value="">Specjalizacja</option>
+            <option value="">{t('adminDashboard.specialization')}</option>
             {specjalizacje.map(spec => (
               <option key={spec} value={spec}>
                 {spec}
@@ -199,18 +201,18 @@ const AdminDashboardPage: React.FC = () => {
             type="submit"
             className="w-full md:col-span-2 px-4 py-2 bg-alimed-blue text-white rounded-lg hover:bg-blue-700 transition"
           >
-            Zmien na Lekarza
+            {t('adminDashboard.promote')}
           </button>
         </form>
       </Card>
 
       <Card>
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
-          <h3 className="text-xl font-semibold text-gray-900">Pacjenci</h3>
+          <h3 className="text-xl font-semibold text-gray-900">{t('adminDashboard.patients')}</h3>
           <input
             value={pacjentFilter}
             onChange={(e) => setPacjentFilter(e.target.value)}
-            placeholder="Filtruj po imieniu i nazwisku"
+            placeholder={t('adminDashboard.filterPlaceholder')}
             className="w-full md:w-80 px-3 py-2 border border-gray-300 rounded-lg"
           />
         </div>
@@ -218,9 +220,9 @@ const AdminDashboardPage: React.FC = () => {
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Pacjent</th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{t('doctorPatients.patient')}</th>
                 <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">PESEL</th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Wizyty</th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{t('doctorDashboard.visits')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -234,7 +236,7 @@ const AdminDashboardPage: React.FC = () => {
               {filteredPacjenci.length === 0 && (
                 <tr>
                   <td className="px-4 py-3 text-sm text-gray-500" colSpan={3}>
-                    Brak pacjentow.
+                    {t('adminDashboard.noPatients')}
                   </td>
                 </tr>
               )}
@@ -245,7 +247,7 @@ const AdminDashboardPage: React.FC = () => {
 
       <Card>
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
-          <h3 className="text-xl font-semibold text-gray-900">Lekarze</h3>
+          <h3 className="text-xl font-semibold text-gray-900">{t('adminDashboard.doctors')}</h3>
           <input
             value={lekarzFilter}
             onChange={(e) => setLekarzFilter(e.target.value)}
@@ -257,9 +259,9 @@ const AdminDashboardPage: React.FC = () => {
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Lekarz</th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Specjalizacja</th>
-                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Placowka</th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{t('myVisits.doctor')}</th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{t('adminDashboard.specialization')}</th>
+                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">{t('adminDashboard.selectFacility')}</th>
                 <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Login</th>
               </tr>
             </thead>
@@ -275,7 +277,7 @@ const AdminDashboardPage: React.FC = () => {
               {filteredLekarze.length === 0 && (
                 <tr>
                   <td className="px-4 py-3 text-sm text-gray-500" colSpan={4}>
-                    Brak lekarzy.
+                    {t('adminDashboard.noDoctors')}
                   </td>
                 </tr>
               )}

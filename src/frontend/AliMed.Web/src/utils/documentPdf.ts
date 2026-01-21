@@ -182,7 +182,7 @@ export const openDocumentPdf = ({ dokument, pacjent, wizyta, tresc, targetWindow
     <div class="header">
       <div class="logo">
         <div style="display:flex;align-items:center;gap:12px;">
-          <img src="/logo.svg" alt="AliMed" style="width:48px;height:48px;" />
+          <img src="${window.location.origin}/logo.svg" alt="AliMed" style="width:48px;height:48px;" />
           <div>
             <span>AliMed</span>
             <small>Dokument medyczny</small>

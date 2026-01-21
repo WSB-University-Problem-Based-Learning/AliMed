@@ -111,7 +111,7 @@
     "dateTime": "Data i godzina",
     "doctor": "Dochtōr",
     "specialization": "Specjalizacyjo",
-      "facility": "Placōwka",
+    "facility": "Placōwka",
     "status": "Status",
     "confirmed": "Potwierdzynō",
     "pending": "Czeko",
@@ -274,7 +274,27 @@
     "type": "Typ",
     "addNote": "Przidej notatka",
     "issuePrescription": "Wystow recepta",
-    "selectVisit": "Ôbier wizyta ze listy, coby widziec szczygoly"
+    "selectVisit": "Ôbier wizyta ze listy, coby widziec szczygoly",
+    "statusUpdated": "Status wizyty zaktualizowany.",
+    "documentSaved": "Dokument zapisany.",
+    "noVisitsDay": "Brak wizyt w wybranym dniu.",
+    "baseDate": "Data bazowa",
+    "diagnosisPlaceholder": "Wpisz diagnozę do wizyty",
+    "diagnosisReadOnly": "Wizyta jest już zrealizowana. Diagnoza jest tylko do odczytu.",
+    "markAsCompleted": "Oznacz jako zrealizowana",
+    "saving": "Zapisywanie...",
+    "visitDocuments": "Dokumenty wizyty",
+    "noDocuments": "Brak dokumentów dla wizyty.",
+    "documentType": "Typ dokumentu",
+    "selectDocumentType": "Wybierz typ dokumentu",
+    "documentContent": "Treść dokumentu",
+    "enterDocumentContent": "Wpisz treść dokumentu",
+    "addDocument": "Dodaj dokument",
+    "day": "Dzień",
+    "week": "Tydzień",
+    "month": "Miesiąc",
+    "missingDocumentType": "Wybierz typ dokumentu.",
+    "visitLabel": "Wizyta"
   },
   "doctorPatients": {
     "title": "Pacjynty",
@@ -319,6 +339,24 @@
     "save": "spamiyntej",
     "saveSuccess": "Dane były pomyślnie spamiyntane",
     "errorSaving": "Feler przi spamiyntowaniu danych"
+  },
+  "adminDashboard": {
+    "title": "Panel admina",
+    "changeRoleToDoctor": "Zmień rolę na Lekarz",
+    "selectUser": "Wybierz użytkownika",
+    "selectFacility": "Placówka",
+    "specialization": "Specjalizacja",
+    "promote": "Zmień na Lekarza",
+    "patients": "Pacjenci",
+    "doctors": "Lekarze",
+    "filterPlaceholder": "Filtruj po imieniu i nazwisku",
+    "noPatients": "Brak pacjentów.",
+    "noDoctors": "Brak lekarzy.",
+    "loading": "Ładowanie...",
+    "errorLoading": "Błąd ładowania danych",
+    "selectUserError": "Wybierz użytkownika do zmiany.",
+    "fillAllFieldsError": "Uzupełnij wszystkie pola.",
+    "saveError": "Błąd zapisu",
+    "accessDenied": "Brak dostępu do panelu admina."
   }
 }
-

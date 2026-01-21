@@ -205,7 +205,7 @@ const WizytyLekarzPage: React.FC = () => {
     if (normalized.includes('zrealizowana') || normalized.includes('odbyta') || normalized.includes('zakoncz')) {
       return (
         <span className="px-3 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700">
-          Zrealizowana
+          {t('doctorVisits.statusCompleted')}
         </span>
       );
     }
@@ -275,7 +275,7 @@ const WizytyLekarzPage: React.FC = () => {
     setStatusMessage(null);
     try {
       await apiService.oznaczWizyteOdbyta(selectedWizyta.wizytaId, diagnoza);
-      setStatusMessage('Status wizyty zaktualizowany.');
+      setStatusMessage(t('doctorVisits.statusUpdated'));
       await reloadWizyty(true);
     } catch (err) {
       setStatusError(err instanceof Error ? err.message : t('common.error'));
@@ -291,7 +291,7 @@ const WizytyLekarzPage: React.FC = () => {
 
   const handleCreateDocument = async () => {
     if (!selectedWizyta || !nowyDokument.typDokumentu) {
-      setDokError('Wybierz typ dokumentu.');
+      setDokError(t('doctorVisits.missingDocumentType'));
       return;
     }
     setDokSaving(true);
@@ -322,7 +322,7 @@ const WizytyLekarzPage: React.FC = () => {
       }
 
       setNowyDokument({ typDokumentu: '', tresc: '' });
-      setDokMessage('Dokument zapisany.');
+      setDokMessage(t('doctorVisits.documentSaved'));
     } catch (err) {
       setDokError(err instanceof Error ? err.message : t('common.error'));
     } finally {
@@ -409,126 +409,122 @@ const WizytyLekarzPage: React.FC = () => {
         </div>
 
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <h2 className="text-xl font-semibold text-gray-900">{t('doctorVisits.title')}</h2>
-              <div className="flex flex-col md:flex-row md:items-center gap-3">
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setRange('day')}
-                    className={`px-3 py-2 rounded-lg text-sm font-medium ${
-                      range === 'day'
-                        ? 'bg-alimed-blue text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          <div className="px-6 py-4 border-b border-gray-100 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <h2 className="text-xl font-semibold text-gray-900">{t('doctorVisits.title')}</h2>
+            <div className="flex flex-col md:flex-row md:items-center gap-3">
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setRange('day')}
+                  className={`px-3 py-2 rounded-lg text-sm font-medium ${range === 'day'
+                      ? 'bg-alimed-blue text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
-                  >
-                    Dzien
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setRange('week')}
-                    className={`px-3 py-2 rounded-lg text-sm font-medium ${
-                      range === 'week'
-                        ? 'bg-alimed-blue text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                >
+                  {t('doctorVisits.day')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRange('week')}
+                  className={`px-3 py-2 rounded-lg text-sm font-medium ${range === 'week'
+                      ? 'bg-alimed-blue text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
-                  >
-                    Tydzien
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setRange('month')}
-                    className={`px-3 py-2 rounded-lg text-sm font-medium ${
-                      range === 'month'
-                        ? 'bg-alimed-blue text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                >
+                  {t('doctorVisits.week')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRange('month')}
+                  className={`px-3 py-2 rounded-lg text-sm font-medium ${range === 'month'
+                      ? 'bg-alimed-blue text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
-                  >
-                    Miesiac
-                  </button>
-                </div>
-                <div className="flex items-center gap-2">
-                  <label className="text-sm text-gray-500" htmlFor="visit-date">
-                    Data bazowa
-                  </label>
-                  <input
-                    id="visit-date"
-                    type="date"
-                    value={selectedDate}
-                    onChange={(event) => {
-                      setSelectedDate(event.target.value);
-                      setSelectedWizytaId(null);
-                    }}
-                    className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                  />
-                </div>
+                >
+                  {t('doctorVisits.month')}
+                </button>
+              </div>
+              <div className="flex items-center gap-2">
+                <label className="text-sm text-gray-500" htmlFor="visit-date">
+                  {t('doctorVisits.baseDate')}
+                </label>
+                <input
+                  id="visit-date"
+                  type="date"
+                  value={selectedDate}
+                  onChange={(event) => {
+                    setSelectedDate(event.target.value);
+                    setSelectedWizytaId(null);
+                  }}
+                  className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                />
               </div>
             </div>
+          </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      {t('doctorVisits.time')}
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      {t('doctorVisits.patient')}
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      {t('doctorVisits.visitType')}
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      {t('doctorVisits.status')}
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      {t('doctorVisits.actions')}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {wizyty.map((wizyta) => (
-                    <tr
-                      key={wizyta.wizytaId}
-                      className={`hover:bg-gray-50 transition-colors cursor-pointer ${
-                        selectedWizytaId === wizyta.wizytaId ? 'bg-blue-50' : ''
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {t('doctorVisits.time')}
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {t('doctorVisits.patient')}
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {t('doctorVisits.visitType')}
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {t('doctorVisits.status')}
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {t('doctorVisits.actions')}
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {wizyty.map((wizyta) => (
+                  <tr
+                    key={wizyta.wizytaId}
+                    className={`hover:bg-gray-50 transition-colors cursor-pointer ${selectedWizytaId === wizyta.wizytaId ? 'bg-blue-50' : ''
                       }`}
-                      onClick={() => {
-                        setSelectedWizytaId(wizyta.wizytaId);
-                        openModal(wizyta.wizytaId);
-                      }}
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {formatTime(wizyta.dataWizyty)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {wizyta.pacjent}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">Wizyta</td>
-                      <td className="px-6 py-4 whitespace-nowrap">{getStatusBadge(wizyta.status)}</td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <button
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            openModal(wizyta.wizytaId);
-                          }}
-                          className="text-alimed-blue hover:text-blue-700 text-sm font-medium hover:underline"
-                        >
-                          {t('doctorVisits.details')}
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                  {wizyty.length === 0 && (
-                    <tr>
-                      <td colSpan={5} className="px-6 py-6 text-center text-sm text-gray-500">
-                        Brak wizyt w wybranym dniu.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+                    onClick={() => {
+                      setSelectedWizytaId(wizyta.wizytaId);
+                      openModal(wizyta.wizytaId);
+                    }}
+                  >
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {formatTime(wizyta.dataWizyty)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {wizyta.pacjent}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{t('doctorVisits.visitLabel')}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">{getStatusBadge(wizyta.status)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <button
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          openModal(wizyta.wizytaId);
+                        }}
+                        className="text-alimed-blue hover:text-blue-700 text-sm font-medium hover:underline"
+                      >
+                        {t('doctorVisits.details')}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+                {wizyty.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-6 text-center text-sm text-gray-500">
+                      {t('doctorVisits.noVisitsDay')}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
         {isModalOpen && selectedWizyta && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
@@ -571,13 +567,13 @@ const WizytyLekarzPage: React.FC = () => {
                     onChange={(event) => setDiagnoza(event.target.value)}
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                     rows={3}
-                    placeholder="Wpisz diagnoze do wizyty"
+                    placeholder={t('doctorVisits.diagnosisPlaceholder')}
                     readOnly={isWizytaZrealizowana(selectedWizyta.status)}
                     disabled={isDemoMode}
                   />
                   {isWizytaZrealizowana(selectedWizyta.status) && (
                     <div className="text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded px-3 py-2">
-                      Wizyta jest juz zrealizowana. Diagnoza jest tylko do odczytu.
+                      {t('doctorVisits.diagnosisReadOnly')}
                     </div>
                   )}
                   {statusError && (
@@ -600,14 +596,14 @@ const WizytyLekarzPage: React.FC = () => {
                     }
                   >
                     <PencilSquareIcon className="w-5 h-5" />
-                    {statusSaving ? 'Zapisywanie...' : 'Oznacz jako zrealizowana'}
+                    {statusSaving ? t('doctorVisits.saving') : t('doctorVisits.markAsCompleted')}
                   </button>
                 </div>
 
                 <div className="border-t border-gray-100 pt-4 space-y-4">
                   <div className="flex items-center gap-2">
                     <DocumentTextIcon className="w-5 h-5 text-gray-500" />
-                    <h4 className="text-sm font-medium text-gray-700">Dokumenty wizyty</h4>
+                    <h4 className="text-sm font-medium text-gray-700">{t('doctorVisits.visitDocuments')}</h4>
                   </div>
 
                   {dokError && (
@@ -632,13 +628,13 @@ const WizytyLekarzPage: React.FC = () => {
                       ))}
                     </ul>
                   ) : (
-                    <div className="text-sm text-gray-500">Brak dokumentow dla wizyty.</div>
+                    <div className="text-sm text-gray-500">{t('doctorVisits.noDocuments')}</div>
                   )}
 
                   <div className="space-y-3">
                     <div>
                       <label className="block text-sm font-medium text-gray-600 mb-1" htmlFor="typDokumentu">
-                        Typ dokumentu
+                        {t('doctorVisits.documentType')}
                       </label>
                       <select
                         id="typDokumentu"
@@ -647,16 +643,16 @@ const WizytyLekarzPage: React.FC = () => {
                         onChange={handleDokInputChange}
                         className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                       >
-                        <option value="">Wybierz typ dokumentu</option>
-                        <option value="wynik">Wynik</option>
-                        <option value="recepta">Recepta</option>
-                        <option value="opis">Opis</option>
-                        <option value="skierowanie">Skierowanie</option>
+                        <option value="">{t('doctorVisits.selectDocumentType')}</option>
+                        <option value="wynik">{t('doctorDocumentation.typeWynik')}</option>
+                        <option value="recepta">{t('doctorDocumentation.typeRecepta')}</option>
+                        <option value="opis">{t('doctorDocumentation.typeOpis')}</option>
+                        <option value="skierowanie">{t('doctorDocumentation.typeSkierowanie')}</option>
                       </select>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-600 mb-1" htmlFor="tresc">
-                        Tresc dokumentu
+                        {t('doctorVisits.documentContent')}
                       </label>
                       <textarea
                         id="tresc"
@@ -665,7 +661,7 @@ const WizytyLekarzPage: React.FC = () => {
                         onChange={handleDokInputChange}
                         className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                         rows={4}
-                        placeholder="Wpisz tresc dokumentu"
+                        placeholder={t('doctorVisits.enterDocumentContent')}
                       />
                     </div>
                     <button
@@ -675,7 +671,7 @@ const WizytyLekarzPage: React.FC = () => {
                       className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-alimed-blue text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:bg-blue-200"
                     >
                       <DocumentTextIcon className="w-5 h-5" />
-                      {dokSaving ? 'Zapisywanie...' : 'Dodaj dokument'}
+                      {dokSaving ? t('doctorVisits.saving') : t('doctorVisits.addDocument')}
                     </button>
                   </div>
                 </div>
