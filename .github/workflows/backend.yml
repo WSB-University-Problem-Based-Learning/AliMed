@@ -60,6 +60,16 @@ jobs:
           mkdir -p "$DST_DIR"
           cp "$SRC_DIR"/*.deps.json "$DST_DIR"/ || true
 
+      - name: Ensure testhost.deps.json exists
+        working-directory: WebAPI
+        run: |
+          DST_DIR="API.Alimed.Tests/bin/Release/net9.0"
+          if [ ! -f "$DST_DIR/testhost.deps.json" ]; then
+            if [ -f "$DST_DIR/API.Alimed.deps.json" ]; then
+              cp "$DST_DIR/API.Alimed.deps.json" "$DST_DIR/testhost.deps.json"
+            fi
+          fi
+
       - name: Run tests
         working-directory: WebAPI/API.Alimed.Tests
         run: dotnet test --configuration Release --verbosity normal
