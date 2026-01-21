@@ -26,12 +26,11 @@ namespace API.Alimed.Controllers.Pacjenci
         [HttpGet]
         [Route("moj-profil")]
         [Authorize(Roles = "User, Admin")]
+
+
+
         public async Task<IActionResult> GetMojProfil()
         {
-            // TODO
-
-
-
             var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
 
@@ -78,17 +77,15 @@ namespace API.Alimed.Controllers.Pacjenci
         /// PUT Requests
         ////////////////////////////////////////////////////////////////////////////////////////////////////////
         [HttpPut("moj-profil")]
+
+
+
+
+
         [Authorize(Roles = "User, Admin")]
         public async Task<IActionResult> UpdateMyProfile([FromBody] UpdatePacjentProfileDto dto)
         {
-
-
-            //
-            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            //
-
-
-
+             var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (string.IsNullOrEmpty(userIdStr))
                 return Unauthorized("Brak UserId w tokenie.");

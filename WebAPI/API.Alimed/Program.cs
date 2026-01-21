@@ -12,7 +12,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // mysql conn
-// mysql conn
 var mysqlConn = builder.Configuration.GetConnectionString("MySqlConnection");
 if (!string.IsNullOrEmpty(mysqlConn))
 {
@@ -29,7 +28,7 @@ builder.Services.AddCustomServices(builder.Configuration);
 builder.Services.AddAuthorization(); // auth attributes for endpoints
 builder.Services.AddControllers(); // controller mapping
 builder.Services.AddHttpClient(); // http
-// builder.Services.AddOpenApi();
+
 
 builder.Services.AddRateLimiter(options =>
 {
@@ -115,7 +114,7 @@ if (app.Environment.IsDevelopment())
     app.UseCors("AllowReactApp");
 }
  
-// app.UseHttpsRedirection();
+
 // CORS musi byc przed UseAuthentication bo sra bledami
 app.UseCors("AllowReactApp");
 

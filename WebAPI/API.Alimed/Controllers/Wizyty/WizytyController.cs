@@ -113,21 +113,7 @@ namespace API.Alimed.Controllers.Wizyty
 
 
 
-        //////////////////////////////////////////////////////////////////////////////////////////////////////////
-        /// 
-        // w React
-        // GET /api/wizyty/dostepne-terminy
-            // ?lekarzId=1
-            // &placowkaId=1
-            // &from=2026-01-20
-            // &to=2026-01-25
 
-        // POST /api/wizyty/umow-wizyte
-        // {
-        // "lekarzId": 1,
-        // "placowkaId": 1,
-        // "dataWizyty": "2026-01-22T09:30:00"
-        // }
 
         [HttpGet("dostepne-terminy")]
         [Authorize(Roles = "User")]
