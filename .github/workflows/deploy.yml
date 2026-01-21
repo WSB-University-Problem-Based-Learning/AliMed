@@ -74,6 +74,27 @@ jobs:
           run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Create appsettings.Production.json
+        run: |
+          cat <<EOF > backend-publish/appsettings.Production.json
+          {
+            "ConnectionStrings": {
+              "MySqlConnection": "${{ secrets.DB_CONNECTION_STRING }}"
+            },
+            "Cors": {
+              "AllowedOrigins": [
+                "https://alimed.com.pl",
+                "https://www.alimed.com.pl"
+              ]
+            },
+            "Jwt": {
+              "Key": "${{ secrets.JWT_KEY }}",
+              "Issuer": "MyGitHubAuthAPI",
+              "Audience": "MyReactFrontend"
+            }
+          }
+          EOF
+
       - name: Deploy Backend
         uses: easingthemes/ssh-deploy@v5.1.0
         with:
