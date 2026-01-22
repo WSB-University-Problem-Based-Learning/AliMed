@@ -9,7 +9,6 @@ import {
 } from '@heroicons/react/24/outline';
 import { useTranslation } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
-import LanguageSwitcher from '../components/LanguageSwitcher';
 import { apiService } from '../services/api';
 import type { Dokument, LekarzWizytaSummary } from '../types/api';
 
@@ -23,7 +22,7 @@ interface NadchodzacaWizyta {
 
 const DoctorDashboardPage: React.FC = () => {
   const { t } = useTranslation();
-  const { user, logout, isDemoMode } = useAuth();
+  const { isDemoMode } = useAuth();
   const navigate = useNavigate();
 
   const [nadchodzaceWizyty, setNadchodzaceWizyty] = useState<NadchodzacaWizyta[]>([]);
@@ -91,15 +90,6 @@ const DoctorDashboardPage: React.FC = () => {
     }
   }, [dateOnly, isDemoMode, t]);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
-
-  const userName = user?.firstName && user?.lastName
-    ? `dr ${user.firstName} ${user.lastName}`
-    : user?.firstName || user?.username || user?.githubName || 'Lekarz';
-
   const statCards = [
     {
       id: 'wizyty',
@@ -140,153 +130,118 @@ const DoctorDashboardPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-100">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b-4 border-alimed-blue">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo */}
-            <div className="flex items-center">
-              <img src="/logo.svg" alt="AliMed" className="h-16" />
-            </div>
-
-            {/* User info & actions */}
-            <div className="flex items-center space-x-4">
-              <span className="text-gray-700">
-                {t('doctorDashboard.welcome')}, {userName}
-              </span>
-              <LanguageSwitcher />
-              <button
-                onClick={() => navigate('/moje-dane-lekarza')}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-              >
-                {t('nav.myAccount')}
-              </button>
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 text-sm font-medium text-white bg-alimed-blue rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                {t('nav.logout')}
-              </button>
-            </div>
-          </div>
+    <div>
+      {/* Demo notice */}
+      {isDemoMode && (
+        <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-800">
+          {t('dashboard.demoNotice')}
         </div>
-      </header>
+      )}
 
-      {/* Main content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Demo notice */}
-        {isDemoMode && (
-          <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-800">
-            {t('dashboard.demoNotice')}
+      {error && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+          {error}
+        </div>
+      )}
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {statCards.map((card) => (
+          <div
+            key={card.id}
+            onClick={() => card.onClick ? card.onClick() : setActiveCard(card.id)}
+            className={`bg-white rounded-xl p-6 shadow-sm cursor-pointer transition-all duration-200 hover:shadow-md ${activeCard === card.id ? `border-2 ${card.borderColor}` : 'border-2 border-transparent'
+              }`}
+          >
+            <div className="flex flex-col items-center text-center">
+              <div className={`w-14 h-14 rounded-full ${card.color} flex items-center justify-center mb-4`}>
+                <card.icon className="w-7 h-7" />
+              </div>
+              <h3 className="text-gray-600 font-medium mb-2">{card.title}</h3>
+              {card.value !== null && (
+                <p className="text-3xl font-bold text-gray-900">{card.value}</p>
+              )}
+            </div>
           </div>
-        )}
+        ))}
+      </div>
 
-        {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-            {error}
-          </div>
-        )}
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {statCards.map((card) => (
-            <div
-              key={card.id}
-              onClick={() => card.onClick ? card.onClick() : setActiveCard(card.id)}
-              className={`bg-white rounded-xl p-6 shadow-sm cursor-pointer transition-all duration-200 hover:shadow-md ${activeCard === card.id ? `border-2 ${card.borderColor}` : 'border-2 border-transparent'
-                }`}
-            >
-              <div className="flex flex-col items-center text-center">
-                <div className={`w-14 h-14 rounded-full ${card.color} flex items-center justify-center mb-4`}>
-                  <card.icon className="w-7 h-7" />
+      {loading ? (
+        <div className="text-center text-gray-500">{t('common.loading')}</div>
+      ) : (
+        /* Two column layout for visits */
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Nadchodzące wizyty */}
+          <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+              <h2 className="text-lg font-semibold text-gray-900">
+                {t('doctorDashboard.upcomingVisits')}
+              </h2>
+              <button
+                onClick={() => navigate('/wizyty-lekarza')}
+                className="text-alimed-blue text-sm font-medium hover:underline"
+              >
+                {t('doctorDashboard.seeAll')}
+              </button>
+            </div>
+            <div className="divide-y divide-gray-100">
+              {nadchodzaceWizyty.map((wizyta) => (
+                <div key={wizyta.id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="font-medium text-gray-900">
+                        {wizyta.pacjent}
+                      </p>
+                      <p className="text-sm text-gray-500">{t('doctorDashboard.statusLabel')}: {wizyta.status}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-medium text-gray-900">{wizyta.godzina}</p>
+                      <p className="text-sm text-gray-500 capitalize">{wizyta.dzien}</p>
+                    </div>
+                  </div>
                 </div>
-                <h3 className="text-gray-600 font-medium mb-2">{card.title}</h3>
-                {card.value !== null && (
-                  <p className="text-3xl font-bold text-gray-900">{card.value}</p>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {loading ? (
-          <div className="text-center text-gray-500">{t('common.loading')}</div>
-        ) : (
-          /* Two column layout for visits */
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Nadchodzące wizyty */}
-            <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-              <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-                <h2 className="text-lg font-semibold text-gray-900">
-                  {t('doctorDashboard.upcomingVisits')}
-                </h2>
-                <button
-                  onClick={() => navigate('/wizyty-lekarza')}
-                  className="text-alimed-blue text-sm font-medium hover:underline"
-                >
-                  {t('doctorDashboard.seeAll')}
-                </button>
-              </div>
-              <div className="divide-y divide-gray-100">
-                {nadchodzaceWizyty.map((wizyta) => (
-                  <div key={wizyta.id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="font-medium text-gray-900">
-                          {wizyta.pacjent}
-                        </p>
-                        <p className="text-sm text-gray-500">{t('doctorDashboard.statusLabel')}: {wizyta.status}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-medium text-gray-900">{wizyta.godzina}</p>
-                        <p className="text-sm text-gray-500 capitalize">{wizyta.dzien}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                {nadchodzaceWizyty.length === 0 && (
-                  <div className="px-6 py-8 text-center text-gray-500">
-                    {t('doctorDashboard.noUpcomingVisits')}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Wizyty w tym tygodniu */}
-            <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-              <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-                <h2 className="text-lg font-semibold text-gray-900">
-                  {t('doctorDashboard.weeklyVisits')}
-                </h2>
-                <CalendarIcon className="w-5 h-5 text-gray-400" />
-              </div>
-              <div className="divide-y divide-gray-100">
-                {wizytyTygodnia.map((wizyta) => (
-                  <div key={wizyta.id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <p className="font-medium text-gray-900">
-                          {wizyta.pacjent}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          {wizyta.dzien}, {wizyta.godzina}
-                        </p>
-                      </div>
-                      <span className="text-xs text-gray-500">{t('doctorDashboard.statusLabel')}: {wizyta.status}</span>
-                    </div>
-                  </div>
-                ))}
-                {wizytyTygodnia.length === 0 && (
-                  <div className="px-6 py-8 text-center text-gray-500">
-                    {t('doctorDashboard.noWeeklyVisits')}
-                  </div>
-                )}
-              </div>
+              ))}
+              {nadchodzaceWizyty.length === 0 && (
+                <div className="px-6 py-8 text-center text-gray-500">
+                  {t('doctorDashboard.noUpcomingVisits')}
+                </div>
+              )}
             </div>
           </div>
-        )}
-      </main>
+
+          {/* Wizyty w tym tygodniu */}
+          <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+              <h2 className="text-lg font-semibold text-gray-900">
+                {t('doctorDashboard.weeklyVisits')}
+              </h2>
+              <CalendarIcon className="w-5 h-5 text-gray-400" />
+            </div>
+            <div className="divide-y divide-gray-100">
+              {wizytyTygodnia.map((wizyta) => (
+                <div key={wizyta.id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="font-medium text-gray-900">
+                        {wizyta.pacjent}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        {wizyta.dzien}, {wizyta.godzina}
+                      </p>
+                    </div>
+                    <span className="text-xs text-gray-500">{t('doctorDashboard.statusLabel')}: {wizyta.status}</span>
+                  </div>
+                </div>
+              ))}
+              {wizytyTygodnia.length === 0 && (
+                <div className="px-6 py-8 text-center text-gray-500">
+                  {t('doctorDashboard.noWeeklyVisits')}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

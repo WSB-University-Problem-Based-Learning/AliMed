@@ -49,37 +49,51 @@ function App() {
             {/* Protected routes */}
             <Route path="/dashboard" element={
               <ProtectedRoute roles={[0]}>
-                <DashboardPage />
+                <Layout>
+                  <DashboardPage />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/panel-lekarza" element={
               <ProtectedRoute roles={[1]}>
-                <DoctorDashboardPage />
+                <Layout>
+                  <DoctorDashboardPage />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/wizyty-lekarza" element={
               <ProtectedRoute roles={[1]}>
-                <WizytyLekarzPage />
+                <Layout>
+                  <WizytyLekarzPage />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/pacjenci-lekarza" element={
               <ProtectedRoute roles={[1]}>
-                <PacjenciLekarzPage />
+                <Layout>
+                  <PacjenciLekarzPage />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/pacjenci-lekarza/:id" element={
               <ProtectedRoute roles={[1]}>
-                <DoctorPatientDetailsPage />
+                <Layout>
+                  <DoctorPatientDetailsPage />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/dokumentacja-lekarza" element={
               <ProtectedRoute roles={[1]}>
-                <DokumentacjaLekarzPage />
+                <Layout>
+                  <DokumentacjaLekarzPage />
+                </Layout>
               </ProtectedRoute>
             } />
             <Route path="/moje-dane-lekarza" element={
               <ProtectedRoute roles={[1]}>
-                <MojeDaneLekarzPage />
+                <Layout>
+                  <MojeDaneLekarzPage />
+                </Layout>
               </ProtectedRoute>
             } />
 

@@ -9,12 +9,11 @@ import {
 } from '@heroicons/react/24/outline';
 import { useTranslation } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
-import LanguageSwitcher from '../components/LanguageSwitcher';
 import { apiService } from '../services/api';
 
 const MojeDaneLekarzPage: React.FC = () => {
   const { t } = useTranslation();
-  const { user, logout, isDemoMode } = useAuth();
+  const { user, isDemoMode } = useAuth();
   const navigate = useNavigate();
 
   const [statystyki, setStatystyki] = useState({ wizyty: 0, pacjenci: 0, dokumentacja: 0 });
@@ -57,15 +56,9 @@ const MojeDaneLekarzPage: React.FC = () => {
   }, [isDemoMode]);
   const [activeCard, setActiveCard] = useState<string>('moje-dane');
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
+  // Header and outer wrapper removed to use common Layout
+  // const userName unused
 
-
-  const userName = user?.firstName && user?.lastName
-    ? `dr ${user.firstName} ${user.lastName}`
-    : user?.firstName || user?.username || user?.githubName || 'Lekarz';
 
   const statCards = [
     {
@@ -107,42 +100,7 @@ const MojeDaneLekarzPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-100">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b-4 border-alimed-blue">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo */}
-            <div
-              className="flex items-center space-x-3 cursor-pointer"
-              onClick={() => navigate('/panel-lekarza')}
-            >
-              <img src="/logo.svg" alt="AliMed" className="h-10 w-10" />
-              <span className="text-2xl font-bold text-alimed-blue">AliMed</span>
-            </div>
-
-            {/* User info & actions */}
-            <div className="flex items-center space-x-4">
-              <span className="text-gray-700">
-                {t('doctorDashboard.welcome')}, {userName}
-              </span>
-              <LanguageSwitcher />
-              <button
-                onClick={() => setActiveCard('moje-dane')}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-              >
-                {t('nav.myAccount')}
-              </button>
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 text-sm font-medium text-white bg-alimed-blue rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                {t('nav.logout')}
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+    <div>
 
       {/* Main content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

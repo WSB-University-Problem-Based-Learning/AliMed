@@ -10,14 +10,13 @@ import {
 } from '@heroicons/react/24/outline';
 import { useTranslation } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
-import LanguageSwitcher from '../components/LanguageSwitcher';
 import { apiService } from '../services/api';
 import type { Pacjent } from '../types/api';
 
 const DoctorPatientDetailsPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const { t } = useTranslation();
-    const { user, logout, isDemoMode } = useAuth();
+    const { isDemoMode } = useAuth();
     const navigate = useNavigate();
 
     const [pacjent, setPacjent] = useState<Pacjent | null>(null);
@@ -59,18 +58,9 @@ const DoctorPatientDetailsPage: React.FC = () => {
         fetchPatient();
     }, [id, isDemoMode, t]);
 
-    const handleLogout = () => {
-        logout();
-        navigate('/');
-    };
-
-    const userName = user?.firstName && user?.lastName
-        ? `dr ${user.firstName} ${user.lastName}`
-        : user?.firstName || user?.username || user?.githubName || 'Lekarz';
-
     if (loading) {
         return (
-            <div className="min-h-screen bg-slate-100 flex items-center justify-center">
+            <div className="flex items-center justify-center p-12">
                 <div className="text-alimed-blue text-xl">{t('common.loading')}</div>
             </div>
         );
@@ -78,7 +68,7 @@ const DoctorPatientDetailsPage: React.FC = () => {
 
     if (error || !pacjent) {
         return (
-            <div className="min-h-screen bg-slate-100 flex flex-col items-center justify-center gap-4">
+            <div className="flex flex-col items-center justify-center gap-4 p-12">
                 <div className="text-red-500 text-xl">{error || t('common.error')}</div>
                 <button onClick={() => navigate(-1)} className="text-alimed-blue hover:underline">
                     {t('common.goBack')}
@@ -88,34 +78,8 @@ const DoctorPatientDetailsPage: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen bg-slate-100">
-            <header className="bg-white shadow-sm border-b-4 border-alimed-blue">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center h-16">
-                        <div
-                            className="flex items-center space-x-3 cursor-pointer"
-                            onClick={() => navigate('/panel-lekarza')}
-                        >
-                            <img src="/logo.svg" alt="AliMed" className="h-10 w-10" />
-                            <span className="text-2xl font-bold text-alimed-blue">AliMed</span>
-                        </div>
-
-                        <div className="flex items-center space-x-4">
-                            <span className="text-gray-700">
-                                {t('doctorDashboard.welcome')}, {userName}
-                            </span>
-                            <LanguageSwitcher />
-                            <button
-                                onClick={handleLogout}
-                                className="px-4 py-2 text-sm font-medium text-white bg-alimed-blue rounded-lg hover:bg-blue-700 transition-colors"
-                            >
-                                {t('nav.logout')}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </header>
-
+        <div>
+            {/* Main content */}
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <button
                     onClick={() => navigate('/pacjenci-lekarza')}

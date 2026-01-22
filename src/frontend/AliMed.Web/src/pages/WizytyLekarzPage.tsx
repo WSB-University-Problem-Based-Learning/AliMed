@@ -10,7 +10,6 @@ import {
 } from '@heroicons/react/24/outline';
 import { useTranslation } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
-import LanguageSwitcher from '../components/LanguageSwitcher';
 import { apiService } from '../services/api';
 import type { Dokument, DokumentCreateRequest, LekarzWizytaSummary } from '../types/api';
 
@@ -61,7 +60,7 @@ const formatTime = (value: string) => {
 
 const WizytyLekarzPage: React.FC = () => {
   const { t } = useTranslation();
-  const { user, logout, isDemoMode } = useAuth();
+  const { isDemoMode } = useAuth();
   const navigate = useNavigate();
 
   const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
@@ -170,11 +169,6 @@ const WizytyLekarzPage: React.FC = () => {
     [selectedWizytaId, wizyty],
   );
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
-
   const openModal = (wizytaId: number) => {
     setSelectedWizytaId(wizytaId);
     setIsModalOpen(true);
@@ -230,11 +224,6 @@ const WizytyLekarzPage: React.FC = () => {
     );
   };
 
-  const userName =
-    user?.firstName && user?.lastName
-      ? `dr ${user.firstName} ${user.lastName}`
-      : user?.firstName || user?.username || user?.githubName || 'Lekarz';
-
   const visitsCount = wizyty.length;
   const patientsCount = new Set(wizyty.map((w) => (w.pacjent || '').trim()).filter(Boolean)).size;
 
@@ -276,6 +265,10 @@ const WizytyLekarzPage: React.FC = () => {
       onClick: () => navigate('/moje-dane-lekarza'),
     },
   ];
+
+  // ... (keeping other handlers like handleMarkCompleted, isWizytaZrealizowana, handleCreateDocument) ...
+  // Wait, I need to keep those handlers, but I'm editing a chunk. 
+  // I will just return the layout change here.
 
   const handleMarkCompleted = async () => {
     if (!selectedWizyta) return;
@@ -356,39 +349,7 @@ const WizytyLekarzPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100">
-      <header className="bg-white shadow-sm border-b-4 border-alimed-blue">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div
-              className="flex items-center space-x-3 cursor-pointer"
-              onClick={() => navigate('/panel-lekarza')}
-            >
-              <img src="/logo.svg" alt="AliMed" className="h-10 w-10" />
-              <span className="text-2xl font-bold text-alimed-blue">AliMed</span>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              <span className="text-gray-700">
-                {t('doctorDashboard.welcome')}, {userName}
-              </span>
-              <LanguageSwitcher />
-              <button
-                onClick={() => navigate('/moje-dane-lekarza')}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-              >
-                {t('nav.myAccount')}
-              </button>
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 text-sm font-medium text-white bg-alimed-blue rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                {t('nav.logout')}
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+    <div>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {isDemoMode && (
