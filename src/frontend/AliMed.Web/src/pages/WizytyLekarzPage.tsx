@@ -87,6 +87,7 @@ const WizytyLekarzPage: React.FC = () => {
     typDokumentu: '',
     tresc: '',
   });
+  const [dokumentacjaCount, setDokumentacjaCount] = useState<number | null>(null);
 
   const reloadWizyty = useCallback(async (silent = false) => {
     if (!silent) {
@@ -244,6 +245,31 @@ const WizytyLekarzPage: React.FC = () => {
     loadStats();
   }, [isDemoMode]);
 
+  useEffect(() => {
+    const loadDokumentacjaCount = async () => {
+      if (isDemoMode) {
+        setDokumentacjaCount(mockDokumenty.length);
+        return;
+      }
+      if (!wizyty.length) {
+        setDokumentacjaCount(0);
+        return;
+      }
+      try {
+        const docs = await Promise.all(
+          wizyty.map((w) => apiService.getDokumentyWizytyLekarz(w.wizytaId).catch(() => [] as Dokument[])),
+        );
+        const count = docs.reduce((sum, list) => sum + list.length, 0);
+        setDokumentacjaCount(count);
+      } catch (e) {
+        console.error('Failed to load dokumentacja count', e);
+        setDokumentacjaCount(null);
+      }
+    };
+
+    loadDokumentacjaCount();
+  }, [isDemoMode, wizyty]);
+
   const statCards = [
     {
       id: 'wizyty',
@@ -267,7 +293,7 @@ const WizytyLekarzPage: React.FC = () => {
       id: 'dokumentacja',
       icon: DocumentTextIcon,
       title: t('doctorDashboard.documentation'),
-      value: stats.dokumentacja,
+      value: dokumentacjaCount ?? stats.dokumentacja,
       color: 'bg-purple-100 text-purple-600',
       borderColor: 'border-purple-500',
       onClick: () => navigate('/dokumentacja-lekarza'),
@@ -334,10 +360,12 @@ const WizytyLekarzPage: React.FC = () => {
           wizytaId: selectedWizyta.wizytaId,
         };
         setDokumenty((prev) => [newDoc, ...prev]);
+        setDokumentacjaCount((prev) => (prev ?? 0) + 1);
       } else {
         await apiService.createDokument(payload);
         const data = await apiService.getDokumentyWizytyLekarz(selectedWizyta.wizytaId);
         setDokumenty(data);
+        setDokumentacjaCount((prev) => (prev ?? 0) + 1);
       }
 
       setNowyDokument({ typDokumentu: '', tresc: '' });
@@ -349,22 +377,6 @@ const WizytyLekarzPage: React.FC = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="text-alimed-blue text-xl">{t('common.loading')}</div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-        {t('common.error')}: {error}
-      </div>
-    );
-  }
-
   return (
     <div>
 
@@ -372,6 +384,12 @@ const WizytyLekarzPage: React.FC = () => {
         {isDemoMode && (
           <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-800">
             {t('dashboard.demoNotice')}
+          </div>
+        )}
+
+        {error && (
+          <div className="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            {t('common.error')}: {error}
           </div>
         )}
 
@@ -445,6 +463,9 @@ const WizytyLekarzPage: React.FC = () => {
                   }}
                   className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
                 />
+                {loading && (
+                  <span className="text-sm text-gray-500">{t('common.loading')}</span>
+                )}
               </div>
             </div>
           </div>
@@ -491,6 +512,7 @@ const WizytyLekarzPage: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap">{getStatusBadge(wizyta.status)}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <button
+                        type="button"
                         onClick={(event) => {
                           event.stopPropagation();
                           openModal(wizyta.wizytaId);
@@ -502,7 +524,14 @@ const WizytyLekarzPage: React.FC = () => {
                     </td>
                   </tr>
                 ))}
-                {wizyty.length === 0 && (
+                {loading && wizyty.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-6 text-center text-sm text-gray-500">
+                      {t('common.loading')}
+                    </td>
+                  </tr>
+                )}
+                {!loading && wizyty.length === 0 && (
                   <tr>
                     <td colSpan={5} className="px-6 py-6 text-center text-sm text-gray-500">
                       {t('doctorVisits.noVisitsDay')}
@@ -521,6 +550,7 @@ const WizytyLekarzPage: React.FC = () => {
                   {t('doctorVisits.visitDetails')}
                 </h3>
                 <button
+                  type="button"
                   onClick={closeModal}
                   className="text-gray-500 hover:text-gray-700"
                   aria-label="Zamknij"
@@ -574,6 +604,7 @@ const WizytyLekarzPage: React.FC = () => {
                     </div>
                   )}
                   <button
+                    type="button"
                     className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-alimed-blue text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:bg-blue-200"
                     onClick={handleMarkCompleted}
                     disabled={
@@ -586,6 +617,7 @@ const WizytyLekarzPage: React.FC = () => {
                     {statusSaving ? t('doctorVisits.saving') : t('doctorVisits.markAsCompleted')}
                   </button>
                   <button
+                    type="button"
                     className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors font-medium disabled:opacity-50"
                     onClick={async () => {
                       if (!window.confirm('Czy na pewno oznaczyć nieobecność pacjenta?')) return;
