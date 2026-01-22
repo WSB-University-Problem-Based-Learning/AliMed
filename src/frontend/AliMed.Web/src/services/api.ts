@@ -504,7 +504,10 @@ export const apiService = {
   },
 
   async getLekarzWizytyMiesiac(date: string): Promise<LekarzWizytaSummary[]> {
-    const qs = new URLSearchParams({ date }).toString();
+    const d = new Date(date);
+    const year = d.getUTCFullYear().toString();
+    const month = (d.getUTCMonth() + 1).toString();
+    const qs = new URLSearchParams({ year, month }).toString();
     const response = await fetch(`${API_BASE_URL}/api/Lekarze/moje-wizyty/miesiac?${qs}`, {
       headers: getHeaders(true),
       credentials: 'include',
