@@ -76,12 +76,17 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create appsettings.Production.json
+        env:
+          CONN: ${{ secrets.DB_CONNECTION_STRING }}
+          JWT: ${{ secrets.JWT_KEY }}
+          GH_ID: ${{ secrets.GH_OAUTH_CLIENT_ID }}
+          GH_SECRET: ${{ secrets.GH_OAUTH_CLIENT_SECRET }}
         run: |
           jq -n \
-            --arg conn "${{ secrets.DB_CONNECTION_STRING }}" \
-            --arg jwt "${{ secrets.JWT_KEY }}" \
-            --arg githubClientId "${{ secrets.GH_OAUTH_CLIENT_ID }}" \
-            --arg githubClientSecret "${{ secrets.GH_OAUTH_CLIENT_SECRET }}" \
+            --arg conn "$CONN" \
+            --arg jwt "$JWT" \
+            --arg githubClientId "$GH_ID" \
+            --arg githubClientSecret "$GH_SECRET" \
             '{
               ConnectionStrings: {
                 MySqlConnection: $conn
