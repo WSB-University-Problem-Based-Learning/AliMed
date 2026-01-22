@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.OpenApi.Models;
 
-
+//trigger gh actions by olek
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
