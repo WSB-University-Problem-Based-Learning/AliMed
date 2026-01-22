@@ -77,24 +77,25 @@ jobs:
 
       - name: Create appsettings.Production.json
         run: |
-          cat <<EOF > backend-publish/appsettings.Production.json
-          {
-            "ConnectionStrings": {
-              "MySqlConnection": "${{ secrets.DB_CONNECTION_STRING }}"
-            },
-            "Cors": {
-              "AllowedOrigins": [
-                "https://alimed.com.pl",
-                "https://www.alimed.com.pl"
-              ]
-            },
-            "Jwt": {
-              "Key": "${{ secrets.JWT_KEY }}",
-              "Issuer": "MyGitHubAuthAPI",
-              "Audience": "MyReactFrontend"
-            }
-          }
-          EOF
+          jq -n \
+            --arg conn "${{ secrets.DB_CONNECTION_STRING }}" \
+            --arg jwt "${{ secrets.JWT_KEY }}" \
+            '{
+              ConnectionStrings: {
+                MySqlConnection: $conn
+              },
+              Cors: {
+                AllowedOrigins: [
+                  "https://alimed.com.pl",
+                  "https://www.alimed.com.pl"
+                ]
+              },
+              Jwt: {
+                Key: $jwt,
+                Issuer: "MyGitHubAuthAPI",
+                Audience: "MyReactFrontend"
+              }
+            }' > backend-publish/appsettings.Production.json
 
       - name: Deploy Backend
         uses: easingthemes/ssh-deploy@v5.1.0
