@@ -211,12 +211,13 @@ namespace API.Alimed.Controllers
 
             if (user == null)
             {
-                Unauthorized("User nie istnieje");
+                return Unauthorized("User nie istnieje");
             }
             // nowy access token
+            var displayName = user.GithubName ?? user.Username ?? user.Email ?? "User";
             var newAccessToken = _jwtService.GenerateToken(
                 user!.UserId.ToString(),
-                user.GithubName!,
+                displayName,
                 user.Role.ToString()
                 );
 
