@@ -282,6 +282,8 @@ namespace API.Alimed.Controllers.Lekarze
             var pacjent = await _db.Pacjenci
                 .AsNoTracking()
                 .Include(p => p.Wizyty)
+                .Include(p => p.User)
+                .Include(p => p.AdresZamieszkania)
                 .FirstOrDefaultAsync(p => p.PacjentId == pacjentId);
 
             if (pacjent == null)
@@ -324,6 +326,15 @@ namespace API.Alimed.Controllers.Lekarze
                 pacjent.Nazwisko,
                 pacjent.Pesel,
                 pacjent.DataUrodzenia,
+                Email = pacjent.User != null ? pacjent.User.Email : null,
+                AdresZamieszkania = pacjent.AdresZamieszkania == null ? null : new
+                {
+                    pacjent.AdresZamieszkania.Ulica,
+                    pacjent.AdresZamieszkania.NumerDomu,
+                    pacjent.AdresZamieszkania.KodPocztowy,
+                    pacjent.AdresZamieszkania.Miasto,
+                    pacjent.AdresZamieszkania.Kraj
+                },
                 Wizyty = wizyty
             });
         }

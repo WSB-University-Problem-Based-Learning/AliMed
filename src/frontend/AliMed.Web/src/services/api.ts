@@ -1,4 +1,4 @@
-import type { Pacjent, Lekarz, Wizyta, WizytaDetail, AuthResponse, Dokument, DokumentCreateRequest, DokumentUpdateDto, RegisterRequest, LoginRequest, WizytaCreateRequest, DostepneTerminyResponse, Placowka, UpdatePacjentProfileRequest, AdminUserSummary, PromoteToDoctorRequest, LekarzWizytaSummary, AdminPacjentSummary, AdminLekarzSummary } from '../types/api';
+import type { Pacjent, Lekarz, Wizyta, WizytaDetail, AuthResponse, Dokument, DokumentCreateRequest, DokumentUpdateDto, RegisterRequest, LoginRequest, WizytaCreateRequest, DostepneTerminyResponse, Placowka, UpdatePacjentProfileRequest, AdminUserSummary, PromoteToDoctorRequest, LekarzWizytaSummary, AdminPacjentSummary, AdminLekarzSummary, LekarzPacjentDetails } from '../types/api';
 import { config } from '../config/env';
 
 const API_BASE_URL = config.apiBaseUrl;
@@ -537,12 +537,43 @@ export const apiService = {
     return response.json();
   },
 
-  async getLekarzPacjentById(pacjentId: number): Promise<Pacjent> {
+  async getLekarzPacjentById(pacjentId: number): Promise<LekarzPacjentDetails> {
     const response = await fetch(`${API_BASE_URL}/api/Lekarze/pacjenci/${pacjentId}`, {
       headers: getHeaders(true),
       credentials: 'include',
     });
     if (!response.ok) throw new Error('Failed to fetch patient details');
-    return response.json();
+    const data = await response.json();
+    const adres = data.adresZamieszkania ?? data.adres;
+    return {
+      pacjentId: data.pacjentId,
+      imie: data.imie,
+      nazwisko: data.nazwisko,
+      pesel: data.pesel,
+      dataUrodzenia: data.dataUrodzenia,
+      email: data.email,
+      adresZamieszkania: adres ? {
+        ulica: adres.ulica,
+        numerDomu: adres.numerDomu,
+        kodPocztowy: adres.kodPocztowy,
+        miasto: adres.miasto,
+        kraj: adres.kraj,
+      } : undefined,
+      wizyty: (data.wizyty || []).map((w: any) => ({
+        wizytaId: w.wizytaId,
+        dataWizyty: w.dataWizyty,
+        status: normalizeStatus(w.status),
+        diagnoza: w.diagnoza,
+        dokumenty: (w.dokumenty || []).map((d: any) => ({
+          dokumentId: d.dokumentId,
+          nazwaPliku: d.nazwaPliku,
+          typDokumentu: d.typDokumentu,
+          opis: d.opis,
+          dataUtworzenia: d.dataUtworzenia,
+          wizytaId: w.wizytaId,
+          pacjentId: data.pacjentId,
+        })),
+      })),
+    };
   },
 };

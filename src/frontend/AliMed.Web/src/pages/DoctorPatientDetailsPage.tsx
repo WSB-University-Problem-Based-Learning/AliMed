@@ -11,7 +11,7 @@ import {
 import { useTranslation } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { apiService } from '../services/api';
-import type { Pacjent } from '../types/api';
+import type { LekarzPacjentDetails, Dokument } from '../types/api';
 
 const DoctorPatientDetailsPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -19,7 +19,7 @@ const DoctorPatientDetailsPage: React.FC = () => {
     const { isDemoMode } = useAuth();
     const navigate = useNavigate();
 
-    const [pacjent, setPacjent] = useState<Pacjent | null>(null);
+    const [pacjent, setPacjent] = useState<LekarzPacjentDetails | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -42,7 +42,8 @@ const DoctorPatientDetailsPage: React.FC = () => {
                             miasto: 'Warszawa',
                             ulica: 'Prosta',
                             numerDomu: '1'
-                        }
+                        },
+                        wizyty: []
                     });
                 } else {
                     const data = await apiService.getLekarzPacjentById(Number(id));
@@ -76,6 +77,35 @@ const DoctorPatientDetailsPage: React.FC = () => {
             </div>
         );
     }
+
+    const formatDate = (value: string) => {
+        const date = new Date(value);
+        return date.toLocaleDateString('pl-PL');
+    };
+
+    const formatDateTime = (value: string) => {
+        const date = new Date(value);
+        return date.toLocaleString('pl-PL', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+        });
+    };
+
+    const wizyty = pacjent.wizyty ?? [];
+    const dokumenty: Array<Dokument & { dataWizyty?: string }> = wizyty.flatMap((wizyta) =>
+        (wizyta.dokumenty ?? []).map((dokument) => ({
+            ...dokument,
+            wizytaId: wizyta.wizytaId,
+            dataWizyty: wizyta.dataWizyty,
+            pacjentId: pacjent.pacjentId,
+        })),
+    );
+    const dokumentySorted = [...dokumenty].sort(
+        (a, b) => new Date(b.dataUtworzenia).getTime() - new Date(a.dataUtworzenia).getTime(),
+    );
 
     return (
         <div>
@@ -156,19 +186,71 @@ const DoctorPatientDetailsPage: React.FC = () => {
 
                 {/* Tu można dodać sekcję Historia Wizyt i Dokumentacja w przyszłości */}
                 <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="bg-white rounded-xl shadow-sm p-6 opacity-75">
+                    <div className="bg-white rounded-xl shadow-sm p-6">
                         <div className="flex items-center gap-2 mb-4">
                             <CalendarDaysIcon className="w-6 h-6 text-alimed-blue" />
                             <h3 className="text-lg font-semibold text-gray-900">{t('doctorVisits.title')}</h3>
                         </div>
-                        <p className="text-gray-500 italic text-sm">{t('common.comingSoon')}</p>
+                        {wizyty.length === 0 ? (
+                            <p className="text-gray-500 italic text-sm">{t('common.noData')}</p>
+                        ) : (
+                            <ul className="space-y-4">
+                                {wizyty.map((wizyta) => (
+                                    <li key={wizyta.wizytaId} className="border border-gray-100 rounded-lg p-4">
+                                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                                            <div>
+                                                <p className="text-sm text-gray-500">
+                                                    {formatDateTime(wizyta.dataWizyty)}
+                                                </p>
+                                                <p className="text-sm text-gray-700">
+                                                    {t('doctorVisits.status')}: {wizyta.status || '-'}
+                                                </p>
+                                            </div>
+                                            <span className="text-xs text-gray-500">
+                                                {t('doctorVisits.visitDocuments')}: {wizyta.dokumenty?.length ?? 0}
+                                            </span>
+                                        </div>
+                                        <p className="mt-2 text-sm text-gray-700">
+                                            <span className="font-medium">{t('myVisits.diagnosis')}:</span>{' '}
+                                            {wizyta.diagnoza || '-'}
+                                        </p>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
                     </div>
-                    <div className="bg-white rounded-xl shadow-sm p-6 opacity-75">
+                    <div className="bg-white rounded-xl shadow-sm p-6">
                         <div className="flex items-center gap-2 mb-4">
                             <DocumentTextIcon className="w-6 h-6 text-alimed-blue" />
                             <h3 className="text-lg font-semibold text-gray-900">{t('doctorDocumentation.title')}</h3>
                         </div>
-                        <p className="text-gray-500 italic text-sm">{t('common.comingSoon')}</p>
+                        {dokumentySorted.length === 0 ? (
+                            <p className="text-gray-500 italic text-sm">{t('doctorDocumentation.noDocuments')}</p>
+                        ) : (
+                            <ul className="space-y-4">
+                                {dokumentySorted.map((dokument) => (
+                                    <li key={dokument.dokumentId} className="border border-gray-100 rounded-lg p-4">
+                                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                                            <div>
+                                                <p className="text-sm font-medium text-gray-900">
+                                                    {dokument.nazwaPliku || `${t('doctorDocumentation.type')}: ${dokument.typDokumentu || '-'}`}
+                                                </p>
+                                                <p className="text-sm text-gray-500">
+                                                    {formatDate(dokument.dataUtworzenia)}
+                                                    {dokument.dataWizyty ? ` \u2022 ${t('doctorVisits.visit')}: ${formatDateTime(dokument.dataWizyty)}` : ''}
+                                                </p>
+                                            </div>
+                                            <span className="text-xs text-gray-500">
+                                                {dokument.typDokumentu || '-'}
+                                            </span>
+                                        </div>
+                                        {dokument.opis && (
+                                            <p className="mt-2 text-sm text-gray-700">{dokument.opis}</p>
+                                        )}
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
                     </div>
                 </div>
 

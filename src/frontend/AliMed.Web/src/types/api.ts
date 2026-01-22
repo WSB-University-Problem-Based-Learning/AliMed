@@ -9,6 +9,18 @@ export interface Pacjent {
   email?: string;
 }
 
+export interface LekarzPacjentWizyta {
+  wizytaId: number;
+  dataWizyty: string;
+  status?: string;
+  diagnoza?: string;
+  dokumenty?: Dokument[];
+}
+
+export interface LekarzPacjentDetails extends Pacjent {
+  wizyty?: LekarzPacjentWizyta[];
+}
+
 export interface Adres {
   ulica?: string;
   numerDomu?: string;
