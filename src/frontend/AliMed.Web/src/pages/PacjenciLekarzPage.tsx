@@ -76,10 +76,7 @@ const PacjenciLekarzPage: React.FC = () => {
     navigate(`/pacjenci-lekarza/${id}`);
   };
 
-  const handleEditPatient = (id: number) => {
-    // Doctors cannot edit patient data directly
-    console.log('Edycja zablokowana dla lekarza:', id);
-  };
+
 
   const userName = user?.firstName && user?.lastName
     ? `dr ${user.firstName} ${user.lastName}`
@@ -253,12 +250,7 @@ const PacjenciLekarzPage: React.FC = () => {
                           >
                             {t('doctorPatients.view')}
                           </button>
-                          <button
-                            onClick={() => handleEditPatient(pacjent.pacjentId)}
-                            className="text-gray-600 hover:text-gray-800 text-sm font-medium hover:underline"
-                          >
-                            {t('doctorPatients.edit')}
-                          </button>
+
                         </div>
                       </td>
                     </tr>

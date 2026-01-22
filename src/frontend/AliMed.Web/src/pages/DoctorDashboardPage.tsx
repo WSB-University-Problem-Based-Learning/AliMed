@@ -221,7 +221,10 @@ const DoctorDashboardPage: React.FC = () => {
                 <h2 className="text-lg font-semibold text-gray-900">
                   {t('doctorDashboard.upcomingVisits')}
                 </h2>
-                <button className="text-alimed-blue text-sm font-medium hover:underline">
+                <button
+                  onClick={() => navigate('/wizyty-lekarza')}
+                  className="text-alimed-blue text-sm font-medium hover:underline"
+                >
                   {t('doctorDashboard.seeAll')}
                 </button>
               </div>

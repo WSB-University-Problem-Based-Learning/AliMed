@@ -197,14 +197,14 @@ const DoctorPatientDetailsPage: React.FC = () => {
                             <CalendarDaysIcon className="w-6 h-6 text-alimed-blue" />
                             <h3 className="text-lg font-semibold text-gray-900">{t('doctorVisits.title')}</h3>
                         </div>
-                        <p className="text-gray-500 italic text-sm">Historia wizyt będzie dostępna wkrótce.</p>
+                        <p className="text-gray-500 italic text-sm">{t('common.comingSoon')}</p>
                     </div>
                     <div className="bg-white rounded-xl shadow-sm p-6 opacity-75">
                         <div className="flex items-center gap-2 mb-4">
                             <DocumentTextIcon className="w-6 h-6 text-alimed-blue" />
                             <h3 className="text-lg font-semibold text-gray-900">{t('doctorDocumentation.title')}</h3>
                         </div>
-                        <p className="text-gray-500 italic text-sm">Dokumentacja pacjenta będzie dostępna wkrótce.</p>
+                        <p className="text-gray-500 italic text-sm">{t('common.comingSoon')}</p>
                     </div>
                 </div>
 

@@ -219,7 +219,7 @@ const WizytyLekarzPage: React.FC = () => {
     if (normalized.includes('anul')) {
       return (
         <span className="px-3 py-1 text-xs font-medium rounded-full bg-red-100 text-red-700">
-          Anulowana
+          {t('doctorVisits.statusCancelled')}
         </span>
       );
     }
@@ -559,7 +559,7 @@ const WizytyLekarzPage: React.FC = () => {
 
                 <div className="border-t border-gray-100 pt-4 space-y-3">
                   <label className="text-sm font-medium text-gray-500" htmlFor="diagnoza">
-                    Diagnoza
+                    {t('doctorVisits.diagnosisLabel')}
                   </label>
                   <textarea
                     id="diagnoza"

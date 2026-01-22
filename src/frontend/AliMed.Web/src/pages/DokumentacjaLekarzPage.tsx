@@ -5,7 +5,6 @@ import {
   UsersIcon,
   DocumentTextIcon,
   UserCircleIcon,
-  FunnelIcon,
 } from '@heroicons/react/24/outline';
 import { useTranslation } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
@@ -406,10 +405,7 @@ const DokumentacjaLekarzPage: React.FC = () => {
               <h3 className="text-lg font-medium text-gray-900">
                 {t('doctorDocumentation.documentList')}
               </h3>
-              <button className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
-                <FunnelIcon className="w-4 h-4" />
-                {t('doctorDocumentation.filter')}
-              </button>
+
             </div>
 
             <div className="overflow-x-auto">
@@ -425,9 +421,7 @@ const DokumentacjaLekarzPage: React.FC = () => {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       {t('doctorDocumentation.type')}
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      {t('doctorDocumentation.actions')}
-                    </th>
+
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -454,9 +448,7 @@ const DokumentacjaLekarzPage: React.FC = () => {
                       <td className="px-6 py-4 whitespace-nowrap">
                         {getTypBadge(dokument.typDokumentu || '')}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
-                        -
-                      </td>
+
                     </tr>
                   ))}
                 </tbody>
