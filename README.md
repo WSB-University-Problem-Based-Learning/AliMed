@@ -99,8 +99,8 @@ graph TD
 ### 🔹 Frontend
 - **Framework**: [React 19](https://react.dev/) + [Vite](https://vitejs.dev/)
 - **Język**: TypeScript
-- **Stylizacja**: TailwindCSS + Framer Motion (animacje)
-- **Ikony/UI**: Lucide React + Headless UI
+- **Stylizacja**: TailwindCSS
+- **Ikony/UI**: @heroicons/react + Headless UI
 - **Internacjonalizacja**: i18next (obsługa PL/EN)
 - **Komunikacja**: Axios z interceptorami dla JWT
 
@@ -113,7 +113,7 @@ graph TD
 
 ### 🔹 Infrastruktura & Baza Danych
 - **Serwer**: OCI VM.Standard.E2.1.Micro (Ubuntu 24.04.3 LTS)
-- **Baza Danych**: **MySQL HeatWave** (Managed instance w OCI)
+- **Baza Danych**: **MySQL HeatWave 9.5.2** (Managed instance w OCI)
 - **Web Server**: Nginx (SSL via Certbot/Let's Encrypt)
 - **Process Manager**: Systemd (zarządzanie usługą API)
 
@@ -139,7 +139,7 @@ Projekt wykorzystuje **GitHub Actions** do pełnej automatyzacji procesów budow
 ### Wymagania
 - Node.js 20+
 - .NET 9.0 SDK
-- MySQL 8.0 lub dostęp do VPN/OCI
+- MySQL 9.0+ lub dostęp do VPN/OCI
 
 ### Szybki start (Local)
 

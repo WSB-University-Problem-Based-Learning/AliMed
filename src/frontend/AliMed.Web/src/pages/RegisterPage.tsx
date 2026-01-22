@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { apiService } from '../services/api';
 import type { RegisterRequest } from '../types/api';
 import LanguageSwitcher from '../components/LanguageSwitcher';
+import Button from '../components/Button';
 
 const RegisterPage: React.FC = () => {
   const { t } = useTranslation();
@@ -320,13 +321,13 @@ const RegisterPage: React.FC = () => {
                 </div>
               </div>
 
-              <button
+              <Button
                 type="button"
                 onClick={handleNextStep}
-                className="w-full bg-alimed-light-blue hover:bg-alimed-blue text-white font-medium py-3 px-4 rounded-lg transition-colors"
+                fullWidth
               >
                 {t('register.next')}
-              </button>
+              </Button>
             </div>
           )}
 
@@ -477,20 +478,21 @@ const RegisterPage: React.FC = () => {
               </div>
 
               <div className="flex gap-4 pt-4">
-                <button
+                <Button
                   type="button"
                   onClick={handlePrevStep}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-3 px-4 rounded-lg transition-colors"
+                  variant="secondary"
+                  className="flex-1"
                 >
                   {t('register.back')}
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
-                  disabled={loading}
-                  className="flex-1 bg-alimed-light-blue hover:bg-alimed-blue text-white font-medium py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  isLoading={loading}
+                  className="flex-1"
                 >
-                  {loading ? t('common.loading') : t('register.submit')}
-                </button>
+                  {t('register.submit')}
+                </Button>
               </div>
             </div>
           )}
