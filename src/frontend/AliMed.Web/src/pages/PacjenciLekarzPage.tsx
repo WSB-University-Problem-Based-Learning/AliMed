@@ -38,7 +38,7 @@ const PacjenciLekarzPage: React.FC = () => {
             { pacjentId: 2, imie: 'Jan', nazwisko: 'Kowalski', pesel: '78012345678', dataUrodzenia: '1978-01-23', email: 'jan.kowalski@example.com' },
           ];
           setPacjenci(mockData);
-          setStats({ wizyty: 12, pacjenci: 2, dokumentacja: 5 });
+          setStats({ wizyty: 0, pacjenci: mockData.length, dokumentacja: 0 });
         } else {
           try {
             const [patientsData, visitsData] = await Promise.all([
