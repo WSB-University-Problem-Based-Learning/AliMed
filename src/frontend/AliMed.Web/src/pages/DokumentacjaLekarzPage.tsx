@@ -5,6 +5,7 @@ import {
   UsersIcon,
   DocumentTextIcon,
   UserCircleIcon,
+  ArrowDownTrayIcon,
 } from '@heroicons/react/24/outline';
 import { useTranslation } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
@@ -233,6 +234,26 @@ const DokumentacjaLekarzPage: React.FC = () => {
     }
   };
 
+  const handleDownload = async (id: number, filename: string) => {
+    try {
+      if (isDemoMode) {
+        alert('Pobieranie w trybie demo jest niedostępne.');
+        return;
+      }
+      const blob = await apiService.downloadDokument(id);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+    } catch (error) {
+      console.error('Download error:', error);
+      setError(t('doctorDocumentation.errorDownloading'));
+    }
+  };
+
   const getTypBadge = (typ: string) => {
     switch (typ) {
       case 'wynik':
@@ -379,6 +400,9 @@ const DokumentacjaLekarzPage: React.FC = () => {
                       {t('doctorDocumentation.type')}
                     </th>
 
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {t('doctorDocumentation.actions')}
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
@@ -405,7 +429,16 @@ const DokumentacjaLekarzPage: React.FC = () => {
                       <td className="px-6 py-4 whitespace-nowrap">
                         {getTypBadge(dokument.typDokumentu || '')}
                       </td>
-
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <button
+                          onClick={() => handleDownload(dokument.dokumentId, dokument.nazwaPliku || `dokument-${dokument.dokumentId}.txt`)}
+                          className="text-alimed-blue hover:text-blue-900 flex items-center gap-1"
+                          title={t('doctorDocumentation.download')}
+                        >
+                          <ArrowDownTrayIcon className="w-5 h-5" />
+                          <span className="hidden sm:inline">{t('doctorDocumentation.download')}</span>
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
