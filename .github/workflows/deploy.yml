@@ -80,6 +80,8 @@ jobs:
           jq -n \
             --arg conn "${{ secrets.DB_CONNECTION_STRING }}" \
             --arg jwt "${{ secrets.JWT_KEY }}" \
+            --arg githubClientId "${{ secrets.GH_OAUTH_CLIENT_ID }}" \
+            --arg githubClientSecret "${{ secrets.GH_OAUTH_CLIENT_SECRET }}" \
             '{
               ConnectionStrings: {
                 MySqlConnection: $conn
@@ -92,8 +94,12 @@ jobs:
               },
               Jwt: {
                 Key: $jwt,
-                Issuer: "MyGitHubAuthAPI",
-                Audience: "MyReactFrontend"
+                Issuer: "AliMed.Api",
+                Audience: "AliMed.Web"
+              },
+              GitHub: {
+                ClientId: $githubClientId,
+                ClientSecret: $githubClientSecret
               }
             }' > backend-publish/appsettings.Production.json
 
