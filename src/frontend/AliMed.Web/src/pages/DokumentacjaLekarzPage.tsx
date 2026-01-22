@@ -160,9 +160,18 @@ const DokumentacjaLekarzPage: React.FC = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
+    if (name === 'wizytaId') {
+      const parsed = value ? Number(value) : '';
+      setSelectedWizytaId(parsed);
+      setNowyDokument(prev => ({
+        ...prev,
+        wizytaId: parsed,
+      }));
+      return;
+    }
     setNowyDokument(prev => ({
       ...prev,
-      [name]: name === 'wizytaId' ? (value ? Number(value) : '') : value,
+      [name]: value,
     }));
   };
 

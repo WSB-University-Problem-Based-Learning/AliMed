@@ -5,12 +5,13 @@ import {
   PlusCircleIcon,
   DocumentTextIcon,
   UserCircleIcon,
-  XMarkIcon
+  CalendarIcon
 } from '@heroicons/react/24/outline';
 import { useTranslation } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
-import type { User, Wizyta } from '../types/api';
+import type { Dokument, Pacjent, User, Wizyta, WizytaDetail } from '../types/api';
 import { apiService } from '../services/api';
+import { openDocumentPdf } from '../utils/documentPdf';
 
 const DashboardPage: React.FC = () => {
   const { t, language } = useTranslation();
@@ -42,7 +43,10 @@ const DashboardPage: React.FC = () => {
     }
     return null;
   });
-  const [selectedWizyta, setSelectedWizyta] = useState<Wizyta | null>(null);
+  const [selectedWizyta, setSelectedWizyta] = useState<WizytaDetail | null>(null);
+  const [loadingDetails, setLoadingDetails] = useState(false);
+  const [detailsError, setDetailsError] = useState<string | null>(null);
+  const [pacjentCache, setPacjentCache] = useState<Pacjent | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -92,6 +96,45 @@ const DashboardPage: React.FC = () => {
       hour: '2-digit',
       minute: '2-digit',
     });
+  };
+
+  const formatDocumentName = (name?: string) => {
+    if (!name) return '';
+    return name.endsWith('.txt') ? name.slice(0, -4) : name;
+  };
+
+  const handlePreview = async (dokument: Dokument) => {
+    const popup = window.open('', '_blank');
+    if (!popup) {
+      alert(t('visitDetails.popupBlocked'));
+      return;
+    }
+    try {
+      const pacjentPromise = pacjentCache
+        ? Promise.resolve(pacjentCache)
+        : apiService.getMojProfil().catch(() => undefined);
+      const trescPromise = apiService
+        .downloadDokument(dokument.dokumentId)
+        .then((blob) => blob.text())
+        .catch(() => undefined);
+
+      const [pacjent, tresc] = await Promise.all([pacjentPromise, trescPromise]);
+
+      if (pacjent && !pacjentCache) {
+        setPacjentCache(pacjent);
+      }
+
+      openDocumentPdf({
+        dokument,
+        pacjent: pacjent ?? undefined,
+        wizyta: selectedWizyta ?? undefined,
+        tresc,
+        targetWindow: popup,
+      });
+    } catch {
+      popup.close();
+      alert(t('documents.errorDownloading'));
+    }
   };
 
 
@@ -195,17 +238,29 @@ const DashboardPage: React.FC = () => {
                       {formatDate(wizyta.dataWizyty)} {formatTime(wizyta.dataWizyty)}
                     </td>
                     <td className="py-4 text-gray-900">
-                      {wizyta.lekarz ? `${wizyta.lekarz.imie} ${wizyta.lekarz.nazwisko}` : '-'}
+                      {wizyta.lekarzName
+                        || (wizyta.lekarz ? `${wizyta.lekarz.imie} ${wizyta.lekarz.nazwisko}` : '-')}
                     </td>
                     <td className="py-4 text-gray-600">
-                      {wizyta.lekarz?.specjalizacja || '-'}
+                      {wizyta.specjalizacja || wizyta.lekarz?.specjalizacja || '-'}
                     </td>
                     <td className="py-4 text-gray-600">
                       {typeof wizyta.placowka === 'string' ? wizyta.placowka : wizyta.placowka?.nazwa || '-'}
                     </td>
                     <td className="py-4">
                       <button
-                        onClick={() => setSelectedWizyta(wizyta)}
+                        onClick={async () => {
+                          setDetailsError(null);
+                          setLoadingDetails(true);
+                          try {
+                            const details = await apiService.getWizytaById(wizyta.wizytaId);
+                            setSelectedWizyta(details);
+                          } catch (err) {
+                            setDetailsError(err instanceof Error ? err.message : t('common.error'));
+                          } finally {
+                            setLoadingDetails(false);
+                          }
+                        }}
                         className="text-alimed-blue hover:underline text-sm"
                       >
                         {t('common.details')}
@@ -219,62 +274,104 @@ const DashboardPage: React.FC = () => {
         )}
       </div>
 
-      {/* Visit Details Modal */}
       {selectedWizyta && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 relative">
-            <button
-              onClick={() => setSelectedWizyta(null)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
-            >
-              <XMarkIcon className="w-6 h-6" />
-            </button>
-
-            <h3 className="text-xl font-bold text-gray-900 mb-4">{t('visitDetails.title')}</h3>
-
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm font-medium text-gray-500">{t('visitDetails.visitDate')}</label>
-                <p className="text-gray-900">
-                  {formatDate(selectedWizyta.dataWizyty)} {formatTime(selectedWizyta.dataWizyty)}
-                </p>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-xl max-w-3xl w-full mx-4 overflow-hidden">
+            <div className="px-6 py-5 border-b border-gray-100 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-full bg-alimed-blue/10 text-alimed-blue flex items-center justify-center">
+                  <CalendarIcon className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">{t('visitDetails.title')}</h3>
+                  <p className="text-sm text-gray-500">
+                    {t('visitDetails.checkInfo')}
+                  </p>
+                </div>
               </div>
-              <div>
-                <label className="text-sm font-medium text-gray-500">{t('visitDetails.doctor')}</label>
-                <p className="text-gray-900">
-                  {selectedWizyta.lekarz ? `${selectedWizyta.lekarz.imie} ${selectedWizyta.lekarz.nazwisko}` : '-'}
-                </p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-500">{t('dashboard.specialization')}</label>
-                <p className="text-gray-900">{selectedWizyta.lekarz?.specjalizacja || '-'}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-500">{t('visitDetails.facility')}</label>
-                <p className="text-gray-900">
-                  {typeof selectedWizyta.placowka === 'string'
-                    ? selectedWizyta.placowka
-                    : selectedWizyta.placowka?.nazwa || '-'}
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-6 flex gap-3">
               <button
                 onClick={() => setSelectedWizyta(null)}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition"
+                className="px-3 py-1.5 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
               >
-                {t('common.close')}
+                {t('visitDetails.close')}
               </button>
-              <button
-                onClick={() => {
-                  setSelectedWizyta(null);
-                  navigate('/moje-wizyty');
-                }}
-                className="flex-1 px-4 py-2 bg-alimed-blue text-white rounded-lg hover:bg-blue-700 transition"
-              >
-                {t('dashboard.myVisits')}
-              </button>
+            </div>
+            <div className="p-6 space-y-6">
+              {detailsError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded">
+                  {detailsError}
+                </div>
+              )}
+              {loadingDetails ? (
+                <div className="text-gray-500">{t('common.loading')}</div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="rounded-xl border border-gray-100 bg-gray-50 p-4 text-sm text-gray-700 space-y-2">
+                      <div className="text-xs uppercase tracking-wide text-gray-400">{t('visitDetails.visitDate')}</div>
+                      <div className="text-base font-semibold text-gray-900">
+                        {formatDate(selectedWizyta.dataWizyty)} · {formatTime(selectedWizyta.dataWizyty)}
+                      </div>
+                      <div><span className="text-gray-500">{t('visitDetails.status')}:</span> {selectedWizyta.status}</div>
+                      <div><span className="text-gray-500">{t('visitDetails.facility')}:</span> {selectedWizyta.placowka}</div>
+                    </div>
+                    <div className="rounded-xl border border-gray-100 bg-white p-4 text-sm text-gray-700 space-y-2">
+                      <div className="text-xs uppercase tracking-wide text-gray-400">{t('visitDetails.doctor')}</div>
+                      <div className="text-base font-semibold text-gray-900">
+                        {selectedWizyta.lekarz} ({selectedWizyta.specjalizacja})
+                      </div>
+                      {selectedWizyta.diagnoza ? (
+                        <div>
+                          <span className="text-gray-500">{t('visitDetails.diagnosis')}:</span> {selectedWizyta.diagnoza}
+                        </div>
+                      ) : (
+                        <div className="text-gray-400">{t('visitDetails.noDiagnosis')}</div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl border border-gray-100 p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <h4 className="font-semibold text-gray-900">{t('visitDetails.documents')}</h4>
+                        <p className="text-sm text-gray-500">{t('visitDetails.clickToDownload')}</p>
+                      </div>
+                      <span className="text-xs text-gray-400">
+                        {selectedWizyta.dokumenty.length} {t('visitDetails.files')}
+                      </span>
+                    </div>
+                    {selectedWizyta.dokumenty.length > 0 ? (
+                      <div className="space-y-2">
+                        {selectedWizyta.dokumenty.map((d: Dokument) => (
+                          <div
+                            key={d.dokumentId}
+                            className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 rounded-lg border border-gray-100 px-3 py-2"
+                          >
+                            <div className="text-sm text-gray-700">
+                              <div className="font-medium text-gray-900">
+                                {formatDocumentName(d.nazwaPliku) || `Dokument #${d.dokumentId}`}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {t('visitDetails.type')}: {d.typDokumentu || 'inne'}
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => handlePreview(d)}
+                              className="inline-flex items-center justify-center px-3 py-2 text-sm font-medium text-alimed-blue bg-alimed-blue/10 rounded-lg hover:bg-alimed-blue/20 transition"
+                            >
+                              {t('visitDetails.downloadPdf')}
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-sm text-gray-500">
+                        {t('visitDetails.noDocuments')}
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
