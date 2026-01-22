@@ -2,6 +2,7 @@
   "common": {
     "appName": "AliMed",
     "loading": "Laduja...",
+    "required": "To pole je wymŏgane",
     "error": "Feler",
     "save": "Spamiyntej",
     "cancel": "Pociep",

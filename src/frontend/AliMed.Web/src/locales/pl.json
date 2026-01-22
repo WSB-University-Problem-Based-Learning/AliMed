@@ -2,6 +2,7 @@
   "common": {
     "appName": "AliMed",
     "loading": "Ładowanie...",
+    "required": "To pole jest wymagane",
     "error": "Błąd",
     "save": "Zapisz",
     "cancel": "Anuluj",
