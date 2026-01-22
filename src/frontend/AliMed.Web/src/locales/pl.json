@@ -344,7 +344,8 @@
     "selectVisitAndType": "Wybierz wizytę i typ dokumentu.",
     "documentSaved": "Dokument został zapisany.",
     "documentSaveError": "Błąd zapisu dokumentu",
-    "selectVisit": "Wybierz wizytę"
+    "selectVisit": "Wybierz wizytę",
+    "missingData": "Brak danych pacjenta lub wizyty dla tego dokumentu."
   },
   "doctorMyData": {
     "title": "Moje dane",

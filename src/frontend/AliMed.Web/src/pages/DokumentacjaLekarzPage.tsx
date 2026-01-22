@@ -11,6 +11,7 @@ import { useTranslation } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { apiService } from '../services/api';
 import type { Dokument, DokumentCreateRequest, LekarzWizytaSummary } from '../types/api';
+import { openDocumentPdf } from '../utils/documentPdf';
 
 interface NowyDokument {
   wizytaId: number | '';
@@ -234,22 +235,47 @@ const DokumentacjaLekarzPage: React.FC = () => {
     }
   };
 
-  const handleDownload = async (id: number, filename: string) => {
+  const handlePreview = async (dokument: Dokument) => {
+    if (isDemoMode) {
+      alert('Podgląd w trybie demo jest niedostępny.');
+      return;
+    }
+
+    const popup = window.open('', '_blank');
+    if (!popup) {
+      alert('Zablokowano wyskakujące okno. Zezwól na otwieranie okien.');
+      return;
+    }
+
     try {
-      if (isDemoMode) {
-        alert('Pobieranie w trybie demo jest niedostępne.');
+      if (!dokument.pacjentId || !dokument.wizytaId) {
+        alert(t('doctorDocumentation.missingData')); // Or generic error
+        popup.close();
         return;
       }
-      const blob = await apiService.downloadDokument(id);
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', filename);
-      document.body.appendChild(link);
-      link.click();
-      link.parentNode?.removeChild(link);
+
+      const pacjentPromise = apiService.getLekarzPacjentById(dokument.pacjentId);
+      const wizytaPromise = apiService.getWizytaById(dokument.wizytaId);
+      const trescPromise = apiService.downloadDokument(dokument.dokumentId)
+        .then(blob => blob.text())
+        .catch(() => undefined);
+
+      const [pacjent, wizyta, tresc] = await Promise.all([
+        pacjentPromise,
+        wizytaPromise,
+        trescPromise
+      ]);
+
+      openDocumentPdf({
+        dokument,
+        pacjent,
+        wizyta,
+        tresc,
+        targetWindow: popup,
+      });
     } catch (error) {
-      console.error('Download error:', error);
+      console.error('Preview error:', error);
+      popup.close();
       setError(t('doctorDocumentation.errorDownloading'));
     }
   };
@@ -431,9 +457,9 @@ const DokumentacjaLekarzPage: React.FC = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <button
-                          onClick={() => handleDownload(dokument.dokumentId, dokument.nazwaPliku || `dokument-${dokument.dokumentId}.txt`)}
+                          onClick={() => handlePreview(dokument)}
                           className="text-alimed-blue hover:text-blue-900 flex items-center gap-1"
-                          title={t('doctorDocumentation.download')}
+                          title={t('doctorDocumentation.preview')}
                         >
                           <ArrowDownTrayIcon className="w-5 h-5" />
                           <span className="hidden sm:inline">{t('doctorDocumentation.download')}</span>

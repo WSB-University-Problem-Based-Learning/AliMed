@@ -68,7 +68,7 @@ namespace API.Alimed.Controllers.Wizyty
         }
 
         [HttpGet("{id}")]
-        [Authorize(Roles = "User")]
+        [Authorize(Roles = "User,Lekarz")]
         public async Task<IResult> GetMojaWizyta(int id)
         {
             var userId = Guid.Parse(
@@ -79,10 +79,28 @@ namespace API.Alimed.Controllers.Wizyty
                 .AsNoTracking()
                 .Include(w => w.Lekarz)
                 .Include(w => w.Placowka)
-                .FirstOrDefaultAsync(w => w.WizytaId == id && w.Pacjent!.UserId == userId);
+                .Include(w => w.Pacjent)
+                .FirstOrDefaultAsync(w => w.WizytaId == id);
 
             if (wizyta == null)
                 return Results.NotFound("Wizyta nie istnieje.");
+
+            // Check access
+            bool hasAccess = false;
+
+            // 1. Is Patient owner?
+            if (wizyta.Pacjent != null && wizyta.Pacjent.UserId == userId)
+            {
+                hasAccess = true;
+            }
+            // 2. Is Doctor owner?
+            else if (wizyta.Lekarz != null && wizyta.Lekarz.UserId == userId)
+            {
+                hasAccess = true;
+            }
+
+            if (!hasAccess)
+                return Results.Forbid();
 
             var dokumenty = await _db.Dokumenty
                 .AsNoTracking()
