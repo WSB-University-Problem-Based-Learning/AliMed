@@ -103,12 +103,17 @@ const MojeWizytyPage: React.FC = () => {
     return normalized === 'odbyta' || normalized === 'zrealizowana';
   };
 
+  const isCancelledStatus = (status?: string) => {
+    const normalized = (status || '').toLowerCase();
+    return normalized.includes('anul');
+  };
+
   const filterWizyty = (wizyty: Wizyta[]) => {
     const now = new Date();
 
     switch (filter) {
       case 'upcoming':
-        return wizyty.filter(w => !isCompletedStatus(w.status) && new Date(w.dataWizyty) >= now);
+        return wizyty.filter(w => !isCompletedStatus(w.status) && !isCancelledStatus(w.status) && new Date(w.dataWizyty) >= now);
       case 'completed':
         return wizyty.filter(w => isCompletedStatus(w.status) || new Date(w.dataWizyty) < now);
       default:
@@ -123,6 +128,15 @@ const MojeWizytyPage: React.FC = () => {
   const formatDocumentName = (name?: string) => {
     if (!name) return '';
     return name.endsWith('.txt') ? name.slice(0, -4) : name;
+  };
+
+  const isCancelableStatus = (status?: string) => {
+    const normalized = (status || '').toLowerCase();
+    return (
+      !normalized.includes('zrealiz') &&
+      !normalized.includes('odby') &&
+      !normalized.includes('anul')
+    );
   };
 
   const handlePreview = async (dokument: Dokument) => {
@@ -431,6 +445,31 @@ const MojeWizytyPage: React.FC = () => {
                       </div>
                     )}
                   </div>
+
+                  {isCancelableStatus(selectedWizyta.status) && (
+                    <div className="flex justify-end">
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          if (!window.confirm(t('common.cancel'))) return;
+                          try {
+                            await apiService.cancelWizyta(selectedWizyta.wizytaId);
+                            setWizyty((prev) => prev.map((w) => (
+                              w.wizytaId === selectedWizyta.wizytaId
+                                ? { ...w, status: 'Anulowana', czyOdbyta: false }
+                                : w
+                            )));
+                            setSelectedWizyta((prev) => prev ? { ...prev, status: 'Anulowana' } : prev);
+                          } catch (err) {
+                            setDetailsError(err instanceof Error ? err.message : t('common.error'));
+                          }
+                        }}
+                        className="px-4 py-2 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition text-sm font-medium"
+                      >
+                        {t('common.cancel')}
+                      </button>
+                    </div>
+                  )}
                 </>
               )}
             </div>

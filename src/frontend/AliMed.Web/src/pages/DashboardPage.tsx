@@ -64,9 +64,10 @@ const DashboardPage: React.FC = () => {
         const data = await apiService.getWizyty();
         // Filter only upcoming visits
         const now = new Date();
-        const upcomingWizyty = data.filter(w =>
-          !w.czyOdbyta && new Date(w.dataWizyty) >= now
-        );
+    const isCancelled = (status?: string) => (status || '').toLowerCase().includes('anul');
+    const upcomingWizyty = data.filter(w =>
+      !w.czyOdbyta && !isCancelled(w.status) && new Date(w.dataWizyty) >= now
+    );
         setWizyty(upcomingWizyty);
       } catch (err) {
         console.error('Failed to fetch wizyty:', err);
@@ -101,6 +102,15 @@ const DashboardPage: React.FC = () => {
   const formatDocumentName = (name?: string) => {
     if (!name) return '';
     return name.endsWith('.txt') ? name.slice(0, -4) : name;
+  };
+
+  const isCancelableStatus = (status?: string) => {
+    const normalized = (status || '').toLowerCase();
+    return (
+      !normalized.includes('zrealiz') &&
+      !normalized.includes('odby') &&
+      !normalized.includes('anul')
+    );
   };
 
   const handlePreview = async (dokument: Dokument) => {
@@ -370,6 +380,27 @@ const DashboardPage: React.FC = () => {
                       </div>
                     )}
                   </div>
+
+                  {isCancelableStatus(selectedWizyta.status) && (
+                    <div className="flex justify-end">
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          if (!window.confirm(t('common.cancel'))) return;
+                          try {
+                            await apiService.cancelWizyta(selectedWizyta.wizytaId);
+                            setWizyty((prev) => prev.filter((w) => w.wizytaId !== selectedWizyta.wizytaId));
+                            setSelectedWizyta(null);
+                          } catch (err) {
+                            setDetailsError(err instanceof Error ? err.message : t('common.error'));
+                          }
+                        }}
+                        className="px-4 py-2 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition text-sm font-medium"
+                      >
+                        {t('common.cancel')}
+                      </button>
+                    </div>
+                  )}
                 </>
               )}
             </div>

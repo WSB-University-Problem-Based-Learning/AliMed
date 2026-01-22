@@ -331,7 +331,7 @@ namespace API.Alimed.Controllers.Wizyty
         //Authorization: Bearer <JWT>
 
         [HttpPut("{id}/anuluj")]
-        [Authorize(Roles = "User")]
+        [Authorize(Roles = "User,Lekarz")]
         public async Task<IResult> AnulujWizyte(int id)
         {
             var userId = Guid.Parse(
@@ -340,19 +340,23 @@ namespace API.Alimed.Controllers.Wizyty
 
             var wizyta = await _db.Wizyty
                 .Include(w => w.Pacjent)
+                .Include(w => w.Lekarz)
                 .FirstOrDefaultAsync(w => w.WizytaId == id);
 
             if (wizyta == null)
                 return Results.NotFound("Wizyta nie istnieje.");
 
-            if (wizyta.Pacjent.UserId != userId)
+            var isPacjentOwner = wizyta.Pacjent != null && wizyta.Pacjent.UserId == userId;
+            var isLekarzOwner = wizyta.Lekarz != null && wizyta.Lekarz.UserId == userId;
+
+            if (!isPacjentOwner && !isLekarzOwner)
                 return Results.Forbid();
 
-            if (wizyta.Status != StatusWizyty.Zaplanowana)
-                return Results.BadRequest("Tej wizyty nie można już anulować.");
+            if (wizyta.Status == StatusWizyty.Zrealizowana)
+                return Results.BadRequest("Nie można anulować zrealizowanej wizyty.");
 
-            if (wizyta.DataWizyty < DateTime.Now.AddHours(24))
-                return Results.BadRequest("Wizytę można anulować najpóźniej 24h przed terminem.");
+            if (wizyta.Status == StatusWizyty.Anulowana)
+                return Results.BadRequest("Wizyta jest już anulowana.");
 
             wizyta.Status = StatusWizyty.Anulowana;
 

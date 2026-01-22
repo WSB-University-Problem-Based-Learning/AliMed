@@ -244,6 +244,11 @@ const WizytyLekarzPage: React.FC = () => {
     return normalized.includes('odbyta') || normalized.includes('zrealizowana');
   };
 
+  const isWizytaAnulowana = (status?: string) => {
+    const normalized = String(status ?? '').toLowerCase();
+    return normalized.includes('anul');
+  };
+
   const handleCreateDocument = async () => {
     if (!selectedWizyta || !nowyDokument.typDokumentu) {
       setDokError(t('doctorVisits.missingDocumentType'));
@@ -503,6 +508,33 @@ const WizytyLekarzPage: React.FC = () => {
                   >
                     <PencilSquareIcon className="w-5 h-5" />
                     {statusSaving ? t('doctorVisits.saving') : t('doctorVisits.markAsCompleted')}
+                  </button>
+                  <button
+                    type="button"
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-amber-100 text-amber-800 rounded-lg hover:bg-amber-200 transition-colors font-medium disabled:opacity-50"
+                    onClick={async () => {
+                      if (!window.confirm(t('common.cancel'))) return;
+                      setStatusSaving(true);
+                      try {
+                        await apiService.cancelWizyta(selectedWizyta.wizytaId);
+                        setStatusMessage('Wizyta anulowana.');
+                        await reloadWizyty(true);
+                        closeModal();
+                      } catch (err) {
+                        setStatusError(err instanceof Error ? err.message : t('common.error'));
+                      } finally {
+                        setStatusSaving(false);
+                      }
+                    }}
+                    disabled={
+                      statusSaving ||
+                      isDemoMode ||
+                      isWizytaZrealizowana(selectedWizyta.status) ||
+                      isWizytaAnulowana(selectedWizyta.status)
+                    }
+                  >
+                    <XMarkIcon className="w-5 h-5" />
+                    {t('common.cancel')}
                   </button>
                   <button
                     type="button"

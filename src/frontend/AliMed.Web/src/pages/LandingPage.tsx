@@ -29,9 +29,6 @@ const LandingPage: React.FC = () => {
               <Link to="/" className="text-gray-700 hover:text-alimed-blue transition">
                 {t('nav.home')}
               </Link>
-              <a href="#features" className="text-gray-700 hover:text-alimed-blue transition">
-                {t('nav.functionality')}
-              </a>
               <LanguageSwitcher />
               <Link 
                 to="/login" 
