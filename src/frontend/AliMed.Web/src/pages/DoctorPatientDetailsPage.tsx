@@ -5,8 +5,8 @@ import {
     EnvelopeIcon,
     MapPinIcon,
     CalendarDaysIcon,
-    DocumentTextIcon,
-    ArrowLeftIcon
+    ArrowLeftIcon,
+    XMarkIcon
 } from '@heroicons/react/24/outline';
 import { useTranslation } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
@@ -22,6 +22,13 @@ const DoctorPatientDetailsPage: React.FC = () => {
     const [pacjent, setPacjent] = useState<LekarzPacjentDetails | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [selectedWizyta, setSelectedWizyta] = useState<NonNullable<LekarzPacjentDetails['wizyty']>[number] | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [showAddDoc, setShowAddDoc] = useState(false);
+    const [docForm, setDocForm] = useState({ typDokumentu: '', tresc: '' });
+    const [docSubmitting, setDocSubmitting] = useState(false);
+    const [docError, setDocError] = useState<string | null>(null);
+    const [docSuccess, setDocSuccess] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchPatient = async () => {
@@ -95,17 +102,72 @@ const DoctorPatientDetailsPage: React.FC = () => {
     };
 
     const wizyty = pacjent.wizyty ?? [];
-    const dokumenty: Array<Dokument & { dataWizyty?: string }> = wizyty.flatMap((wizyta) =>
-        (wizyta.dokumenty ?? []).map((dokument) => ({
-            ...dokument,
-            wizytaId: wizyta.wizytaId,
-            dataWizyty: wizyta.dataWizyty,
-            pacjentId: pacjent.pacjentId,
-        })),
-    );
-    const dokumentySorted = [...dokumenty].sort(
-        (a, b) => new Date(b.dataUtworzenia).getTime() - new Date(a.dataUtworzenia).getTime(),
-    );
+
+    const isWizytaZrealizowana = (status?: string) => {
+        const normalized = (status || '').toLowerCase();
+        return normalized.includes('zrealiz') || normalized.includes('odby');
+    };
+
+    const openWizytaModal = (wizyta: NonNullable<LekarzPacjentDetails['wizyty']>[number]) => {
+        setSelectedWizyta(wizyta);
+        setIsModalOpen(true);
+        setDocError(null);
+        setDocSuccess(null);
+        setDocForm({ typDokumentu: '', tresc: '' });
+        setShowAddDoc((wizyta.dokumenty?.length ?? 0) === 0);
+    };
+
+    const closeWizytaModal = () => {
+        setIsModalOpen(false);
+        setSelectedWizyta(null);
+        setDocError(null);
+        setDocSuccess(null);
+        setDocSubmitting(false);
+        setShowAddDoc(false);
+    };
+
+    const updateWizytaDokumenty = (wizytaId: number, dokumenty: Dokument[]) => {
+        setPacjent((prev) => {
+            if (!prev) return prev;
+            return {
+                ...prev,
+                wizyty: prev.wizyty?.map((w) =>
+                    w.wizytaId === wizytaId ? { ...w, dokumenty } : w
+                ),
+            };
+        });
+        setSelectedWizyta((prev) => (prev && prev.wizytaId === wizytaId ? { ...prev, dokumenty } : prev));
+    };
+
+    const handleDocInputChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setDocForm((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const handleAddDokument = async () => {
+        if (!selectedWizyta) return;
+        if (!docForm.typDokumentu) {
+            setDocError(t('doctorDocumentation.selectVisitAndType'));
+            return;
+        }
+        try {
+            setDocSubmitting(true);
+            setDocError(null);
+            await apiService.createDokument({
+                wizytaId: selectedWizyta.wizytaId,
+                typDokumentu: docForm.typDokumentu,
+                tresc: docForm.tresc || undefined,
+            });
+            const docs = await apiService.getDokumentyWizytyLekarz(selectedWizyta.wizytaId);
+            updateWizytaDokumenty(selectedWizyta.wizytaId, docs);
+            setDocSuccess(t('doctorDocumentation.documentSaved'));
+            setDocForm({ typDokumentu: '', tresc: '' });
+        } catch (err) {
+            setDocError(err instanceof Error ? err.message : t('doctorDocumentation.documentSaveError'));
+        } finally {
+            setDocSubmitting(false);
+        }
+    };
 
     return (
         <div>
@@ -185,7 +247,7 @@ const DoctorPatientDetailsPage: React.FC = () => {
                 </div>
 
                 {/* Tu można dodać sekcję Historia Wizyt i Dokumentacja w przyszłości */}
-                <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="mt-8">
                     <div className="bg-white rounded-xl shadow-sm p-6">
                         <div className="flex items-center gap-2 mb-4">
                             <CalendarDaysIcon className="w-6 h-6 text-alimed-blue" />
@@ -214,38 +276,23 @@ const DoctorPatientDetailsPage: React.FC = () => {
                                             <span className="font-medium">{t('myVisits.diagnosis')}:</span>{' '}
                                             {wizyta.diagnoza || '-'}
                                         </p>
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
-                    </div>
-                    <div className="bg-white rounded-xl shadow-sm p-6">
-                        <div className="flex items-center gap-2 mb-4">
-                            <DocumentTextIcon className="w-6 h-6 text-alimed-blue" />
-                            <h3 className="text-lg font-semibold text-gray-900">{t('doctorDocumentation.title')}</h3>
-                        </div>
-                        {dokumentySorted.length === 0 ? (
-                            <p className="text-gray-500 italic text-sm">{t('doctorDocumentation.noDocuments')}</p>
-                        ) : (
-                            <ul className="space-y-4">
-                                {dokumentySorted.map((dokument) => (
-                                    <li key={dokument.dokumentId} className="border border-gray-100 rounded-lg p-4">
-                                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
-                                            <div>
-                                                <p className="text-sm font-medium text-gray-900">
-                                                    {dokument.nazwaPliku || `${t('doctorDocumentation.type')}: ${dokument.typDokumentu || '-'}`}
-                                                </p>
-                                                <p className="text-sm text-gray-500">
-                                                    {formatDate(dokument.dataUtworzenia)}
-                                                    {dokument.dataWizyty ? ` \u2022 ${t('doctorVisits.visit')}: ${formatDateTime(dokument.dataWizyty)}` : ''}
-                                                </p>
+                                        {isWizytaZrealizowana(wizyta.status) && (
+                                            <div className="mt-4 flex flex-wrap gap-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => openWizytaModal(wizyta)}
+                                                    className="px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-700 hover:bg-gray-50 transition"
+                                                >
+                                                    {t('doctorVisits.details')}
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => openWizytaModal(wizyta)}
+                                                    className="px-3 py-2 rounded-lg bg-alimed-blue/10 text-alimed-blue text-sm font-medium hover:bg-alimed-blue/20 transition"
+                                                >
+                                                    {t('doctorDocumentation.title')}
+                                                </button>
                                             </div>
-                                            <span className="text-xs text-gray-500">
-                                                {dokument.typDokumentu || '-'}
-                                            </span>
-                                        </div>
-                                        {dokument.opis && (
-                                            <p className="mt-2 text-sm text-gray-700">{dokument.opis}</p>
                                         )}
                                     </li>
                                 ))}
@@ -255,6 +302,151 @@ const DoctorPatientDetailsPage: React.FC = () => {
                 </div>
 
             </main>
+            {isModalOpen && selectedWizyta && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-2xl shadow-xl max-w-3xl w-full mx-4 overflow-hidden">
+                        <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+                            <div>
+                                <h3 className="text-lg font-semibold text-gray-900">{t('doctorVisits.visitDetails')}</h3>
+                                <p className="text-sm text-gray-500">
+                                    {formatDateTime(selectedWizyta.dataWizyty)}
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={closeWizytaModal}
+                                className="text-gray-500 hover:text-gray-700"
+                                aria-label={t('visitDetails.close')}
+                            >
+                                <XMarkIcon className="w-5 h-5" />
+                            </button>
+                        </div>
+                        <div className="p-6 space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="rounded-xl border border-gray-100 bg-gray-50 p-4 text-sm text-gray-700 space-y-2">
+                                    <div className="text-xs uppercase tracking-wide text-gray-400">{t('visitDetails.visitDate')}</div>
+                                    <div className="text-base font-semibold text-gray-900">
+                                        {formatDateTime(selectedWizyta.dataWizyty)}
+                                    </div>
+                                    <div><span className="text-gray-500">{t('visitDetails.status')}:</span> {selectedWizyta.status || '-'}</div>
+                                </div>
+                                <div className="rounded-xl border border-gray-100 bg-white p-4 text-sm text-gray-700 space-y-2">
+                                    <div className="text-xs uppercase tracking-wide text-gray-400">{t('visitDetails.diagnosis')}</div>
+                                    {selectedWizyta.diagnoza ? (
+                                        <div className="text-gray-900">{selectedWizyta.diagnoza}</div>
+                                    ) : (
+                                        <div className="text-gray-400">{t('visitDetails.noDiagnosis')}</div>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="rounded-xl border border-gray-100 p-4">
+                                <div className="flex items-center justify-between mb-3">
+                                    <div>
+                                        <h4 className="font-semibold text-gray-900">{t('doctorDocumentation.title')}</h4>
+                                        <p className="text-sm text-gray-500">{t('doctorDocumentation.documentList')}</p>
+                                    </div>
+                                    <span className="text-xs text-gray-400">
+                                        {(selectedWizyta.dokumenty?.length ?? 0)} {t('visitDetails.files')}
+                                    </span>
+                                </div>
+                                {(selectedWizyta.dokumenty?.length ?? 0) > 0 ? (
+                                    <div className="space-y-2">
+                                        {selectedWizyta.dokumenty?.map((dokument) => (
+                                            <div
+                                                key={dokument.dokumentId}
+                                                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 rounded-lg border border-gray-100 px-3 py-2"
+                                            >
+                                                <div className="text-sm text-gray-700">
+                                                    <div className="font-medium text-gray-900">
+                                                        {dokument.nazwaPliku || `Dokument #${dokument.dokumentId}`}
+                                                    </div>
+                                                    <div className="text-xs text-gray-500">
+                                                        {t('visitDetails.type')}: {dokument.typDokumentu || 'inne'}
+                                                    </div>
+                                                </div>
+                                                <span className="text-xs text-gray-500">{formatDate(dokument.dataUtworzenia)}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-sm text-gray-500 space-y-2">
+                                        <p>{t('doctorDocumentation.noDocuments')}</p>
+                                        <p>{t('doctorDocumentation.noDocumentsPrompt')}</p>
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowAddDoc(true)}
+                                            className="inline-flex items-center px-3 py-2 rounded-lg bg-alimed-blue/10 text-alimed-blue text-sm font-medium hover:bg-alimed-blue/20 transition"
+                                        >
+                                            {t('doctorDocumentation.addDocument')}
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+
+                            {showAddDoc && (
+                                <div className="rounded-xl border border-gray-100 p-4 space-y-4">
+                                    <h4 className="font-semibold text-gray-900">{t('doctorDocumentation.addDocument')}</h4>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-600 mb-1">
+                                            {t('doctorDocumentation.documentType')}
+                                        </label>
+                                        <select
+                                            name="typDokumentu"
+                                            value={docForm.typDokumentu}
+                                            onChange={handleDocInputChange}
+                                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                                        >
+                                            <option value="">{t('doctorDocumentation.selectDocumentType')}</option>
+                                            <option value="wynik">{t('doctorDocumentation.typeWynik')}</option>
+                                            <option value="recepta">{t('doctorDocumentation.typeRecepta')}</option>
+                                            <option value="opis">{t('doctorDocumentation.typeOpis')}</option>
+                                            <option value="skierowanie">{t('doctorDocumentation.typeSkierowanie')}</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-600 mb-1">
+                                            {t('doctorDocumentation.documentContent')}
+                                        </label>
+                                        <textarea
+                                            name="tresc"
+                                            value={docForm.tresc}
+                                            onChange={handleDocInputChange}
+                                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                                            rows={4}
+                                            placeholder={t('doctorDocumentation.enterDocumentContent')}
+                                        />
+                                    </div>
+                                    {docError && (
+                                        <div className="text-sm text-red-600">{docError}</div>
+                                    )}
+                                    {docSuccess && (
+                                        <div className="text-sm text-green-600">{docSuccess}</div>
+                                    )}
+                                    <div className="flex gap-2 justify-end">
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowAddDoc(false)}
+                                            className="px-3 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm hover:bg-gray-50 transition"
+                                            disabled={docSubmitting}
+                                        >
+                                            {t('common.cancel')}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={handleAddDokument}
+                                            className="px-4 py-2 rounded-lg bg-alimed-blue text-white text-sm font-medium hover:bg-blue-700 transition disabled:opacity-60"
+                                            disabled={docSubmitting}
+                                        >
+                                            {docSubmitting ? t('common.loading') : t('doctorDocumentation.saveDocument')}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

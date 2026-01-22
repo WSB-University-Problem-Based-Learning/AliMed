@@ -350,6 +350,7 @@
     "errorLoadingVisits": "Błąd ładowania wizyt",
     "errorLoadingDocuments": "Błąd ładowania dokumentów",
     "selectVisitAndType": "Wybierz wizytę i typ dokumentu.",
+    "noDocumentsPrompt": "Niy ma dokumyntacyje. Chcesz dodać nowō?",
     "documentSaved": "Dokument został zapisany.",
     "documentSaveError": "Błąd zapisu dokumentu",
     "selectVisit": "Wybierz wizytę",
