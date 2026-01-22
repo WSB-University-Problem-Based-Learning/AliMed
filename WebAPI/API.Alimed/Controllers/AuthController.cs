@@ -68,20 +68,20 @@ namespace API.Alimed.Controllers
                 };
 
                 var tokenResponse = await httpClient.PostAsJsonAsync(tokenRequestUrl, tokenRequestBody);
-                Console.WriteLine($"\n\"#########################################################\\");
-                Console.Write($"Token req body: {tokenRequestBody}");
-                Console.WriteLine($"\n\"#########################################################\\");
+                // Console.WriteLine($"\n\"#########################################################\\");
+                // Console.Write($"Token req body: {tokenRequestBody}");
+                // Console.WriteLine($"\n\"#########################################################\\");
 
                 if (!tokenResponse.IsSuccessStatusCode)
                 {
                     var errorContent = await tokenResponse.Content.ReadAsStringAsync();
 
                     // errors
-                    Console.WriteLine($"\n\"#########################################################\\");
-                    Console.WriteLine($"Zwrotka z GITHUB (StatusCode: {tokenResponse.StatusCode})");
-                    Console.WriteLine($"Wyslany kod autoryzacji: {payload.Code}");
-                    Console.WriteLine($"Error tresc GitHub: {errorContent}");
-                    Console.WriteLine($"#########################################################\n");
+                    // Console.WriteLine($"\n\"#########################################################\\");
+                    // Console.WriteLine($"Zwrotka z GITHUB (StatusCode: {tokenResponse.StatusCode})");
+                    // Console.WriteLine($"Wyslany kod autoryzacji: {payload.Code}");
+                    // Console.WriteLine($"Error tresc GitHub: {errorContent}");
+                    // Console.WriteLine($"#########################################################\n");
 
                     // error do frontendu 401/400
                     return StatusCode((int)tokenResponse.StatusCode, $"Nieudana wymiana kodu GitHub. Specs: {errorContent}");
@@ -157,7 +157,7 @@ namespace API.Alimed.Controllers
                         Secure = true, // HTTPS w produkcji
                         Expires = DateTimeOffset.UtcNow.AddDays(7),
                         SameSite = SameSiteMode.None, // Dla cross-origin
-                        Path = "/api/auth"
+                        Path = "/api"
                     }
                 );
 
@@ -273,7 +273,7 @@ namespace API.Alimed.Controllers
                 Secure = true,
                 SameSite = SameSiteMode.None,
                 Expires = DateTime.UtcNow.AddDays(7),
-                Path = "/api/auth"
+                Path = "/api"
             });
 
             return Ok(new { token = jwtToken });
@@ -310,7 +310,7 @@ namespace API.Alimed.Controllers
                 Secure = true,
                 SameSite = SameSiteMode.None,
                 Expires = DateTime.UtcNow.AddDays(7),
-                Path = "/api/auth"
+                Path = "/api"
             });
 
             return Ok(new { token = jwtToken });
@@ -339,7 +339,7 @@ namespace API.Alimed.Controllers
                 HttpOnly = true,
                 Secure = true,
                 SameSite = SameSiteMode.None,
-                Path = "/api/auth"
+                Path = "/api"
             });
 
             return Ok(new { message = "Wylogowano." });
