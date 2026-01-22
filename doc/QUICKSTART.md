@@ -2,7 +2,7 @@
 
 ## Szybkie uruchomienie z Docker Compose (zalecane)
 
-### 1. Uruchom tylko bazę danych MySQL
+### 1. Uruchom tylko bazę danych MySQL 9.5.2
 
 ```bash
 docker-compose up -d mysql
@@ -54,7 +54,7 @@ Frontend będzie dostępny: **http://localhost:5173**
 ### Wymagania
 - Node.js 20+
 - .NET 9.0 SDK
-- MySQL 8.0+ zainstalowany lokalnie
+- MySQL 9.0+ zainstalowany lokalnie
 
 ### Kroki
 

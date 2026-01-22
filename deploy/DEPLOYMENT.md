@@ -1,67 +1,133 @@
-# 🚀 AliMed Production Deployment Guide
+# 🚀 Przewodnik Wdrożeniowy AliMed
 
-## Overview
-AliMed is deployed to an Oracle Cloud VM running Ubuntu.
-- **Frontend**: Served by Nginx as static files.
-- **Backend**: Runs as a Systemd service (`alimed-api`) on port 5056.
-- **Database**: Oracle Heatwave MySQL (managed service).
-- **Deployment**: Fully automated via GitHub Actions.
+Dokument ten szczegółowo opisuje proces automatycznego wdrażania (Deployment) aplikacji AliMed na środowisko produkcyjne, architekturę CI/CD oraz procedury obsługi serwera.
 
-## Server Information
-- **IP**: `130.162.222.70`
-- **SSH**: `ssh -i ~/.ssh/alimed.key ubuntu@130.162.222.70`
-- **OS**: Ubuntu 22.04 LTS
+---
 
-## 🔄 Automated Deployment
-Deployment is handled automatically by GitHub Actions workflows.
+## 🏗️ Przegląd Architektury
 
-| Component | Trigger | Workflow |
-|-----------|---------|----------|
-| **Backend** | Push to `main` | `.github/workflows/backend.yml` builds & tests. On success, `deploy.yml` deploys to server. |
-| **Frontend** | Push to `main`| `.github/workflows/frontend.yml` builds. On success, `deploy.yml` deploys to server. |
+System działa w środowisku **Oracle Cloud Infrastructure (OCI)** na maszynie wirtualnej z systemem **Ubuntu 24.04 LTS**.
 
-### Required GitHub Secrets
-The following secrets must be configured in the GitHub Repository settings:
-- `SSH_PRIVATE_KEY`: Private SSH key for `ubuntu` user.
-- `REMOTE_HOST`: `130.162.222.70`
-- `REMOTE_USER`: `ubuntu`
-- `REMOTE_TARGET`: `/home/ubuntu/www` (Frontend path)
-- `REMOTE_TARGET_BACKEND`: `/opt/alimed/api` (Backend path)
+*   **Frontend**: Aplikacja React (SPA) serwowana jako pliki statyczne przez serwer **Nginx**.
+*   **Backend**: API .NET 9.0 działające jako usługa systemowa Linux (`systemd`).
+*   **Baza Danych**: MySQL HeatWave (Managed Service w OCI).
+*   **Automatyzacja**: Cały proces od commitu do wdrożenia jest zautomatyzowany przez **GitHub Actions**.
 
-## 🛠️ Manual Server Operations
-Although deployment is automated, you may need to access the server for monitoring or troubleshooting.
+---
 
-### Checking Service Status
+## 🔄 Jak to działa? (GitHub Actions Workflows)
+
+Proces CI/CD składa się z trzech powiązanych ze sobą plików workflow (`.github/workflows/*.yml`).
+
+### 1. Backend CI (`backend.yml`)
+> **Plik:** [.github/workflows/backend.yml](../.github/workflows/backend.yml)
+
+Ten proces uruchamia się automatycznie przy każdym wypchnięciu zmian (push) do katalogu `WebAPI/`.
+
+**Kroki procesu:**
+1.  **Build**: Kompilacja kodu .NET 9.0.
+2.  **Test**: Uruchomienie testów jednostkowych i integracyjnych.
+3.  **Publish**: Stworzenie paczki wdrożeniowej (artefaktu) gotowej do uruchomienia na serwerze.
+4.  **Upload Artifact**: Przesłanie gotowej paczki do tymczasowego magazynu GitHub, aby mogła zostać użyta w etapie wdrożenia.
+
+### 2. Frontend CI (`frontend.yml`)
+> **Plik:** [.github/workflows/frontend.yml](../.github/workflows/frontend.yml)
+
+Uruchamia się przy zmianach w katalogu `src/frontend/`.
+
+**Kroki procesu:**
+1.  **Instalacja**: Pobranie zależności (`npm ci`).
+2.  **Linting**: Sprawdzenie jakości kodu (`npm run lint`).
+3.  **Build**: Budowanie wersji produkcyjnej aplikacji (`npm run build`) -> powstaje katalog `dist/`.
+4.  **Upload Artifact**: Przesłanie katalogu `dist` jako artefaktu.
+
+### 3. Deploy Orchestration (`deploy.yml`)
+> **Plik:** [.github/workflows/deploy.yml](../.github/workflows/deploy.yml)
+
+To jest **główny proces wdrażający**. Uruchamia się on **tylko wtedy**, gdy pomyślnie zakończą się workflowy `Backend CI` lub `Frontend CI` na głównej gałęzi (`main`).
+
+**Co dokładnie się dzieje?**
+1.  **Pobranie Artefaktów**: Skrypt pobiera zbudowane wcześniej pliki (z Backend CI lub Frontend CI).
+2.  **Generowanie Konfiguracji**:
+    *   Tworzony jest w locie plik `appsettings.Production.json` dla Backendu.
+    *   Wrażliwe dane (hasła do bazy, klucze JWT) są wstrzykiwane z **GitHub Secrets** – nie ma ich w kodzie źródłowym!
+3.  **Deploy Frontendu** (jeśli dotyczy):
+    *   Wysyłka plików przez SSH (SCP) do katalogu `/home/ubuntu/www`.
+4.  **Deploy Backendu** (jeśli dotyczy):
+    *   Zatrzymanie usługi API (`sudo systemctl stop alimed-api`).
+    *   Wysyłka plików binarnych do `/opt/alimed/api`.
+    *   Ponowne uruchomienie usługi (`sudo systemctl start alimed-api`).
+
+---
+
+## 🔐 Zarządzanie Sekretami
+
+Bezpieczeństwo procesu opiera się na **GitHub Secrets** (Settings -> Secrets and variables -> Actions). Wymagane są następujące zmienne:
+
+| Nazwa Sekretu | Opis |
+|---------------|------|
+| `SSH_PRIVATE_KEY` | Prywatny klucz SSH umożliwiający logowanie do serwera jako użytkownik `ubuntu`. |
+| `REMOTE_HOST` | Adres IP serwera produkcyjnego (`130.162.222.70`). |
+| `REMOTE_USER` | Użytkownik systemowy (`ubuntu`). |
+| `REMOTE_TARGET` | Ścieżka dla plików frontendu (`/home/ubuntu/www`). |
+| `REMOTE_TARGET_BACKEND` | Ścieżka dla plików backendu (`/opt/alimed/api`). |
+| `DB_CONNECTION_STRING` | Pełny connection string do bazy produkcyjnej MySQL. |
+| `JWT_KEY` | Sekretny klucz do podpisywania tokenów autoryzacyjnych. |
+
+---
+
+## 🛠️ Obsługa Manualna Serwera
+
+W razie problemów możesz zalogować się na serwer przez SSH, aby sprawdzić stan usług.
+
+**Logowanie:**
 ```bash
-# Check Backend API
-sudo systemctl status alimed-api
+ssh -i ~/.ssh/alimed.key ubuntu@130.162.222.70
+```
 
-# Check Nginx (Frontend & Proxy)
+### Sprawdzanie Statusu
+
+Sprawdź, czy Backend działa:
+```bash
+sudo systemctl status alimed-api
+```
+
+Sprawdź, czy Serwer WWW (Nginx) działa:
+```bash
 sudo systemctl status nginx
 ```
 
-### Viewing Logs
+### Logi (Diagnostyka)
+
+Podgląd logów Backendu "na żywo":
 ```bash
-# Backend Live Logs
+# -u: nazwa usługi, -f: follow (śledzenie na bieżąco)
 sudo journalctl -u alimed-api -f
+```
 
-# Nginx Access Logs
-sudo tail -f /var/log/nginx/access.log
-
-# Nginx Error Logs
+Logi błędów serwera Nginx:
+```bash
 sudo tail -f /var/log/nginx/error.log
 ```
 
-### Restarting Services manually
-If necessary:
+### Restartowanie Usług
+
+Jeśli wdrożenie się zawiesiło lub usługa padła:
 ```bash
+# Restart API
 sudo systemctl restart alimed-api
+
+# Restart Nginx
 sudo systemctl restart nginx
 ```
 
-## 🔐 Configuration Management
-Configuration is managed via files on the server that are **NOT** in the repository.
-- **Backend**: `/opt/alimed/api/appsettings.Production.json` (Database connection, etc.)
-- **Nginx**: `/etc/nginx/conf.d/alimed.conf` (Main site configuration)
+---
 
-**Do not overwrite these files during deployment.** The deployment script only updates the application binaries.
+## 📂 Pliki Konfiguracyjne na Serwerze
+
+Pewne pliki nie znajdują się w repozytorium GitHub ze względów bezpieczeństwa lub specyfiki środowiska.
+
+1.  **Backend Config**: `/opt/alimed/api/appsettings.Production.json`
+    *   Generowany automatycznie podczas deploymentu z sekretów.
+2.  **Nginx Config**: `/etc/nginx/conf.d/alimed.conf`
+    *   Zarządzany ręcznie przez administratora. Definiuje proxy pass do API (port 5056) oraz serwowanie plików Reacta.

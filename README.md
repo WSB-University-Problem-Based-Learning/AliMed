@@ -159,6 +159,7 @@ Projekt wykorzystuje **GitHub Actions** do pełnej automatyzacji procesów budow
 - **Dokumentacja API (Swagger)**: [alimed.com.pl/api/swagger](https://alimed.com.pl/api/swagger)
 - **Schemat Bazy Danych**: [doc/database-schema.html](doc/database-schema.html)
 - **Przewodnik Wdrożeniowy**: [deploy/DEPLOYMENT.md](deploy/DEPLOYMENT.md)
+- **Tablica Kanban**: [GitHub Projects](https://github.com/orgs/WSB-University-Problem-Based-Learning/projects/1)
 
 ---
 
