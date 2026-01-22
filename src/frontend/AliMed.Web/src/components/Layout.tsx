@@ -20,10 +20,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { logout, user } = useAuth();
+  const { logout, user, isAuthenticated } = useAuth();
 
   // Check if user is logged in
-  const isLoggedIn = !!localStorage.getItem('alimed_token');
+  const isLoggedIn = isAuthenticated;
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -86,28 +86,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     if (user?.firstName) return user.firstName;
     if (user?.username) return user.username;
 
-    // Try to get from localStorage
-    const userData = localStorage.getItem('alimed_user');
-    if (userData) {
-      try {
-        const parsed = JSON.parse(userData);
-        return parsed.firstName || parsed.username || 'User';
-      } catch {
-        return 'User';
-      }
-    }
-
-    // Try to decode from JWT
-    const token = localStorage.getItem('alimed_token');
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        return payload.unique_name || payload.github_login || payload.email?.split('@')[0] || 'User';
-      } catch {
-        return 'User';
-      }
-    }
-
+    if (user?.githubName) return user.githubName;
     return 'User';
   };
 

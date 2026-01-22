@@ -1,9 +1,11 @@
-import React, { createContext, useContext, useState, type ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import type { User, UserRole } from '../types/api';
+import { apiService, setAuthToken } from '../services/api';
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
+  isAuthReady: boolean;
   isDemoMode: boolean;
   login: (_token: string, _refreshToken: string) => void;
   logout: () => void;
@@ -62,101 +64,156 @@ const getUserFromToken = (token: string): User | null => {
   };
 };
 
+const buildDefaultDemoUser = (): User => ({
+  userId: 'demo-user',
+  email: 'demo@alimed.pl',
+  firstName: 'Demo',
+  lastName: 'User',
+  role: 0,
+});
+
 const readStoredAuth = () => {
   if (typeof window === 'undefined') {
-    return { storedToken: null, storedUser: null, storedDemoMode: false };
+    return { storedDemoMode: false, storedDemoUser: null };
   }
 
-  const storedToken = localStorage.getItem('alimed_token');
   const storedDemoMode = localStorage.getItem('alimed_demo_mode') === 'true';
+  let storedDemoUser: User | null = null;
 
-  let storedUser: User | null = null;
-  const storedUserRaw = localStorage.getItem('alimed_user');
-
-  if (storedUserRaw) {
-    try {
-      storedUser = JSON.parse(storedUserRaw) as User;
-    } catch (e) {
-      console.error('Failed to parse stored user', e);
+  if (storedDemoMode) {
+    const storedUserRaw = localStorage.getItem('alimed_user');
+    if (storedUserRaw) {
+      try {
+        storedDemoUser = JSON.parse(storedUserRaw) as User;
+      } catch (e) {
+        console.error('Failed to parse stored demo user', e);
+      }
     }
   }
 
-  const derivedUser = storedToken && !storedUser ? getUserFromToken(storedToken) : null;
+  if (storedDemoMode && !storedDemoUser) {
+    storedDemoUser = buildDefaultDemoUser();
+  }
 
-  // RefreshToken is stored as HttpOnly cookie by backend, not in localStorage
-  return { storedToken, storedUser: storedUser ?? derivedUser, storedDemoMode };
+  return { storedDemoMode, storedDemoUser };
 };
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const { storedToken, storedUser, storedDemoMode } = readStoredAuth();
+  const { storedDemoMode, storedDemoUser } = readStoredAuth();
+  const initialDemoToken =
+    storedDemoMode && storedDemoUser?.role === 1 ? 'demo-token-doctor' : storedDemoMode ? 'demo-token' : null;
 
-  const [user, setUserState] = useState<User | null>(storedUser);
-  const [token, setToken] = useState<string | null>(storedToken);
-  // RefreshToken is in HttpOnly cookie, managed by backend
-  const [, setRefreshToken] = useState<string | null>(storedToken ? 'stored-in-cookie' : null);
+  const [user, setUserState] = useState<User | null>(storedDemoUser);
+  const [token, setToken] = useState<string | null>(initialDemoToken);
   const [isDemoMode, setIsDemoMode] = useState(storedDemoMode);
+  const [isAuthReady, setIsAuthReady] = useState(storedDemoMode);
 
-  const login = (newToken: string, newRefreshToken: string) => {
-    setToken(newToken);
-    // RefreshToken is stored as HttpOnly cookie by backend, don't store it in localStorage
-    setRefreshToken(newRefreshToken || 'stored-in-cookie');
-    setIsDemoMode(false);
-    localStorage.setItem('alimed_token', newToken);
-    const derivedUser = getUserFromToken(newToken);
-    if (derivedUser) {
-      setUserState(derivedUser);
-      localStorage.setItem('alimed_user', JSON.stringify(derivedUser));
+  const clearDemoStorage = () => {
+    if (typeof window === 'undefined') {
+      return;
     }
-    // Remove refresh token from localStorage as it's now handled via HttpOnly cookie
-    localStorage.removeItem('alimed_refresh_token');
     localStorage.removeItem('alimed_demo_mode');
+    localStorage.removeItem('alimed_user');
+  };
+
+  const applyToken = (newToken: string | null) => {
+    if (!newToken) {
+      setToken(null);
+      setUserState(null);
+      setAuthToken(null);
+      return;
+    }
+
+    const derivedUser = getUserFromToken(newToken);
+    if (!derivedUser) {
+      setToken(null);
+      setUserState(null);
+      setAuthToken(null);
+      return;
+    }
+
+    setToken(newToken);
+    setUserState(derivedUser);
+    setAuthToken(newToken);
+  };
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const bootstrapAuth = async () => {
+      if (isDemoMode) {
+        setAuthToken(token);
+        setIsAuthReady(true);
+        return;
+      }
+
+      if (token) {
+        setIsAuthReady(true);
+        return;
+      }
+
+      try {
+        const { accessToken } = await apiService.refreshToken();
+        if (cancelled) return;
+        applyToken(accessToken || null);
+      } catch {
+        if (cancelled) return;
+        applyToken(null);
+      } finally {
+        if (!cancelled) {
+          setIsAuthReady(true);
+        }
+      }
+    };
+
+    bootstrapAuth();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isDemoMode]);
+
+  const login = (newToken: string, _refreshToken: string) => {
+    setIsDemoMode(false);
+    clearDemoStorage();
+    applyToken(newToken);
+    setIsAuthReady(true);
   };
 
   const logout = async () => {
-    // Call backend to revoke refresh token (if not in demo mode)
     if (!isDemoMode) {
       try {
-        // Dynamically import to avoid circular dependencies
-        const { apiService } = await import('../services/api');
         await apiService.logout();
       } catch (error) {
         console.error('Error during backend logout:', error);
       }
     }
-    
-    // Clear local state
-    setToken(null);
-    setRefreshToken(null);
-    setUserState(null);
+
+    applyToken(null);
     setIsDemoMode(false);
-    localStorage.removeItem('alimed_token');
-    localStorage.removeItem('alimed_refresh_token');
-    localStorage.removeItem('alimed_user');
-    localStorage.removeItem('alimed_demo_mode');
+    clearDemoStorage();
+    setIsAuthReady(true);
   };
 
   const setUser = (newUser: User) => {
     setUserState(newUser);
-    localStorage.setItem('alimed_user', JSON.stringify(newUser));
+    if (isDemoMode && typeof window !== 'undefined') {
+      localStorage.setItem('alimed_user', JSON.stringify(newUser));
+    }
   };
 
   const enableDemoMode = () => {
-    const demoUser: User = {
-      userId: 'demo-user',
-      email: 'demo@alimed.pl',
-      firstName: 'Demo',
-      lastName: 'User',
-      role: 0, // UserRole.User = 0 (Patient)
-    };
-    
+    const demoUser = buildDefaultDemoUser();
+
     setUserState(demoUser);
     setToken('demo-token');
-    setRefreshToken('demo-refresh-token');
+    setAuthToken('demo-token');
     setIsDemoMode(true);
-    localStorage.setItem('alimed_token', 'demo-token');
-    localStorage.setItem('alimed_refresh_token', 'demo-refresh-token');
-    localStorage.setItem('alimed_demo_mode', 'true');
-    localStorage.setItem('alimed_user', JSON.stringify(demoUser));
+    setIsAuthReady(true);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('alimed_demo_mode', 'true');
+      localStorage.setItem('alimed_user', JSON.stringify(demoUser));
+    }
   };
 
   const enableDemoModeAsDoctor = () => {
@@ -167,15 +224,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       lastName: 'Nowak',
       role: 1, // UserRole.Lekarz = 1 (Doctor)
     };
-    
+
     setUserState(demoDoctor);
     setToken('demo-token-doctor');
-    setRefreshToken('demo-refresh-token-doctor');
+    setAuthToken('demo-token-doctor');
     setIsDemoMode(true);
-    localStorage.setItem('alimed_token', 'demo-token-doctor');
-    localStorage.setItem('alimed_refresh_token', 'demo-refresh-token-doctor');
-    localStorage.setItem('alimed_demo_mode', 'true');
-    localStorage.setItem('alimed_user', JSON.stringify(demoDoctor));
+    setIsAuthReady(true);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('alimed_demo_mode', 'true');
+      localStorage.setItem('alimed_user', JSON.stringify(demoDoctor));
+    }
   };
 
   return (
@@ -183,6 +241,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       value={{
         user,
         isAuthenticated: !!token,
+        isAuthReady,
         isDemoMode,
         login,
         logout,

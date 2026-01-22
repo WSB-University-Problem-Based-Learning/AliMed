@@ -156,11 +156,12 @@ namespace API.Alimed.Controllers
                         HttpOnly = true,
                         Secure = true, // HTTPS w produkcji
                         Expires = DateTimeOffset.UtcNow.AddDays(7),
-                        SameSite = SameSiteMode.None // Dla cross-origin
+                        SameSite = SameSiteMode.None, // Dla cross-origin
+                        Path = "/api/auth"
                     }
                 );
 
-                return Ok(new { token = jwtToken, refreshToken = refreshToken });
+                return Ok(new { token = jwtToken });
 
 
             }
@@ -271,10 +272,11 @@ namespace API.Alimed.Controllers
                 HttpOnly = true,
                 Secure = true,
                 SameSite = SameSiteMode.None,
-                Expires = DateTime.UtcNow.AddDays(7)
+                Expires = DateTime.UtcNow.AddDays(7),
+                Path = "/api/auth"
             });
 
-            return Ok(new { token = jwtToken, refreshToken = refreshToken });
+            return Ok(new { token = jwtToken });
         }
 
 
@@ -307,10 +309,11 @@ namespace API.Alimed.Controllers
                 HttpOnly = true,
                 Secure = true,
                 SameSite = SameSiteMode.None,
-                Expires = DateTime.UtcNow.AddDays(7)
+                Expires = DateTime.UtcNow.AddDays(7),
+                Path = "/api/auth"
             });
 
-            return Ok(new { token = jwtToken, refreshToken = refreshToken });
+            return Ok(new { token = jwtToken });
         }
 
 
@@ -334,8 +337,9 @@ namespace API.Alimed.Controllers
             {
                 Expires = DateTime.UtcNow.AddDays(-1),
                 HttpOnly = true,
-                Secure = false,
-                SameSite = SameSiteMode.Strict
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Path = "/api/auth"
             });
 
             return Ok(new { message = "Wylogowano." });

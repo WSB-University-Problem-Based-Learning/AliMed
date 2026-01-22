@@ -19,31 +19,7 @@ const DashboardPage: React.FC = () => {
   const { user: authUser, isDemoMode } = useAuth();
   const [wizyty, setWizyty] = useState<Wizyta[]>([]);
   const [loading, setLoading] = useState(true);
-  const [user] = useState<User | null>(() => {
-    if (authUser) return authUser;
-    const userData = localStorage.getItem('alimed_user');
-    if (userData) {
-      return JSON.parse(userData);
-    }
-    // Fallback: if we have a token but no user data, create minimal user
-    const token = localStorage.getItem('alimed_token');
-    if (token) {
-      try {
-        // Decode JWT to get user info
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        return {
-          userId: payload.nameid || 'unknown',
-          email: payload.email || '',
-          firstName: payload.unique_name || payload.github_login || 'User',
-          lastName: '',
-          role: 0,
-        };
-      } catch {
-        return { userId: 'unknown', email: '', firstName: 'User', lastName: '', role: 0 };
-      }
-    }
-    return null;
-  });
+  const user: User | null = authUser ?? null;
   const [selectedWizyta, setSelectedWizyta] = useState<WizytaDetail | null>(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [detailsError, setDetailsError] = useState<string | null>(null);
@@ -53,14 +29,6 @@ const DashboardPage: React.FC = () => {
   const [cancelLoading, setCancelLoading] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const token = localStorage.getItem('alimed_token');
-
-    // Only redirect if there's no token at all
-    if (!token) {
-      navigate('/login');
-    }
-  }, [navigate]);
   useEffect(() => {
     const fetchWizyty = async () => {
       try {

@@ -5,6 +5,7 @@ import { config } from '../config/env';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import { useAuth } from '../context/AuthContext';
 import Button from '../components/Button';
+import { apiService } from '../services/api';
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -26,20 +27,7 @@ const LoginPage: React.FC = () => {
 
     setIsLoading(true);
     try {
-      const response = await fetch(`${config.apiBaseUrl}/api/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.message || t('login.invalidCredentials'));
-      }
-
-      const data = await response.json();
+      const data = await apiService.loginLocal({ email, password });
       login(data.token, data.refreshToken || '');
       const payload = JSON.parse(atob(data.token.split('.')[1]));
       const role =

@@ -4,8 +4,14 @@ import { config } from '../config/env';
 const API_BASE_URL = config.apiBaseUrl;
 
 // Helper function to get auth token
+let authToken: string | null = null;
+
+export const setAuthToken = (token: string | null) => {
+  authToken = token;
+};
+
 const getAuthToken = (): string | null => {
-  return localStorage.getItem('alimed_token');
+  return authToken;
 };
 
 // Helper function to create headers with auth

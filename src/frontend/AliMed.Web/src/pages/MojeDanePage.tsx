@@ -10,30 +10,8 @@ const MojeDanePage: React.FC = () => {
   const { t } = useTranslation();
   const { user: authUser, isDemoMode } = useAuth();
   const navigate = useNavigate();
-  
-  const [user] = useState<User | null>(() => {
-    if (authUser) return authUser;
-    const userData = localStorage.getItem('alimed_user');
-    if (userData) return JSON.parse(userData);
-    
-    // Fallback: decode JWT to get user info
-    const token = localStorage.getItem('alimed_token');
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        return {
-          userId: payload.nameid || 'unknown',
-          email: payload.email || '',
-          firstName: payload.unique_name || payload.github_login || 'User',
-          lastName: '',
-          role: 0,
-        };
-      } catch {
-        return null;
-      }
-    }
-    return null;
-  });
+
+  const user: User | null = authUser ?? null;
 
   const [pacjent, setPacjent] = useState<Pacjent | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -58,13 +36,6 @@ const MojeDanePage: React.FC = () => {
 
   useEffect(() => {
     const fetchPacjentData = async () => {
-      // Check for token first, not user object
-      const token = localStorage.getItem('alimed_token');
-      if (!token) {
-        navigate('/login');
-        return;
-      }
-
       try {
         setLoading(true);
         // In demo mode, use mock data
@@ -122,7 +93,7 @@ const MojeDanePage: React.FC = () => {
     };
 
     fetchPacjentData();
-  }, [user, navigate, isDemoMode, t]);
+  }, [user, isDemoMode, t]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
