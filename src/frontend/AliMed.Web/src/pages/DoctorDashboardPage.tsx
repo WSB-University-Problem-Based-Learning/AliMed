@@ -89,7 +89,7 @@ const DoctorDashboardPage: React.FC = () => {
     } else {
       setLoading(false);
     }
-  }, [dateOnly, isDemoMode]);
+  }, [dateOnly, isDemoMode, t]);
 
   const handleLogout = () => {
     logout();

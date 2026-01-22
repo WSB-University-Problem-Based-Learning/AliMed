@@ -127,7 +127,7 @@ const DokumentacjaLekarzPage: React.FC = () => {
     };
 
     loadWizyty();
-  }, [isDemoMode]);
+  }, [isDemoMode, t]);
 
   useEffect(() => {
     if (!wizyty.length) {
@@ -178,7 +178,7 @@ const DokumentacjaLekarzPage: React.FC = () => {
     };
 
     loadDokumenty();
-  }, [isDemoMode, selectedWizytaId]);
+  }, [isDemoMode, selectedWizytaId, t]);
 
   const handleLogout = () => {
     logout();

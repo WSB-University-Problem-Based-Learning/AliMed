@@ -76,7 +76,7 @@ const AdminDashboardPage: React.FC = () => {
     } else {
       setLoading(false);
     }
-  }, [isAdmin]);
+  }, [isAdmin, t]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
