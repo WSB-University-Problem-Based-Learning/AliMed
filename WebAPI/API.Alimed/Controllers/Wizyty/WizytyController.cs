@@ -144,6 +144,9 @@ namespace API.Alimed.Controllers.Wizyty
             if (to < from)
                 return Results.BadRequest("'to' musi być >= 'from'.");
 
+            var startDate = from.Date;
+            var endDate = to.Date.AddDays(1);
+
             // 1️⃣ Walidacja lekarza
             var lekarz = await _db.Lekarze
                 .AsNoTracking()
@@ -178,8 +181,8 @@ namespace API.Alimed.Controllers.Wizyty
                     w.LekarzId == lekarzId &&
                     w.PlacowkaId == placowkaId &&
                     w.Status == StatusWizyty.Zaplanowana &&
-                    w.DataWizyty >= from &&
-                    w.DataWizyty <= to)
+                    w.DataWizyty >= startDate &&
+                    w.DataWizyty < endDate)
                 .Select(w => w.DataWizyty)
                 .ToListAsync();
 
@@ -189,7 +192,7 @@ namespace API.Alimed.Controllers.Wizyty
             var available = new List<DateTime>();
             var now = DateTime.Now;
 
-            for (var day = from.Date; day <= to.Date; day = day.AddDays(1))
+            for (var day = startDate; day < endDate; day = day.AddDays(1))
             {
                 var dayOfWeek = day.DayOfWeek;
 
@@ -218,7 +221,7 @@ namespace API.Alimed.Controllers.Wizyty
             {
                 lekarzId,
                 placowkaId,
-                from = from.Date,
+                from = startDate,
                 to = to.Date,
                 available
             });
