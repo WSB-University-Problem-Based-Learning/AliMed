@@ -533,4 +533,13 @@ export const apiService = {
     if (!response.ok) throw new Error('Failed to fetch doctor patients');
     return response.json();
   },
+
+  async getLekarzPacjentById(pacjentId: number): Promise<Pacjent> {
+    const response = await fetch(`${API_BASE_URL}/api/Lekarze/pacjenci/${pacjentId}`, {
+      headers: getHeaders(true),
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to fetch patient details');
+    return response.json();
+  },
 };

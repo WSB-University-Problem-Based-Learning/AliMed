@@ -73,13 +73,12 @@ const PacjenciLekarzPage: React.FC = () => {
   };
 
   const handleViewPatient = (id: number) => {
-    console.log('Zobacz pacjenta:', id);
-    // TODO: Navigate to patient details
+    navigate(`/pacjenci-lekarza/${id}`);
   };
 
   const handleEditPatient = (id: number) => {
-    console.log('Edytuj pacjenta:', id);
-    // TODO: Navigate to edit patient
+    // Doctors cannot edit patient data directly
+    console.log('Edycja zablokowana dla lekarza:', id);
   };
 
   const userName = user?.firstName && user?.lastName

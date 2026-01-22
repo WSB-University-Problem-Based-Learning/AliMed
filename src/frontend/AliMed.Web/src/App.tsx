@@ -12,6 +12,7 @@ import WizytyLekarzPage from './pages/WizytyLekarzPage';
 import PacjenciLekarzPage from './pages/PacjenciLekarzPage';
 import DokumentacjaLekarzPage from './pages/DokumentacjaLekarzPage';
 import MojeDaneLekarzPage from './pages/MojeDaneLekarzPage';
+import DoctorPatientDetailsPage from './pages/DoctorPatientDetailsPage';
 import PacjenciPage from './pages/PacjenciPage';
 import MojeWizytyPage from './pages/MojeWizytyPage';
 import UmowWizytePage from './pages/UmowWizytePage';
@@ -44,7 +45,7 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/auth/github/callback" element={<GitHubCallbackPage />} />
-            
+
             {/* Protected routes */}
             <Route path="/dashboard" element={
               <ProtectedRoute roles={[0]}>
@@ -66,6 +67,11 @@ function App() {
                 <PacjenciLekarzPage />
               </ProtectedRoute>
             } />
+            <Route path="/pacjenci-lekarza/:id" element={
+              <ProtectedRoute roles={[1]}>
+                <DoctorPatientDetailsPage />
+              </ProtectedRoute>
+            } />
             <Route path="/dokumentacja-lekarza" element={
               <ProtectedRoute roles={[1]}>
                 <DokumentacjaLekarzPage />
@@ -76,7 +82,7 @@ function App() {
                 <MojeDaneLekarzPage />
               </ProtectedRoute>
             } />
-            
+
             {/* Admin/Staff routes */}
             <Route path="/pacjenci" element={
               <ProtectedRoute roles={[0, 2]}>
