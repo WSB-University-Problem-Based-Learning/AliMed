@@ -18,10 +18,12 @@ const MojeDaneLekarzPage: React.FC = () => {
   const navigate = useNavigate();
 
   const [statystyki, setStatystyki] = useState({ wizyty: 0, pacjenci: 0, dokumentacja: 0 });
-  const [lekarzDetails, setLekarzDetails] = useState<{ specjalizacja?: string; placowkaId?: number } | null>(null);
+
+  // Note: We cannot fetch doctor details (specialization) because GET /api/AuthorizedEndpoint/lekarze is 403 Forbidden for doctors.
+  // There is no dedicated /api/Lekarze/moj-profil endpoint yet.
 
   useEffect(() => {
-    const fetchStatsAndProfile = async () => {
+    const fetchStats = async () => {
       try {
         if (isDemoMode) {
           setStatystyki({ wizyty: 0, pacjenci: 0, dokumentacja: 0 });
@@ -30,12 +32,10 @@ const MojeDaneLekarzPage: React.FC = () => {
             const dateOnly = new Date().toISOString().split('T')[0];
             const [
               wizytyTygodnia,
-              pacjenci,
-              allDoctors
+              pacjenci
             ] = await Promise.all([
               apiService.getLekarzWizytyTydzien(dateOnly),
-              apiService.getLekarzPacjenci(),
-              apiService.getLekarze()
+              apiService.getLekarzPacjenci()
             ]);
 
             setStatystyki({
@@ -43,17 +43,6 @@ const MojeDaneLekarzPage: React.FC = () => {
               pacjenci: pacjenci.length,
               dokumentacja: 0,
             });
-
-            // Try to find current doctor by matching first/last name from auth user
-            if (user?.firstName && user?.lastName) {
-              const found = allDoctors.find(
-                d => d.imie?.toLowerCase() === user.firstName?.toLowerCase() &&
-                  d.nazwisko?.toLowerCase() === user.lastName?.toLowerCase()
-              );
-              if (found) {
-                setLekarzDetails({ specjalizacja: found.specjalizacja, placowkaId: found.placowkaId });
-              }
-            }
 
           } catch (e) {
             console.error(e);
@@ -64,8 +53,8 @@ const MojeDaneLekarzPage: React.FC = () => {
       }
     };
 
-    fetchStatsAndProfile();
-  }, [isDemoMode, user]);
+    fetchStats();
+  }, [isDemoMode]);
   const [activeCard, setActiveCard] = useState<string>('moje-dane');
 
   const handleLogout = () => {
@@ -218,7 +207,7 @@ const MojeDaneLekarzPage: React.FC = () => {
             <div>
               <label className="block text-sm font-medium text-gray-500 mb-1">{t('doctorMyData.specialization')}</label>
               <p className="text-lg font-medium text-gray-900">
-                {lekarzDetails?.specjalizacja ? lekarzDetails.specjalizacja : <span className="italic text-gray-500">(Pobierane z systemu)</span>}
+                <span className="italic text-gray-500">(Pobierane z systemu)</span>
               </p>
             </div>
           </div>
