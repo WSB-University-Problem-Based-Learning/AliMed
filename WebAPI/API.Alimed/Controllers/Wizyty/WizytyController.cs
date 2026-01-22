@@ -179,10 +179,10 @@ namespace API.Alimed.Controllers.Wizyty
                 .AsNoTracking()
                 .Where(w =>
                     w.LekarzId == lekarzId &&
-                    w.PlacowkaId == placowkaId &&
                     w.Status == StatusWizyty.Zaplanowana &&
                     w.DataWizyty >= startDate &&
-                    w.DataWizyty < endDate)
+                    w.DataWizyty < endDate &&
+                    (w.PlacowkaId == placowkaId || w.PlacowkaId == null))
                 .Select(w => w.DataWizyty)
                 .ToListAsync();
 
