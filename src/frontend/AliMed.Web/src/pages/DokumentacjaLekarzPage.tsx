@@ -1,12 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import {
-  CalendarDaysIcon,
-  UsersIcon,
-  DocumentTextIcon,
-  UserCircleIcon,
-  ArrowDownTrayIcon,
-} from '@heroicons/react/24/outline';
+import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import { useTranslation } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { apiService } from '../services/api';
@@ -73,7 +66,6 @@ const mockDokumentyByWizyta: Record<number, Dokument[]> = {
 const DokumentacjaLekarzPage: React.FC = () => {
   const { t } = useTranslation();
   const { isDemoMode } = useAuth();
-  const navigate = useNavigate();
 
   const [wizyty, setWizyty] = useState<LekarzWizytaSummary[]>([]);
   const [dokumenty, setDokumenty] = useState<Dokument[]>([]);
@@ -83,7 +75,6 @@ const DokumentacjaLekarzPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
-  const [activeCard, setActiveCard] = useState<string>('dokumentacja');
   const [nowyDokument, setNowyDokument] = useState<NowyDokument>({
     wizytaId: '',
     typDokumentu: '',
@@ -302,41 +293,6 @@ const DokumentacjaLekarzPage: React.FC = () => {
 
   /* Header and outer wrapper removed to be compatible with Layout */
 
-  const statCards = [
-    {
-      id: 'wizyty',
-      icon: CalendarDaysIcon,
-      title: t('doctorDashboard.visits'),
-      color: 'bg-blue-100 text-blue-600',
-      borderColor: 'border-alimed-blue',
-      onClick: () => navigate('/wizyty-lekarza'),
-    },
-    {
-      id: 'pacjenci',
-      icon: UsersIcon,
-      title: t('doctorDashboard.patients'),
-      color: 'bg-green-100 text-green-600',
-      borderColor: 'border-green-500',
-      onClick: () => navigate('/pacjenci-lekarza'),
-    },
-    {
-      id: 'dokumentacja',
-      icon: DocumentTextIcon,
-      title: t('doctorDashboard.documentation'),
-      color: 'bg-purple-100 text-purple-600',
-      borderColor: 'border-purple-500',
-      onClick: () => setActiveCard('dokumentacja'),
-    },
-    {
-      id: 'moje-dane',
-      icon: UserCircleIcon,
-      title: t('doctorDashboard.myData'),
-      color: 'bg-orange-100 text-orange-500',
-      borderColor: 'border-orange-500',
-      onClick: () => navigate('/moje-dane-lekarza'),
-    },
-  ];
-
   return (
     <div>
 
@@ -354,25 +310,6 @@ const DokumentacjaLekarzPage: React.FC = () => {
             {error}
           </div>
         )}
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {statCards.map((card) => (
-            <div
-              key={card.id}
-              onClick={card.onClick}
-              className={`bg-white rounded-xl p-6 shadow-sm cursor-pointer transition-all duration-200 hover:shadow-md ${activeCard === card.id ? `border-2 ${card.borderColor}` : 'border-2 border-transparent'
-                }`}
-            >
-              <div className="flex flex-col items-center text-center">
-                <div className={`w-14 h-14 rounded-full ${card.color} flex items-center justify-center mb-4`}>
-                  <card.icon className="w-7 h-7" />
-                </div>
-                <h3 className="text-gray-600 font-medium mb-2">{card.title}</h3>
-              </div>
-            </div>
-          ))}
-        </div>
 
         {/* Dokumentacja section title */}
         <h2 className="text-xl font-semibold text-gray-900 mb-4">

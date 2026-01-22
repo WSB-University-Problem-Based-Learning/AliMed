@@ -1,9 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
-  CalendarDaysIcon,
-  UsersIcon,
-  UserCircleIcon,
   PencilSquareIcon,
   DocumentTextIcon,
   XMarkIcon,
@@ -61,7 +57,6 @@ const formatTime = (value: string) => {
 const WizytyLekarzPage: React.FC = () => {
   const { t } = useTranslation();
   const { isDemoMode } = useAuth();
-  const navigate = useNavigate();
 
   const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
   const [selectedDate, setSelectedDate] = useState<string>(today);
@@ -224,41 +219,6 @@ const WizytyLekarzPage: React.FC = () => {
     );
   };
 
-  const statCards = [
-    {
-      id: 'wizyty',
-      icon: CalendarDaysIcon,
-      title: t('doctorDashboard.visits'),
-      color: 'bg-blue-100 text-blue-600',
-      borderColor: 'border-alimed-blue',
-      onClick: () => undefined,
-    },
-    {
-      id: 'pacjenci',
-      icon: UsersIcon,
-      title: t('doctorDashboard.patients'),
-      color: 'bg-green-100 text-green-600',
-      borderColor: 'border-green-500',
-      onClick: () => navigate('/pacjenci-lekarza'),
-    },
-    {
-      id: 'dokumentacja',
-      icon: DocumentTextIcon,
-      title: t('doctorDashboard.documentation'),
-      color: 'bg-purple-100 text-purple-600',
-      borderColor: 'border-purple-500',
-      onClick: () => navigate('/dokumentacja-lekarza'),
-    },
-    {
-      id: 'moje-dane',
-      icon: UserCircleIcon,
-      title: t('doctorDashboard.myData'),
-      color: 'bg-orange-100 text-orange-500',
-      borderColor: 'border-orange-500',
-      onClick: () => navigate('/moje-dane-lekarza'),
-    },
-  ];
-
   // ... (keeping other handlers like handleMarkCompleted, isWizytaZrealizowana, handleCreateDocument) ...
   // Wait, I need to keep those handlers, but I'm editing a chunk. 
   // I will just return the layout change here.
@@ -340,23 +300,6 @@ const WizytyLekarzPage: React.FC = () => {
             {t('common.error')}: {error}
           </div>
         )}
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {statCards.map((card) => (
-            <div
-              key={card.id}
-              onClick={card.onClick}
-              className="bg-white rounded-xl p-6 shadow-sm cursor-pointer transition-all duration-200 hover:shadow-md border-2 border-transparent"
-            >
-              <div className="flex flex-col items-center text-center">
-                <div className={`w-14 h-14 rounded-full ${card.color} flex items-center justify-center mb-4`}>
-                  <card.icon className="w-7 h-7" />
-                </div>
-                <h3 className="text-gray-600 font-medium mb-2">{card.title}</h3>
-              </div>
-            </div>
-          ))}
-        </div>
 
         <div className="bg-white rounded-xl shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
