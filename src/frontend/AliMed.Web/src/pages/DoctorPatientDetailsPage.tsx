@@ -6,7 +6,11 @@ import {
     MapPinIcon,
     CalendarDaysIcon,
     ArrowLeftIcon,
-    XMarkIcon
+    XMarkIcon,
+    CalendarIcon,
+    CheckCircleIcon,
+    XCircleIcon,
+    ClockIcon
 } from '@heroicons/react/24/outline';
 import { useTranslation } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
@@ -29,6 +33,10 @@ const DoctorPatientDetailsPage: React.FC = () => {
     const [docSubmitting, setDocSubmitting] = useState(false);
     const [docError, setDocError] = useState<string | null>(null);
     const [docSuccess, setDocSuccess] = useState<string | null>(null);
+    const [previewDoc, setPreviewDoc] = useState<Dokument | null>(null);
+    const [previewContent, setPreviewContent] = useState<string | null>(null);
+    const [previewLoading, setPreviewLoading] = useState(false);
+    const [previewError, setPreviewError] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchPatient = async () => {
@@ -102,10 +110,53 @@ const DoctorPatientDetailsPage: React.FC = () => {
     };
 
     const wizyty = pacjent.wizyty ?? [];
+    const selectedDokumentyCount = selectedWizyta?.dokumenty?.length ?? 0;
+    const hasSelectedDokumenty = selectedDokumentyCount > 0;
 
     const isWizytaZrealizowana = (status?: string) => {
         const normalized = (status || '').toLowerCase();
         return normalized.includes('zrealiz') || normalized.includes('odby');
+    };
+
+    const getStatusBadge = (status?: string) => {
+        const normalized = (status || '').toLowerCase();
+        if (normalized.includes('zrealiz') || normalized.includes('odby')) {
+            return (
+                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                    <CheckCircleIcon className="h-4 w-4" />
+                    {status}
+                </span>
+            );
+        }
+        if (normalized.includes('anul')) {
+            return (
+                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                    <XCircleIcon className="h-4 w-4" />
+                    {status}
+                </span>
+            );
+        }
+        if (normalized.includes('nieobec')) {
+            return (
+                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                    <ClockIcon className="h-4 w-4" />
+                    {status}
+                </span>
+            );
+        }
+        if (normalized.includes('zaplan')) {
+            return (
+                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                    <CalendarIcon className="h-4 w-4" />
+                    {status}
+                </span>
+            );
+        }
+        return (
+            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700">
+                {status || '-'}
+            </span>
+        );
     };
 
     const openWizytaModal = (wizyta: NonNullable<LekarzPacjentDetails['wizyty']>[number]) => {
@@ -114,7 +165,10 @@ const DoctorPatientDetailsPage: React.FC = () => {
         setDocError(null);
         setDocSuccess(null);
         setDocForm({ typDokumentu: '', tresc: '' });
-        setShowAddDoc((wizyta.dokumenty?.length ?? 0) === 0);
+        setShowAddDoc(false);
+        setPreviewDoc(null);
+        setPreviewContent(null);
+        setPreviewError(null);
     };
 
     const closeWizytaModal = () => {
@@ -124,6 +178,9 @@ const DoctorPatientDetailsPage: React.FC = () => {
         setDocSuccess(null);
         setDocSubmitting(false);
         setShowAddDoc(false);
+        setPreviewDoc(null);
+        setPreviewContent(null);
+        setPreviewError(null);
     };
 
     const updateWizytaDokumenty = (wizytaId: number, dokumenty: Dokument[]) => {
@@ -166,6 +223,22 @@ const DoctorPatientDetailsPage: React.FC = () => {
             setDocError(err instanceof Error ? err.message : t('doctorDocumentation.documentSaveError'));
         } finally {
             setDocSubmitting(false);
+        }
+    };
+
+    const handlePreviewDokument = async (dokument: Dokument) => {
+        setPreviewDoc(dokument);
+        setPreviewContent(null);
+        setPreviewError(null);
+        setPreviewLoading(true);
+        try {
+            const blob = await apiService.downloadDokument(dokument.dokumentId);
+            const text = await blob.text();
+            setPreviewContent(text || null);
+        } catch (err) {
+            setPreviewError(err instanceof Error ? err.message : t('doctorDocumentation.errorDownloading'));
+        } finally {
+            setPreviewLoading(false);
         }
     };
 
@@ -265,7 +338,7 @@ const DoctorPatientDetailsPage: React.FC = () => {
                                                     {formatDateTime(wizyta.dataWizyty)}
                                                 </p>
                                                 <p className="text-sm text-gray-700">
-                                                    {t('doctorVisits.status')}: {wizyta.status || '-'}
+                                                    {t('doctorVisits.status')}: {getStatusBadge(wizyta.status)}
                                                 </p>
                                             </div>
                                             <span className="text-xs text-gray-500">
@@ -281,16 +354,9 @@ const DoctorPatientDetailsPage: React.FC = () => {
                                                 <button
                                                     type="button"
                                                     onClick={() => openWizytaModal(wizyta)}
-                                                    className="px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-700 hover:bg-gray-50 transition"
-                                                >
-                                                    {t('doctorVisits.details')}
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => openWizytaModal(wizyta)}
                                                     className="px-3 py-2 rounded-lg bg-alimed-blue/10 text-alimed-blue text-sm font-medium hover:bg-alimed-blue/20 transition"
                                                 >
-                                                    {t('doctorDocumentation.title')}
+                                                    {t('doctorVisits.details')}
                                                 </button>
                                             </div>
                                         )}
@@ -347,10 +413,10 @@ const DoctorPatientDetailsPage: React.FC = () => {
                                         <p className="text-sm text-gray-500">{t('doctorDocumentation.documentList')}</p>
                                     </div>
                                     <span className="text-xs text-gray-400">
-                                        {(selectedWizyta.dokumenty?.length ?? 0)} {t('visitDetails.files')}
-                                    </span>
-                                </div>
-                                {(selectedWizyta.dokumenty?.length ?? 0) > 0 ? (
+                                {selectedDokumentyCount} {t('visitDetails.files')}
+                            </span>
+                        </div>
+                                {hasSelectedDokumenty ? (
                                     <div className="space-y-2">
                                         {selectedWizyta.dokumenty?.map((dokument) => (
                                             <div
@@ -365,7 +431,16 @@ const DoctorPatientDetailsPage: React.FC = () => {
                                                         {t('visitDetails.type')}: {dokument.typDokumentu || 'inne'}
                                                     </div>
                                                 </div>
-                                                <span className="text-xs text-gray-500">{formatDate(dokument.dataUtworzenia)}</span>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-xs text-gray-500">{formatDate(dokument.dataUtworzenia)}</span>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handlePreviewDokument(dokument)}
+                                                        className="px-2.5 py-1 rounded-md bg-alimed-blue/10 text-alimed-blue text-xs font-medium hover:bg-alimed-blue/20 transition"
+                                                    >
+                                                        {t('doctorDocumentation.preview')}
+                                                    </button>
+                                                </div>
                                             </div>
                                         ))}
                                     </div>
@@ -383,6 +458,18 @@ const DoctorPatientDetailsPage: React.FC = () => {
                                     </div>
                                 )}
                             </div>
+
+                            {(hasSelectedDokumenty || showAddDoc) && (
+                                <div className="flex justify-end">
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowAddDoc((prev) => !prev)}
+                                        className="px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-700 hover:bg-gray-50 transition"
+                                    >
+                                        {showAddDoc ? t('common.cancel') : t('doctorDocumentation.addDocument')}
+                                    </button>
+                                </div>
+                            )}
 
                             {showAddDoc && (
                                 <div className="rounded-xl border border-gray-100 p-4 space-y-4">
@@ -426,14 +513,6 @@ const DoctorPatientDetailsPage: React.FC = () => {
                                     <div className="flex gap-2 justify-end">
                                         <button
                                             type="button"
-                                            onClick={() => setShowAddDoc(false)}
-                                            className="px-3 py-2 rounded-lg border border-gray-300 text-gray-700 text-sm hover:bg-gray-50 transition"
-                                            disabled={docSubmitting}
-                                        >
-                                            {t('common.cancel')}
-                                        </button>
-                                        <button
-                                            type="button"
                                             onClick={handleAddDokument}
                                             className="px-4 py-2 rounded-lg bg-alimed-blue text-white text-sm font-medium hover:bg-blue-700 transition disabled:opacity-60"
                                             disabled={docSubmitting}
@@ -442,6 +521,41 @@ const DoctorPatientDetailsPage: React.FC = () => {
                                         </button>
                                     </div>
                                 </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+            {previewDoc && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full mx-4 overflow-hidden">
+                        <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+                            <div>
+                                <h3 className="text-lg font-semibold text-gray-900">{t('doctorDocumentation.preview')}</h3>
+                                <p className="text-sm text-gray-500">{previewDoc.nazwaPliku || `Dokument #${previewDoc.dokumentId}`}</p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setPreviewDoc(null);
+                                    setPreviewContent(null);
+                                    setPreviewError(null);
+                                }}
+                                className="text-gray-500 hover:text-gray-700"
+                                aria-label={t('visitDetails.close')}
+                            >
+                                <XMarkIcon className="w-5 h-5" />
+                            </button>
+                        </div>
+                        <div className="p-6">
+                            {previewLoading ? (
+                                <div className="text-gray-500">{t('common.loading')}</div>
+                            ) : previewError ? (
+                                <div className="text-red-600 text-sm">{previewError}</div>
+                            ) : (
+                                <pre className="whitespace-pre-wrap text-sm text-gray-700 bg-gray-50 border border-gray-200 rounded-lg p-4 max-h-96 overflow-y-auto">
+                                    {previewContent || t('doctorDocumentation.noDocuments')}
+                                </pre>
                             )}
                         </div>
                     </div>
