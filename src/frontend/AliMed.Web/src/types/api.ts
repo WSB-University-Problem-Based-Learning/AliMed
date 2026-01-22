@@ -142,14 +142,14 @@ export interface RegisterRequest {
   email: string;
   username: string;
   password: string;
-  firstName?: string;
-  lastName?: string;
-  pesel?: string;
+  firstName: string;
+  lastName: string;
+  pesel: string;
   dataUrodzenia?: string;
-  ulica?: string;
-  numerDomu?: string;
-  kodPocztowy?: string;
-  miasto?: string;
+  ulica: string;
+  numerDomu: string;
+  kodPocztowy: string;
+  miasto: string;
   kraj?: string;
 }
 
@@ -160,8 +160,8 @@ export interface LoginRequest {
 
 export interface WizytaCreateRequest {
   dataWizyty: string;
-  lekarzId?: number;
-  placowkaId?: number;
+  lekarzId: number;
+  placowkaId: number;
   diagnoza?: string;
 }
 

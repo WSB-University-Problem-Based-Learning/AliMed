@@ -30,7 +30,7 @@ const UmowWizytePage: React.FC = () => {
 
   useEffect(() => {
     loadData();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadData = async () => {
@@ -63,17 +63,17 @@ const UmowWizytePage: React.FC = () => {
 
   const getFilteredLekarze = (): Lekarz[] => {
     let filtered = lekarze;
-    
+
     // Filter by facility first
     if (selectedPlacowka) {
       filtered = filtered.filter(l => l.placowkaId === selectedPlacowka);
     }
-    
+
     // Then filter by specialization
     if (selectedSpecjalizacja !== 'all') {
       filtered = filtered.filter(l => l.specjalizacja === selectedSpecjalizacja);
     }
-    
+
     return filtered;
   };
 
@@ -97,11 +97,11 @@ const UmowWizytePage: React.FC = () => {
         setAvailableSlots([]);
         return;
       }
-      
+
       // Get the placówka for the selected doctor
       const lekarz = lekarze.find(l => l.lekarzId === selectedLekarz);
       const placowkaId = selectedPlacowka || lekarz?.placowkaId || 1;
-      
+
       try {
         setLoadingSlots(true);
         setError(null);
@@ -126,7 +126,7 @@ const UmowWizytePage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!selectedLekarz || !selectedDate || !selectedTime) {
       setError(t('bookVisit.fillAllFields'));
       return;
@@ -134,10 +134,15 @@ const UmowWizytePage: React.FC = () => {
 
     // Keep local time without converting to UTC
     const dateTime = `${selectedDate}T${selectedTime}:00`;
-    
+
     // Get the placówka for the selected doctor
     const lekarz = lekarze.find(l => l.lekarzId === selectedLekarz);
     const placowkaId = selectedPlacowka || lekarz?.placowkaId;
+
+    if (!placowkaId) {
+      setError(t('bookVisit.errorLoadingDoctors')); // Fallback error if facility is missing
+      return;
+    }
 
     try {
       setSubmitting(true);
@@ -152,9 +157,9 @@ const UmowWizytePage: React.FC = () => {
       };
 
       await apiService.createWizyta(wizytaData);
-      
+
       setSuccess(true);
-      
+
       // Redirect to visits page after 2 seconds
       setTimeout(() => {
         navigate('/moje-wizyty');
@@ -170,7 +175,7 @@ const UmowWizytePage: React.FC = () => {
   // Format slots for display (HH:mm)
   const formattedSlots = availableSlots
     .filter(dt => dt.startsWith(selectedDate))
-    .map(dt => dt.split('T')[1]?.substring(0,5))
+    .map(dt => dt.split('T')[1]?.substring(0, 5))
     .filter(Boolean) as string[];
   const specjalizacje = getUniqueSpecjalizacje();
 
@@ -293,11 +298,10 @@ const UmowWizytePage: React.FC = () => {
                     key={lekarz.lekarzId}
                     type="button"
                     onClick={() => setSelectedLekarz(lekarz.lekarzId)}
-                    className={`p-4 border-2 rounded-lg text-left transition ${
-                      selectedLekarz === lekarz.lekarzId
+                    className={`p-4 border-2 rounded-lg text-left transition ${selectedLekarz === lekarz.lekarzId
                         ? 'border-alimed-blue bg-blue-50'
                         : 'border-gray-200 hover:border-gray-300'
-                    }`}
+                      }`}
                   >
                     <div className="font-semibold text-gray-900">
                       {lekarz.imie} {lekarz.nazwisko}
@@ -307,7 +311,7 @@ const UmowWizytePage: React.FC = () => {
                 ))
               )}
             </div>
-            
+
             {/* Pagination controls */}
             {totalPages > 1 && (
               <div className="flex items-center justify-center gap-4 mt-4">

@@ -119,10 +119,35 @@ const RegisterPage: React.FC = () => {
     setStep(1);
   };
 
+  const validateStep2 = (): boolean => {
+    const requiredFields: (keyof RegisterRequest)[] = [
+      'firstName', 'lastName', 'pesel', 'ulica', 'numerDomu', 'kodPocztowy', 'miasto'
+    ];
+    let isValid = true;
+    const newErrors: Record<string, string[]> = {};
+
+    requiredFields.forEach(field => {
+      if (!formData[field]) {
+        newErrors[field] = [t('common.required')];
+        isValid = false;
+      }
+    });
+
+    if (!isValid) {
+      setFieldErrors(newErrors);
+      setError(t('register.fillRequiredFields'));
+    }
+    return isValid;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setFieldErrors({});
+
+    if (!validateStep2()) {
+      return;
+    }
 
     try {
       setLoading(true);
