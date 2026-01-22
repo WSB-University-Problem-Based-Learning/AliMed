@@ -122,38 +122,38 @@ const DoctorPatientDetailsPage: React.FC = () => {
         const normalized = (status || '').toLowerCase();
         if (normalized.includes('zrealiz') || normalized.includes('odby')) {
             return (
-                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                    <CheckCircleIcon className="h-4 w-4" />
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    <CheckCircleIcon className="h-3.5 w-3.5" />
                     {status}
                 </span>
             );
         }
         if (normalized.includes('anul')) {
             return (
-                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
-                    <XCircleIcon className="h-4 w-4" />
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                    <XCircleIcon className="h-3.5 w-3.5" />
                     {status}
                 </span>
             );
         }
         if (normalized.includes('nieobec')) {
             return (
-                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
-                    <ClockIcon className="h-4 w-4" />
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                    <ClockIcon className="h-3.5 w-3.5" />
                     {status}
                 </span>
             );
         }
         if (normalized.includes('zaplan')) {
             return (
-                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                    <CalendarIcon className="h-4 w-4" />
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    <CalendarIcon className="h-3.5 w-3.5" />
                     {status}
                 </span>
             );
         }
         return (
-            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700">
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
                 {status || '-'}
             </span>
         );
