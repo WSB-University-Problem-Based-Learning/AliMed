@@ -326,6 +326,7 @@
     "type": "Typ",
     "actions": "Akcje",
     "preview": "Podgląd",
+    "download": "Pobierz",
     "addDocument": "Dodaj dokument",
     "selectPatient": "Wybierz pacjenta",
     "documentType": "Typ dokumentu",

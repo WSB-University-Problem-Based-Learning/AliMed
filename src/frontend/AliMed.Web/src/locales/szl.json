@@ -326,6 +326,7 @@
     "type": "Typ",
     "actions": "Akcyje",
     "preview": "Podglond",
+    "download": "Poberz",
     "addDocument": "Przidej dokumynt",
     "selectPatient": "Ôbier pacjynta",
     "documentType": "Typ dokumyntu",

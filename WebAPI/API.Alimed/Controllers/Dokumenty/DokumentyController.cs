@@ -132,7 +132,7 @@ namespace API.Alimed.Controllers.Dokumenty
         }
 
         [HttpGet("{id}/download")]
-        [Authorize(Roles = "User")]
+        [Authorize(Roles = "User,Lekarz")]
         public async Task<IResult> DownloadDokument(int id)
         {
             var userId = Guid.Parse(
@@ -140,14 +140,36 @@ namespace API.Alimed.Controllers.Dokumenty
             );
 
             var dokument = await _db.Dokumenty
+                .Include(d => d.Pacjent)
                 .AsNoTracking()
-                .FirstOrDefaultAsync(d =>
-                    d.DokumentId == id &&
-                    d.Pacjent != null &&
-                    d.Pacjent.UserId == userId);
+                .FirstOrDefaultAsync(d => d.DokumentId == id);
 
             if (dokument == null)
                 return Results.NotFound("Dokument nie istnieje.");
+
+            // Check access
+            bool hasAccess = false;
+
+            // 1. Is Patient owner?
+            if (dokument.Pacjent != null && dokument.Pacjent.UserId == userId)
+            {
+                hasAccess = true;
+            }
+            // 2. Is Doctor owner?
+            else
+            {
+                var lekarz = await _db.Lekarze
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(l => l.UserId == userId);
+                
+                if (lekarz != null && dokument.LekarzId == lekarz.LekarzId)
+                {
+                    hasAccess = true;
+                }
+            }
+
+            if (!hasAccess)
+                return Results.Forbid();
 
             var content = dokument.Zawartosc ?? Array.Empty<byte>();
             var contentType = string.IsNullOrWhiteSpace(dokument.TypMime)
