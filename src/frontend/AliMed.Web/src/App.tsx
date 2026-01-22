@@ -48,7 +48,7 @@ function App() {
 
             {/* Protected routes */}
             <Route path="/dashboard" element={
-              <ProtectedRoute roles={[0]}>
+              <ProtectedRoute roles={[0, 2]}>
                 <Layout>
                   <DashboardPage />
                 </Layout>
@@ -113,28 +113,28 @@ function App() {
               </ProtectedRoute>
             } />
             <Route path="/moje-wizyty" element={
-              <ProtectedRoute roles={[0]}>
+              <ProtectedRoute roles={[0, 2]}>
                 <Layout>
                   <MojeWizytyPage />
                 </Layout>
               </ProtectedRoute>
             } />
             <Route path="/umow-wizyte" element={
-              <ProtectedRoute roles={[0]}>
+              <ProtectedRoute roles={[0, 2]}>
                 <Layout>
                   <UmowWizytePage />
                 </Layout>
               </ProtectedRoute>
             } />
             <Route path="/dokumenty" element={
-              <ProtectedRoute roles={[0]}>
+              <ProtectedRoute roles={[0, 2]}>
                 <Layout>
                   <DokumentyPage />
                 </Layout>
               </ProtectedRoute>
             } />
             <Route path="/moje-dane" element={
-              <ProtectedRoute roles={[0]}>
+              <ProtectedRoute roles={[0, 2]}>
                 <Layout>
                   <MojeDanePage />
                 </Layout>

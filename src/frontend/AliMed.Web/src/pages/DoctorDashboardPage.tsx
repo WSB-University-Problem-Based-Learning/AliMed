@@ -70,7 +70,7 @@ const DoctorDashboardPage: React.FC = () => {
         setNadchodzaceWizyty(mappedDay);
         setWizytyTygodnia(mappedWeek);
 
-        const dokumentyCount = await countDocuments(wizytyDnia);
+        const dokumentyCount = await countDocuments(wizytyTygodniaResp);
         setStatystyki({
           wizyty: wizytyTygodniaResp.length,
           pacjenci: pacjenci.length,

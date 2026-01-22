@@ -112,7 +112,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100">
+    <div className="min-h-screen bg-slate-100 flex flex-col">
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
@@ -125,7 +125,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <nav className="flex items-center gap-2">
               {isLoggedIn ? (
                 <>
-                  {/* Logged in navigation with color-coded items */}
                   {/* Logged in navigation with color-coded items */}
                   {user?.role === 1 ? (
                     // Doctor Navigation
@@ -181,8 +180,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                           key={item.path}
                           to={item.path}
                           className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${active
-                              ? item.activeColor + ' shadow-sm'
-                              : 'text-gray-600 ' + item.hoverColor
+                            ? item.activeColor + ' shadow-sm'
+                            : 'text-gray-600 ' + item.hoverColor
                             }`}
                         >
                           <Icon className="w-4 h-4" />
@@ -226,7 +225,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {children}
       </main>
 

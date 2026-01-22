@@ -246,9 +246,9 @@ const DokumentyPage: React.FC = () => {
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-alimed-blue focus:border-transparent appearance-none"
               >
                 <option value="all">{t('documents.allTypes')}</option>
-                <option value="recepty">{t('documents.typeRecepta')}</option>
-                <option value="wyniki">{t('documents.typeWynik')}</option>
-                <option value="skierowania">{t('documents.typeSkierowanie')}</option>
+                <option value="recepta">{t('documents.typeRecepta')}</option>
+                <option value="wynik">{t('documents.typeWynik')}</option>
+                <option value="skierowanie">{t('documents.typeSkierowanie')}</option>
                 <option value="inne">{t('documents.typeInne')}</option>
               </select>
             </div>
