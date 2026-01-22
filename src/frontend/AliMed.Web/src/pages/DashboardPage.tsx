@@ -386,7 +386,7 @@ const DashboardPage: React.FC = () => {
                       <button
                         type="button"
                         onClick={async () => {
-                          if (!window.confirm(t('common.cancel'))) return;
+                          if (!window.confirm(t('common.confirmCancelVisit'))) return;
                           try {
                             await apiService.cancelWizyta(selectedWizyta.wizytaId);
                             setWizyty((prev) => prev.filter((w) => w.wizytaId !== selectedWizyta.wizytaId));
