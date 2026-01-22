@@ -9,7 +9,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { useTranslation } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
-import { apiService } from '../services/api';
+import { fetchDoctorStats } from '../utils/doctorStats';
 
 const MojeDaneLekarzPage: React.FC = () => {
   const { t } = useTranslation();
@@ -27,25 +27,8 @@ const MojeDaneLekarzPage: React.FC = () => {
         if (isDemoMode) {
           setStatystyki({ wizyty: 0, pacjenci: 0, dokumentacja: 0 });
         } else {
-          try {
-            const dateOnly = new Date().toISOString().split('T')[0];
-            const [
-              wizytyTygodnia,
-              pacjenci
-            ] = await Promise.all([
-              apiService.getLekarzWizytyTydzien(dateOnly),
-              apiService.getLekarzPacjenci()
-            ]);
-
-            setStatystyki({
-              wizyty: wizytyTygodnia.length,
-              pacjenci: pacjenci.length,
-              dokumentacja: 0,
-            });
-
-          } catch (e) {
-            console.error(e);
-          }
+          const stats = await fetchDoctorStats();
+          setStatystyki(stats);
         }
       } catch (err) {
         console.error(err);

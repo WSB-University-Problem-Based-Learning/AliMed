@@ -10,6 +10,7 @@ import { useTranslation } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { apiService } from '../services/api';
 import type { Pacjent } from '../types/api';
+import { fetchDoctorStats } from '../utils/doctorStats';
 
 const PacjenciLekarzPage: React.FC = () => {
   const { t } = useTranslation();
@@ -40,16 +41,12 @@ const PacjenciLekarzPage: React.FC = () => {
           setStats({ wizyty: 0, pacjenci: mockData.length, dokumentacja: 0 });
         } else {
           try {
-            const [patientsData, visitsData] = await Promise.all([
+            const [patientsData, statsData] = await Promise.all([
               apiService.getLekarzPacjenci(),
-              apiService.getLekarzWizyty()
+              fetchDoctorStats()
             ]);
             setPacjenci(patientsData);
-            setStats({
-              wizyty: visitsData.length,
-              pacjenci: patientsData.length,
-              dokumentacja: 0 // Placeholder as we don't have a direct endpoint for total docs count yet
-            });
+            setStats(statsData);
           } catch (err) {
             console.error('Error details:', err);
             throw err;

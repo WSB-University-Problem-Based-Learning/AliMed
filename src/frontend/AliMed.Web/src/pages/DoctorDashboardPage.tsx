@@ -10,7 +10,8 @@ import {
 import { useTranslation } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { apiService } from '../services/api';
-import type { Dokument, LekarzWizytaSummary } from '../types/api';
+import type { LekarzWizytaSummary } from '../types/api';
+import { fetchDoctorStats } from '../utils/doctorStats';
 
 interface NadchodzacaWizyta {
   id: number;
@@ -47,22 +48,14 @@ const DoctorDashboardPage: React.FC = () => {
       };
     });
 
-  const countDocuments = async (wizyty: LekarzWizytaSummary[]) => {
-    if (!wizyty.length) return 0;
-    const docs = await Promise.all(
-      wizyty.map(w => apiService.getDokumentyWizytyLekarz(w.wizytaId).catch(() => [] as Dokument[]))
-    );
-    return docs.reduce((sum, list) => sum + list.length, 0);
-  };
-
   useEffect(() => {
     const loadDashboard = async () => {
       try {
         setLoading(true);
-        const [wizytyDnia, wizytyTygodniaResp, pacjenci] = await Promise.all([
+        // Load independent data for dashboard lists
+        const [wizytyDnia, wizytyTygodniaResp] = await Promise.all([
           apiService.getLekarzWizytyDzien(dateOnly),
           apiService.getLekarzWizytyTydzien(dateOnly),
-          apiService.getLekarzPacjenci(),
         ]);
 
         const mappedDay = mapWizyty(wizytyDnia);
@@ -70,12 +63,10 @@ const DoctorDashboardPage: React.FC = () => {
         setNadchodzaceWizyty(mappedDay);
         setWizytyTygodnia(mappedWeek);
 
-        const dokumentyCount = await countDocuments(wizytyTygodniaResp);
-        setStatystyki({
-          wizyty: wizytyTygodniaResp.length,
-          pacjenci: pacjenci.length,
-          dokumentacja: dokumentyCount,
-        });
+        // Load stats using shared utility
+        const stats = await fetchDoctorStats();
+        setStatystyki(stats);
+
       } catch (err) {
         setError(err instanceof Error ? err.message : t('doctorDashboard.errorLoading'));
       } finally {

@@ -12,6 +12,7 @@ import { useTranslation } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { apiService } from '../services/api';
 import type { Dokument, DokumentCreateRequest, LekarzWizytaSummary } from '../types/api';
+import { fetchDoctorStats } from '../utils/doctorStats';
 
 const mockWizyty: LekarzWizytaSummary[] = [
   {
@@ -224,15 +225,31 @@ const WizytyLekarzPage: React.FC = () => {
     );
   };
 
-  const visitsCount = wizyty.length;
-  const patientsCount = new Set(wizyty.map((w) => (w.pacjent || '').trim()).filter(Boolean)).size;
+  // Stats state
+  const [stats, setStats] = useState({ wizyty: 0, pacjenci: 0, dokumentacja: 0 });
+
+  useEffect(() => {
+    const loadStats = async () => {
+      if (isDemoMode) {
+        setStats({ wizyty: mockWizyty.length, pacjenci: 2, dokumentacja: mockDokumenty.length });
+        return;
+      }
+      try {
+        const data = await fetchDoctorStats();
+        setStats(data);
+      } catch (e) {
+        console.error('Failed to load stats', e);
+      }
+    };
+    loadStats();
+  }, [isDemoMode]);
 
   const statCards = [
     {
       id: 'wizyty',
       icon: CalendarDaysIcon,
       title: t('doctorDashboard.visits'),
-      value: visitsCount,
+      value: stats.wizyty,
       color: 'bg-blue-100 text-blue-600',
       borderColor: 'border-alimed-blue',
       onClick: () => undefined,
@@ -241,7 +258,7 @@ const WizytyLekarzPage: React.FC = () => {
       id: 'pacjenci',
       icon: UsersIcon,
       title: t('doctorDashboard.patients'),
-      value: patientsCount,
+      value: stats.pacjenci,
       color: 'bg-green-100 text-green-600',
       borderColor: 'border-green-500',
       onClick: () => navigate('/pacjenci-lekarza'),
@@ -250,7 +267,7 @@ const WizytyLekarzPage: React.FC = () => {
       id: 'dokumentacja',
       icon: DocumentTextIcon,
       title: t('doctorDashboard.documentation'),
-      value: 0, // Placeholder, usually we don't fetch stats here to save bandwidth or use consistency
+      value: stats.dokumentacja,
       color: 'bg-purple-100 text-purple-600',
       borderColor: 'border-purple-500',
       onClick: () => navigate('/dokumentacja-lekarza'),
