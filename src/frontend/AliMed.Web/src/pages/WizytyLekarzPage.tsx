@@ -258,6 +258,15 @@ const WizytyLekarzPage: React.FC = () => {
       onClick: () => navigate('/pacjenci-lekarza'),
     },
     {
+      id: 'dokumentacja',
+      icon: DocumentTextIcon,
+      title: t('doctorDashboard.documentation'),
+      value: 0, // Placeholder, usually we don't fetch stats here to save bandwidth or use consistency
+      color: 'bg-purple-100 text-purple-600',
+      borderColor: 'border-purple-500',
+      onClick: () => navigate('/dokumentacja-lekarza'),
+    },
+    {
       id: 'moje-dane',
       icon: UserCircleIcon,
       title: t('doctorDashboard.myData'),

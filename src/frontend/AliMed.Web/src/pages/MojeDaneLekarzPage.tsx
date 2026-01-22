@@ -18,37 +18,42 @@ const MojeDaneLekarzPage: React.FC = () => {
   const navigate = useNavigate();
 
   const [statystyki, setStatystyki] = useState({ wizyty: 0, pacjenci: 0, dokumentacja: 0 });
+  const [lekarzDetails, setLekarzDetails] = useState<{ specjalizacja?: string; placowkaId?: number } | null>(null);
+
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchStatsAndProfile = async () => {
       try {
         if (isDemoMode) {
-          // In demo mode, we can show 0 or some consistent demo data. 
-          // Current user request implies they expect 0 if no data, so for consistency let's keep 0 or small consistent numbers.
-          // But to be safe and "fix" the bug of "12, 248, 34", let's set to 0 or valid demo data if we decide to have demo data.
-          // User said "it should be 0 0 0, if there is none such data".
           setStatystyki({ wizyty: 0, pacjenci: 0, dokumentacja: 0 });
         } else {
           try {
             const dateOnly = new Date().toISOString().split('T')[0];
-            const [wizytyTygodnia, pacjenci] = await Promise.all([
+            const [
+              wizytyTygodnia,
+              pacjenci,
+              allDoctors
+            ] = await Promise.all([
               apiService.getLekarzWizytyTydzien(dateOnly),
-              apiService.getLekarzPacjenci()
+              apiService.getLekarzPacjenci(),
+              apiService.getLekarze()
             ]);
-
-            // For documentation count, we need to sum up docs from visits or use a dedicated endpoint if available.
-            // Reusing logic from Dashboard:
-            // This is heavy to do on every page load. Ideally backend should provide stats.
-            // For now, let's just show 0 for docs or try to fetch if critical, but to save bandwidth maybe just wizyty/pacjenci?
-            // Dashboard does a heavy fetch. Let's replicate light fetch for now or just 0.
-            // Let's stick to 0 for docs to avoid performance issues, or fetch if we want perfection.
-            // Given the user constraint, let's simple fetch only what is easy, or replicate full logic.
-            // Replicating full logic for consistency.
 
             setStatystyki({
               wizyty: wizytyTygodnia.length,
               pacjenci: pacjenci.length,
-              dokumentacja: 0, // Placeholder to avoid too many requests, or we can fetch a few
+              dokumentacja: 0,
             });
+
+            // Try to find current doctor by matching first/last name from auth user
+            if (user?.firstName && user?.lastName) {
+              const found = allDoctors.find(
+                d => d.imie?.toLowerCase() === user.firstName?.toLowerCase() &&
+                  d.nazwisko?.toLowerCase() === user.lastName?.toLowerCase()
+              );
+              if (found) {
+                setLekarzDetails({ specjalizacja: found.specjalizacja, placowkaId: found.placowkaId });
+              }
+            }
 
           } catch (e) {
             console.error(e);
@@ -59,8 +64,8 @@ const MojeDaneLekarzPage: React.FC = () => {
       }
     };
 
-    fetchStats();
-  }, [isDemoMode]);
+    fetchStatsAndProfile();
+  }, [isDemoMode, user]);
   const [activeCard, setActiveCard] = useState<string>('moje-dane');
 
   const handleLogout = () => {
@@ -212,9 +217,8 @@ const MojeDaneLekarzPage: React.FC = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-500 mb-1">{t('doctorMyData.specialization')}</label>
-              <p className="text-lg font-medium text-gray-900 italic text-gray-500">
-                {/* Specjalizacja would come from backend if available in User object, otherwise unavailable */}
-                (Pobierane z systemu)
+              <p className="text-lg font-medium text-gray-900">
+                {lekarzDetails?.specjalizacja ? lekarzDetails.specjalizacja : <span className="italic text-gray-500">(Pobierane z systemu)</span>}
               </p>
             </div>
           </div>

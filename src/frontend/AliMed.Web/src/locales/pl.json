@@ -16,7 +16,8 @@
     "allRightsReserved": "Wszystkie prawa zastrzeżone",
     "teamWSB": "Zespół nr 3 WSB",
     "backToHome": "Powrót do strony głównej",
-    "comingSoon": "Funkcjonalność dostępna wkrótce."
+    "comingSoon": "Funkcjonalność dostępna wkrótce.",
+    "goBack": "Wróć"
   },
   "nav": {
     "home": "Strona główna",
@@ -303,7 +304,8 @@
     "week": "Tydzień",
     "month": "Miesiąc",
     "missingDocumentType": "Wybierz typ dokumentu.",
-    "visitLabel": "Wizyta"
+    "visitLabel": "Wizyta",
+    "visit": "Wizyta"
   },
   "doctorPatients": {
     "title": "Pacjenci",
@@ -352,6 +354,8 @@
     "email": "Adres e-mail",
     "phone": "Numer telefonu",
     "workingHours": "Godziny pracy",
+    "contact": "Dane kontaktowe",
+    "address": "Adres",
     "save": "zapisz",
     "saveSuccess": "Dane zostały pomyślnie zapisane",
     "errorSaving": "Błąd podczas zapisywania danych"

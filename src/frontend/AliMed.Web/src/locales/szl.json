@@ -16,7 +16,8 @@
     "allRightsReserved": "Wszyjske prawa zastrzyżone",
     "teamWSB": "Ekipa nr 3 WSB",
     "backToHome": "Nazod na głōwno strōna",
-    "comingSoon": "Funkcyjo bydzie dostympno niyskorzi."
+    "comingSoon": "Funkcyjo bydzie dostympno niyskorzi.",
+    "goBack": "Nazod"
   },
   "nav": {
     "home": "Głōwno strōna",
@@ -303,7 +304,8 @@
     "week": "Tydzień",
     "month": "Miesiąc",
     "missingDocumentType": "Wybierz typ dokumentu.",
-    "visitLabel": "Wizyta"
+    "visitLabel": "Wizyta",
+    "visit": "Wizyta"
   },
   "doctorPatients": {
     "title": "Pacjynty",
@@ -352,6 +354,8 @@
     "email": "Adresa e-mail",
     "phone": "Numer telefōnu",
     "workingHours": "Godziny roboty",
+    "contact": "Kōntakt",
+    "address": "Adresa",
     "save": "spamiyntej",
     "saveSuccess": "Dane były pomyślnie spamiyntane",
     "errorSaving": "Feler przi spamiyntowaniu danych"
