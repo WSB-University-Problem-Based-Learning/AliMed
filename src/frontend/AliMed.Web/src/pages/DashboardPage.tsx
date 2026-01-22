@@ -5,7 +5,8 @@ import {
   PlusCircleIcon,
   DocumentTextIcon,
   UserCircleIcon,
-  CalendarIcon
+  CalendarIcon,
+  CheckCircleIcon
 } from '@heroicons/react/24/outline';
 import { useTranslation } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
@@ -47,6 +48,9 @@ const DashboardPage: React.FC = () => {
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [detailsError, setDetailsError] = useState<string | null>(null);
   const [pacjentCache, setPacjentCache] = useState<Pacjent | null>(null);
+  const [isCancelConfirmOpen, setIsCancelConfirmOpen] = useState(false);
+  const [cancelSuccess, setCancelSuccess] = useState(false);
+  const [cancelLoading, setCancelLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -144,6 +148,24 @@ const DashboardPage: React.FC = () => {
     } catch {
       popup.close();
       alert(t('documents.errorDownloading'));
+    }
+  };
+
+  const handleCancelVisit = async () => {
+    if (!selectedWizyta) return;
+    setDetailsError(null);
+    setCancelLoading(true);
+    try {
+      await apiService.cancelWizyta(selectedWizyta.wizytaId);
+      setWizyty((prev) => prev.filter((w) => w.wizytaId !== selectedWizyta.wizytaId));
+      setSelectedWizyta(null);
+      setIsCancelConfirmOpen(false);
+      setCancelSuccess(true);
+      setTimeout(() => setCancelSuccess(false), 2000);
+    } catch (err) {
+      setDetailsError(err instanceof Error ? err.message : t('common.error'));
+    } finally {
+      setCancelLoading(false);
     }
   };
 
@@ -385,16 +407,7 @@ const DashboardPage: React.FC = () => {
                     <div className="flex justify-end">
                       <button
                         type="button"
-                        onClick={async () => {
-                          if (!window.confirm(t('common.confirmCancelVisit'))) return;
-                          try {
-                            await apiService.cancelWizyta(selectedWizyta.wizytaId);
-                            setWizyty((prev) => prev.filter((w) => w.wizytaId !== selectedWizyta.wizytaId));
-                            setSelectedWizyta(null);
-                          } catch (err) {
-                            setDetailsError(err instanceof Error ? err.message : t('common.error'));
-                          }
-                        }}
+                        onClick={() => setIsCancelConfirmOpen(true)}
                         className="px-4 py-2 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 transition text-sm font-medium"
                       >
                         {t('common.cancel')}
@@ -404,6 +417,45 @@ const DashboardPage: React.FC = () => {
                 </>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {isCancelConfirmOpen && selectedWizyta && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full mx-4 overflow-hidden">
+            <div className="px-6 py-5 border-b border-gray-100">
+              <h3 className="text-lg font-semibold text-gray-900">{t('common.confirmCancelVisitTitle')}</h3>
+              <p className="text-sm text-gray-500 mt-1">{t('common.confirmCancelVisitMessage')}</p>
+            </div>
+            <div className="p-6 flex gap-3 justify-end">
+              <button
+                type="button"
+                onClick={() => setIsCancelConfirmOpen(false)}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition text-sm"
+                disabled={cancelLoading}
+              >
+                {t('common.no')}
+              </button>
+              <button
+                type="button"
+                onClick={handleCancelVisit}
+                className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition text-sm font-medium disabled:opacity-60"
+                disabled={cancelLoading}
+              >
+                {cancelLoading ? t('common.loading') : t('common.yes')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {cancelSuccess && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full mx-4 p-8 text-center">
+            <CheckCircleIcon className="w-16 h-16 text-green-500 mx-auto mb-4" />
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">{t('common.cancelSuccessTitle')}</h3>
+            <p className="text-gray-600">{t('common.cancelSuccessMessage')}</p>
           </div>
         </div>
       )}
