@@ -70,7 +70,7 @@ const normalizeLekarzName = (value: unknown): string | undefined => {
 export const apiService = {
   // Authentication - GitHub OAuth
   async loginWithGithub(code: string): Promise<AuthResponse> {
-    const response = await fetch(`${API_BASE_URL}/api/Auth/github`, {
+    const response = await fetch(`${API_BASE_URL}/api/auth/github`, {
       method: 'POST',
       headers: getHeaders(),
       body: JSON.stringify({ code }),
@@ -87,7 +87,7 @@ export const apiService = {
 
   // Authentication - Local login (email + password)
   async loginLocal(credentials: LoginRequest): Promise<AuthResponse> {
-    const response = await fetch(`${API_BASE_URL}/api/Auth/login`, {
+    const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
       method: 'POST',
       headers: getHeaders(),
       body: JSON.stringify(credentials),
@@ -106,7 +106,7 @@ export const apiService = {
 
   // Authentication - Register new user
   async register(data: RegisterRequest): Promise<AuthResponse> {
-    const response = await fetch(`${API_BASE_URL}/api/Auth/register`, {
+    const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
       method: 'POST',
       headers: getHeaders(),
       body: JSON.stringify(data),
@@ -369,7 +369,7 @@ export const apiService = {
 
   // Refresh token - call backend refresh endpoint
   async refreshToken(): Promise<{ accessToken: string }> {
-    const response = await fetch(`${API_BASE_URL}/api/Auth/refresh`, {
+    const response = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
       method: 'POST',
       credentials: 'include', // Send HttpOnly cookie
     });
@@ -380,7 +380,7 @@ export const apiService = {
   // Logout - revoke refresh token on backend
   async logout(): Promise<void> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/Auth/logout`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/logout`, {
         method: 'POST',
         headers: getHeaders(true),
         credentials: 'include', // Send HttpOnly cookie to revoke it
