@@ -239,12 +239,13 @@ const MojeWizytyPage: React.FC = () => {
       </div>
 
       <div className="space-y-4">
-        {sortedWizyty.map((wizyta) => {
-          const isPast = new Date(wizyta.dataWizyty) < new Date();
-          const isCompleted = isCompletedStatus(wizyta.status);
+      {sortedWizyty.map((wizyta) => {
+        const isPast = new Date(wizyta.dataWizyty) < new Date();
+        const isCompleted = isCompletedStatus(wizyta.status);
+        const isCancelled = isCancelledStatus(wizyta.status);
 
-          return (
-            <Card key={wizyta.wizytaId}>
+        return (
+          <Card key={wizyta.wizytaId}>
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div className="flex-1 space-y-3">
                   {/* Date and Time */}
@@ -299,7 +300,12 @@ const MojeWizytyPage: React.FC = () => {
 
                 {/* Status badge */}
                 <div className="flex flex-col items-end gap-2">
-                  {isCompleted ? (
+                  {isCancelled ? (
+                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+                      <XCircleIcon className="h-4 w-4" />
+                      {t('myVisits.statusCancelled')}
+                    </span>
+                  ) : isCompleted ? (
                     <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
                       <CheckCircleIcon className="h-4 w-4" />
                       {t('myVisits.statusCompleted')}
@@ -317,6 +323,7 @@ const MojeWizytyPage: React.FC = () => {
                   )}
                   <button
                     onClick={async () => {
+                      if (isCancelled) return;
                       setDetailsError(null);
                       setLoadingDetails(true);
                       try {
@@ -328,7 +335,8 @@ const MojeWizytyPage: React.FC = () => {
                         setLoadingDetails(false);
                       }
                     }}
-                    className="text-sm text-alimed-blue hover:underline"
+                    className={`text-sm ${isCancelled ? 'text-gray-400 cursor-not-allowed' : 'text-alimed-blue hover:underline'}`}
+                    disabled={isCancelled}
                   >
                     {t('visitDetails.title')}
                   </button>
@@ -459,7 +467,7 @@ const MojeWizytyPage: React.FC = () => {
                                 ? { ...w, status: 'Anulowana', czyOdbyta: false }
                                 : w
                             )));
-                            setSelectedWizyta((prev) => prev ? { ...prev, status: 'Anulowana' } : prev);
+                            setSelectedWizyta(null);
                           } catch (err) {
                             setDetailsError(err instanceof Error ? err.message : t('common.error'));
                           }

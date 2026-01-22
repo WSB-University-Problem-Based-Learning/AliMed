@@ -478,8 +478,8 @@ const WizytyLekarzPage: React.FC = () => {
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                     rows={3}
                     placeholder={t('doctorVisits.diagnosisPlaceholder')}
-                    readOnly={isWizytaZrealizowana(selectedWizyta.status)}
-                    disabled={isDemoMode}
+                    readOnly={isWizytaZrealizowana(selectedWizyta.status) || isWizytaAnulowana(selectedWizyta.status)}
+                    disabled={isDemoMode || isWizytaAnulowana(selectedWizyta.status)}
                   />
                   {isWizytaZrealizowana(selectedWizyta.status) && (
                     <div className="text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded px-3 py-2">
@@ -503,7 +503,8 @@ const WizytyLekarzPage: React.FC = () => {
                     disabled={
                       statusSaving ||
                       isDemoMode ||
-                      isWizytaZrealizowana(selectedWizyta.status)
+                      isWizytaZrealizowana(selectedWizyta.status) ||
+                      isWizytaAnulowana(selectedWizyta.status)
                     }
                   >
                     <PencilSquareIcon className="w-5 h-5" />
@@ -556,7 +557,8 @@ const WizytyLekarzPage: React.FC = () => {
                     disabled={
                       statusSaving ||
                       isDemoMode ||
-                      isWizytaZrealizowana(selectedWizyta.status)
+                      isWizytaZrealizowana(selectedWizyta.status) ||
+                      isWizytaAnulowana(selectedWizyta.status)
                     }
                   >
                     <XMarkIcon className="w-5 h-5" />
@@ -631,7 +633,7 @@ const WizytyLekarzPage: React.FC = () => {
                     <button
                       type="button"
                       onClick={handleCreateDocument}
-                      disabled={dokSaving || isDemoMode}
+                      disabled={dokSaving || isDemoMode || isWizytaAnulowana(selectedWizyta.status)}
                       className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-alimed-blue text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:bg-blue-200"
                     >
                       <DocumentTextIcon className="w-5 h-5" />

@@ -168,6 +168,7 @@
     "statusCompleted": "Zrealizowana",
     "statusPast": "Miniona",
     "statusUpcoming": "Nadchodząca",
+    "statusCancelled": "Anulowana",
     "noVisits": "Nie masz żadnych wizyt",
     "noVisitsHint": "Umów wizytę, aby zobaczyć ją tutaj"
   },
@@ -278,6 +279,7 @@
     "statusCompleted": "Zakończona",
     "statusInProgress": "W trakcie",
     "statusScheduled": "Zaplanowana",
+    "statusCancelled": "Anulowana",
     "medicalHistory": "Historia chorób",
     "lastVisit": "Ostatnia wizyta",
     "currentVisit": "Obecna wizyta",
@@ -290,6 +292,7 @@
     "noVisitsDay": "Brak wizyt w wybranym dniu.",
     "baseDate": "Data bazowa",
     "diagnosisPlaceholder": "Wpisz diagnozę do wizyty",
+    "diagnosisLabel": "Szczegóły diagnozy",
     "diagnosisReadOnly": "Wizyta jest już zrealizowana. Diagnoza jest tylko do odczytu.",
     "markAsCompleted": "Oznacz jako zrealizowana",
     "saving": "Zapisywanie...",
