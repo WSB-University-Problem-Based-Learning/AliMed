@@ -9,34 +9,45 @@ import {
 } from '@heroicons/react/24/outline';
 import { useTranslation } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
-import { fetchDoctorStats } from '../utils/doctorStats';
+import { apiService } from '../services/api';
+import type { LekarzProfil } from '../types/api';
 
 const MojeDaneLekarzPage: React.FC = () => {
   const { t } = useTranslation();
-  const { user, isDemoMode } = useAuth();
+  const { isDemoMode } = useAuth();
   const navigate = useNavigate();
 
-  const [statystyki, setStatystyki] = useState({ wizyty: 0, pacjenci: 0, dokumentacja: 0 });
-
-  // Note: We cannot fetch doctor details (specialization) because GET /api/AuthorizedEndpoint/lekarze is 403 Forbidden for doctors.
-  // There is no dedicated /api/Lekarze/moj-profil endpoint yet.
+  const [profil, setProfil] = useState<LekarzProfil | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchProfil = async () => {
       try {
+        setLoading(true);
+        setError(null);
         if (isDemoMode) {
-          setStatystyki({ wizyty: 0, pacjenci: 0, dokumentacja: 0 });
+          setProfil({
+            lekarzId: 1,
+            imie: 'Anna',
+            nazwisko: 'Kowalska',
+            specjalizacja: 'Internista',
+            email: 'anna.kowalska@example.com',
+          });
         } else {
-          const stats = await fetchDoctorStats();
-          setStatystyki(stats);
+          const data = await apiService.getLekarzProfil();
+          setProfil(data);
         }
       } catch (err) {
         console.error(err);
+        setError(t('common.error'));
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchStats();
-  }, [isDemoMode]);
+    fetchProfil();
+  }, [isDemoMode, t]);
   const [activeCard, setActiveCard] = useState<string>('moje-dane');
 
   // Header and outer wrapper removed to use common Layout
@@ -48,7 +59,6 @@ const MojeDaneLekarzPage: React.FC = () => {
       id: 'wizyty',
       icon: CalendarDaysIcon,
       title: t('doctorDashboard.visits'),
-      value: statystyki.wizyty,
       color: 'bg-blue-100 text-blue-600',
       borderColor: 'border-alimed-blue',
       onClick: () => navigate('/wizyty-lekarza')
@@ -57,7 +67,6 @@ const MojeDaneLekarzPage: React.FC = () => {
       id: 'pacjenci',
       icon: UsersIcon,
       title: t('doctorDashboard.patients'),
-      value: statystyki.pacjenci,
       color: 'bg-green-100 text-green-600',
       borderColor: 'border-green-500',
       onClick: () => navigate('/pacjenci-lekarza')
@@ -66,7 +75,6 @@ const MojeDaneLekarzPage: React.FC = () => {
       id: 'dokumentacja',
       icon: DocumentTextIcon,
       title: t('doctorDashboard.documentation'),
-      value: statystyki.dokumentacja,
       color: 'bg-purple-100 text-purple-600',
       borderColor: 'border-purple-500',
       onClick: () => navigate('/dokumentacja-lekarza')
@@ -75,7 +83,6 @@ const MojeDaneLekarzPage: React.FC = () => {
       id: 'moje-dane',
       icon: UserCircleIcon,
       title: t('doctorDashboard.myData'),
-      value: null,
       color: 'bg-orange-100 text-orange-500',
       borderColor: 'border-orange-500',
       onClick: () => setActiveCard('moje-dane')
@@ -108,9 +115,6 @@ const MojeDaneLekarzPage: React.FC = () => {
                   <card.icon className="w-7 h-7" />
                 </div>
                 <h3 className="text-gray-600 font-medium mb-2">{card.title}</h3>
-                {card.value !== null && (
-                  <p className="text-3xl font-bold text-gray-900">{card.value}</p>
-                )}
               </div>
             </div>
           ))}
@@ -132,23 +136,29 @@ const MojeDaneLekarzPage: React.FC = () => {
             </div>
           </div>
 
+          {error && (
+            <div className="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+              {error}
+            </div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 max-w-4xl">
             <div>
               <label className="block text-sm font-medium text-gray-500 mb-1">{t('doctorMyData.firstName')}</label>
-              <p className="text-lg font-medium text-gray-900">{user?.firstName || '-'}</p>
+              <p className="text-lg font-medium text-gray-900">{loading ? t('common.loading') : (profil?.imie || '-')}</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-500 mb-1">{t('doctorMyData.lastName')}</label>
-              <p className="text-lg font-medium text-gray-900">{user?.lastName || '-'}</p>
+              <p className="text-lg font-medium text-gray-900">{loading ? t('common.loading') : (profil?.nazwisko || '-')}</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-500 mb-1">{t('doctorMyData.email')}</label>
-              <p className="text-lg font-medium text-gray-900">{user?.email || '-'}</p>
+              <p className="text-lg font-medium text-gray-900">{loading ? t('common.loading') : (profil?.email || '-')}</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-500 mb-1">{t('doctorMyData.specialization')}</label>
               <p className="text-lg font-medium text-gray-900">
-                <span className="italic text-gray-500">(Pobierane z systemu)</span>
+                {loading ? t('common.loading') : (profil?.specjalizacja || '-')}
               </p>
             </div>
           </div>

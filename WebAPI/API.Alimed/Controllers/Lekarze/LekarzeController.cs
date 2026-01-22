@@ -271,6 +271,52 @@ namespace API.Alimed.Controllers.Lekarze
             return Results.Ok(pacjenci);
         }
 
+        [HttpGet("moj-profil")]
+        [Authorize(Roles = "Lekarz")]
+        public async Task<IResult> GetMojProfilLekarza()
+        {
+            var userId = Guid.Parse(
+                User.FindFirst(ClaimTypes.NameIdentifier)!.Value
+            );
+
+            var lekarz = await _db.Lekarze
+                .AsNoTracking()
+                .Include(l => l.User)
+                .FirstOrDefaultAsync(l => l.UserId == userId);
+
+            if (lekarz == null)
+                return Results.NotFound("Nie znaleziono lekarza.");
+
+            var imie = lekarz.Imie;
+            var nazwisko = lekarz.Nazwisko;
+
+            if (string.IsNullOrWhiteSpace(imie) || string.IsNullOrWhiteSpace(nazwisko))
+            {
+                var source = lekarz.User?.GithubName
+                    ?? lekarz.User?.Username
+                    ?? lekarz.User?.Email;
+
+                if (!string.IsNullOrWhiteSpace(source))
+                {
+                    var parts = source.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                    if (string.IsNullOrWhiteSpace(imie) && parts.Length >= 1)
+                        imie = parts[0];
+                    if (string.IsNullOrWhiteSpace(nazwisko) && parts.Length >= 2)
+                        nazwisko = string.Join(' ', parts.Skip(1));
+                }
+            }
+
+            return Results.Ok(new
+            {
+                lekarz.LekarzId,
+                Imie = imie,
+                Nazwisko = nazwisko,
+                lekarz.Specjalizacja,
+                Email = lekarz.User != null ? lekarz.User.Email : null,
+                lekarz.PlacowkaId
+            });
+        }
+
         [HttpGet("pacjenci/{pacjentId}")]
         [Authorize(Roles = "Lekarz")]
         public async Task<IResult> GetPacjentLekarzaSzczegoly(int pacjentId)

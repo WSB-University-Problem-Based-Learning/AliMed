@@ -10,7 +10,6 @@ import { useTranslation } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { apiService } from '../services/api';
 import type { Pacjent } from '../types/api';
-import { fetchDoctorStats } from '../utils/doctorStats';
 
 const PacjenciLekarzPage: React.FC = () => {
   const { t } = useTranslation();
@@ -20,11 +19,6 @@ const PacjenciLekarzPage: React.FC = () => {
   const [pacjenci, setPacjenci] = useState<Pacjent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [stats, setStats] = useState({
-    wizyty: 0,
-    pacjenci: 0,
-    dokumentacja: 0,
-  });
   const [activeCard, setActiveCard] = useState<string>('pacjenci');
 
   useEffect(() => {
@@ -38,15 +32,10 @@ const PacjenciLekarzPage: React.FC = () => {
             { pacjentId: 2, imie: 'Jan', nazwisko: 'Kowalski', pesel: '78012345678', dataUrodzenia: '1978-01-23', email: 'jan.kowalski@example.com' },
           ];
           setPacjenci(mockData);
-          setStats({ wizyty: 0, pacjenci: mockData.length, dokumentacja: 0 });
         } else {
           try {
-            const [patientsData, statsData] = await Promise.all([
-              apiService.getLekarzPacjenci(),
-              fetchDoctorStats()
-            ]);
+            const patientsData = await apiService.getLekarzPacjenci();
             setPacjenci(patientsData);
-            setStats(statsData);
           } catch (err) {
             console.error('Error details:', err);
             throw err;
@@ -72,7 +61,6 @@ const PacjenciLekarzPage: React.FC = () => {
       id: 'wizyty',
       icon: CalendarDaysIcon,
       title: t('doctorDashboard.visits'),
-      value: stats.wizyty,
       color: 'bg-blue-100 text-blue-600',
       borderColor: 'border-alimed-blue',
       onClick: () => navigate('/wizyty-lekarza')
@@ -81,7 +69,6 @@ const PacjenciLekarzPage: React.FC = () => {
       id: 'pacjenci',
       icon: UsersIcon,
       title: t('doctorDashboard.patients'),
-      value: stats.pacjenci,
       color: 'bg-green-100 text-green-600',
       borderColor: 'border-green-500',
       onClick: () => setActiveCard('pacjenci')
@@ -90,7 +77,6 @@ const PacjenciLekarzPage: React.FC = () => {
       id: 'dokumentacja',
       icon: DocumentTextIcon,
       title: t('doctorDashboard.documentation'),
-      value: stats.dokumentacja,
       color: 'bg-purple-100 text-purple-600',
       borderColor: 'border-purple-500',
       onClick: () => navigate('/dokumentacja-lekarza')
@@ -99,7 +85,6 @@ const PacjenciLekarzPage: React.FC = () => {
       id: 'moje-dane',
       icon: UserCircleIcon,
       title: t('doctorDashboard.myData'),
-      value: null,
       color: 'bg-orange-100 text-orange-500',
       borderColor: 'border-orange-500',
       onClick: () => navigate('/moje-dane-lekarza')
@@ -130,9 +115,6 @@ const PacjenciLekarzPage: React.FC = () => {
                   <card.icon className="w-7 h-7" />
                 </div>
                 <h3 className="text-gray-600 font-medium mb-2">{card.title}</h3>
-                {card.value !== null && (
-                  <p className="text-3xl font-bold text-gray-900">{card.value}</p>
-                )}
               </div>
             </div>
           ))}

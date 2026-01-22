@@ -12,7 +12,6 @@ import { useTranslation } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { apiService } from '../services/api';
 import type { Dokument, DokumentCreateRequest, LekarzWizytaSummary } from '../types/api';
-import { fetchDoctorStats } from '../utils/doctorStats';
 
 const mockWizyty: LekarzWizytaSummary[] = [
   {
@@ -87,7 +86,6 @@ const WizytyLekarzPage: React.FC = () => {
     typDokumentu: '',
     tresc: '',
   });
-  const [dokumentacjaCount, setDokumentacjaCount] = useState<number | null>(null);
 
   const reloadWizyty = useCallback(async (silent = false) => {
     if (!silent) {
@@ -226,56 +224,11 @@ const WizytyLekarzPage: React.FC = () => {
     );
   };
 
-  // Stats state
-  const [stats, setStats] = useState({ wizyty: 0, pacjenci: 0, dokumentacja: 0 });
-
-  useEffect(() => {
-    const loadStats = async () => {
-      if (isDemoMode) {
-        setStats({ wizyty: mockWizyty.length, pacjenci: 2, dokumentacja: mockDokumenty.length });
-        return;
-      }
-      try {
-        const data = await fetchDoctorStats();
-        setStats(data);
-      } catch (e) {
-        console.error('Failed to load stats', e);
-      }
-    };
-    loadStats();
-  }, [isDemoMode]);
-
-  useEffect(() => {
-    const loadDokumentacjaCount = async () => {
-      if (isDemoMode) {
-        setDokumentacjaCount(mockDokumenty.length);
-        return;
-      }
-      if (!wizyty.length) {
-        setDokumentacjaCount(0);
-        return;
-      }
-      try {
-        const docs = await Promise.all(
-          wizyty.map((w) => apiService.getDokumentyWizytyLekarz(w.wizytaId).catch(() => [] as Dokument[])),
-        );
-        const count = docs.reduce((sum, list) => sum + list.length, 0);
-        setDokumentacjaCount(count);
-      } catch (e) {
-        console.error('Failed to load dokumentacja count', e);
-        setDokumentacjaCount(null);
-      }
-    };
-
-    loadDokumentacjaCount();
-  }, [isDemoMode, wizyty]);
-
   const statCards = [
     {
       id: 'wizyty',
       icon: CalendarDaysIcon,
       title: t('doctorDashboard.visits'),
-      value: stats.wizyty,
       color: 'bg-blue-100 text-blue-600',
       borderColor: 'border-alimed-blue',
       onClick: () => undefined,
@@ -284,7 +237,6 @@ const WizytyLekarzPage: React.FC = () => {
       id: 'pacjenci',
       icon: UsersIcon,
       title: t('doctorDashboard.patients'),
-      value: stats.pacjenci,
       color: 'bg-green-100 text-green-600',
       borderColor: 'border-green-500',
       onClick: () => navigate('/pacjenci-lekarza'),
@@ -293,7 +245,6 @@ const WizytyLekarzPage: React.FC = () => {
       id: 'dokumentacja',
       icon: DocumentTextIcon,
       title: t('doctorDashboard.documentation'),
-      value: dokumentacjaCount ?? stats.dokumentacja,
       color: 'bg-purple-100 text-purple-600',
       borderColor: 'border-purple-500',
       onClick: () => navigate('/dokumentacja-lekarza'),
@@ -302,7 +253,6 @@ const WizytyLekarzPage: React.FC = () => {
       id: 'moje-dane',
       icon: UserCircleIcon,
       title: t('doctorDashboard.myData'),
-      value: null,
       color: 'bg-orange-100 text-orange-500',
       borderColor: 'border-orange-500',
       onClick: () => navigate('/moje-dane-lekarza'),
@@ -360,12 +310,10 @@ const WizytyLekarzPage: React.FC = () => {
           wizytaId: selectedWizyta.wizytaId,
         };
         setDokumenty((prev) => [newDoc, ...prev]);
-        setDokumentacjaCount((prev) => (prev ?? 0) + 1);
       } else {
         await apiService.createDokument(payload);
         const data = await apiService.getDokumentyWizytyLekarz(selectedWizyta.wizytaId);
         setDokumenty(data);
-        setDokumentacjaCount((prev) => (prev ?? 0) + 1);
       }
 
       setNowyDokument({ typDokumentu: '', tresc: '' });
@@ -405,9 +353,6 @@ const WizytyLekarzPage: React.FC = () => {
                   <card.icon className="w-7 h-7" />
                 </div>
                 <h3 className="text-gray-600 font-medium mb-2">{card.title}</h3>
-                {card.value !== null && (
-                  <p className="text-3xl font-bold text-gray-900">{card.value}</p>
-                )}
               </div>
             </div>
           ))}

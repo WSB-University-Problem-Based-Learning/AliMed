@@ -78,7 +78,6 @@ const DokumentacjaLekarzPage: React.FC = () => {
   const [wizyty, setWizyty] = useState<LekarzWizytaSummary[]>([]);
   const [dokumenty, setDokumenty] = useState<Dokument[]>([]);
   const [selectedWizytaId, setSelectedWizytaId] = useState<number | ''>('');
-  const [statystyki, setStatystyki] = useState({ wizyty: 0, pacjenci: 0, dokumentacja: 0 });
   const [loading, setLoading] = useState(true);
   const [loadingDokumenty, setLoadingDokumenty] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -131,19 +130,8 @@ const DokumentacjaLekarzPage: React.FC = () => {
 
   useEffect(() => {
     if (!wizyty.length) {
-      setStatystyki({ wizyty: 0, pacjenci: 0, dokumentacja: 0 });
       return;
     }
-
-    const pacjenciSet = new Set(
-      wizyty.map(w => w.pacjentId ?? w.pacjent)
-    );
-
-    setStatystyki(prev => ({
-      ...prev,
-      wizyty: wizyty.length,
-      pacjenci: pacjenciSet.size,
-    }));
 
     if (selectedWizytaId === '') {
       setSelectedWizytaId(wizyty[0].wizytaId);
@@ -155,7 +143,6 @@ const DokumentacjaLekarzPage: React.FC = () => {
     const loadDokumenty = async () => {
       if (!selectedWizytaId) {
         setDokumenty([]);
-        setStatystyki(prev => ({ ...prev, dokumentacja: 0 }));
         return;
       }
 
@@ -164,12 +151,10 @@ const DokumentacjaLekarzPage: React.FC = () => {
         if (isDemoMode) {
           const demoDocs = mockDokumentyByWizyta[selectedWizytaId] || [];
           setDokumenty(demoDocs);
-          setStatystyki(prev => ({ ...prev, dokumentacja: demoDocs.length }));
           return;
         }
         const docs = await apiService.getDokumentyWizytyLekarz(selectedWizytaId);
         setDokumenty(docs);
-        setStatystyki(prev => ({ ...prev, dokumentacja: docs.length }));
       } catch (err) {
         setError(err instanceof Error ? err.message : t('doctorDocumentation.errorLoadingDocuments'));
       } finally {
@@ -322,7 +307,6 @@ const DokumentacjaLekarzPage: React.FC = () => {
       id: 'wizyty',
       icon: CalendarDaysIcon,
       title: t('doctorDashboard.visits'),
-      value: statystyki.wizyty,
       color: 'bg-blue-100 text-blue-600',
       borderColor: 'border-alimed-blue',
       onClick: () => navigate('/wizyty-lekarza'),
@@ -331,7 +315,6 @@ const DokumentacjaLekarzPage: React.FC = () => {
       id: 'pacjenci',
       icon: UsersIcon,
       title: t('doctorDashboard.patients'),
-      value: statystyki.pacjenci,
       color: 'bg-green-100 text-green-600',
       borderColor: 'border-green-500',
       onClick: () => navigate('/pacjenci-lekarza'),
@@ -340,7 +323,6 @@ const DokumentacjaLekarzPage: React.FC = () => {
       id: 'dokumentacja',
       icon: DocumentTextIcon,
       title: t('doctorDashboard.documentation'),
-      value: statystyki.dokumentacja,
       color: 'bg-purple-100 text-purple-600',
       borderColor: 'border-purple-500',
       onClick: () => setActiveCard('dokumentacja'),
@@ -349,7 +331,6 @@ const DokumentacjaLekarzPage: React.FC = () => {
       id: 'moje-dane',
       icon: UserCircleIcon,
       title: t('doctorDashboard.myData'),
-      value: null,
       color: 'bg-orange-100 text-orange-500',
       borderColor: 'border-orange-500',
       onClick: () => navigate('/moje-dane-lekarza'),
@@ -388,9 +369,6 @@ const DokumentacjaLekarzPage: React.FC = () => {
                   <card.icon className="w-7 h-7" />
                 </div>
                 <h3 className="text-gray-600 font-medium mb-2">{card.title}</h3>
-                {card.value !== null && (
-                  <p className="text-3xl font-bold text-gray-900">{card.value}</p>
-                )}
               </div>
             </div>
           ))}

@@ -37,6 +37,15 @@ export interface Lekarz {
   placowkaId?: number;
 }
 
+export interface LekarzProfil {
+  lekarzId: number;
+  imie?: string;
+  nazwisko?: string;
+  specjalizacja?: string;
+  email?: string;
+  placowkaId?: number;
+}
+
 export interface Wizyta {
   wizytaId: number;
   dataWizyty: string;

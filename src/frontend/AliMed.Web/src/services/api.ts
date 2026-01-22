@@ -1,4 +1,4 @@
-import type { Pacjent, Lekarz, Wizyta, WizytaDetail, AuthResponse, Dokument, DokumentCreateRequest, DokumentUpdateDto, RegisterRequest, LoginRequest, WizytaCreateRequest, DostepneTerminyResponse, Placowka, UpdatePacjentProfileRequest, AdminUserSummary, PromoteToDoctorRequest, LekarzWizytaSummary, AdminPacjentSummary, AdminLekarzSummary, LekarzPacjentDetails } from '../types/api';
+import type { Pacjent, Lekarz, Wizyta, WizytaDetail, AuthResponse, Dokument, DokumentCreateRequest, DokumentUpdateDto, RegisterRequest, LoginRequest, WizytaCreateRequest, DostepneTerminyResponse, Placowka, UpdatePacjentProfileRequest, AdminUserSummary, PromoteToDoctorRequest, LekarzWizytaSummary, AdminPacjentSummary, AdminLekarzSummary, LekarzPacjentDetails, LekarzProfil } from '../types/api';
 import { config } from '../config/env';
 
 const API_BASE_URL = config.apiBaseUrl;
@@ -574,6 +574,23 @@ export const apiService = {
           pacjentId: data.pacjentId,
         })),
       })),
+    };
+  },
+
+  async getLekarzProfil(): Promise<LekarzProfil> {
+    const response = await fetch(`${API_BASE_URL}/api/Lekarze/moj-profil`, {
+      headers: getHeaders(true),
+      credentials: 'include',
+    });
+    if (!response.ok) throw new Error('Failed to fetch doctor profile');
+    const data = await response.json();
+    return {
+      lekarzId: data.lekarzId,
+      imie: data.imie,
+      nazwisko: data.nazwisko,
+      specjalizacja: data.specjalizacja,
+      email: data.email,
+      placowkaId: data.placowkaId,
     };
   },
 };
