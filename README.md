@@ -79,12 +79,17 @@ AliMed to nowoczesna platforma medyczna zbudowana w architekturze klient-serwer,
 graph TD
     User([User Browser]) <--> |HTTPS / WSS| Nginx[Nginx Reverse Proxy]
     
-    subgraph OCI ["Oracle Cloud Infrastructure (Always Free)"]
-        Nginx <--> |Port 5056| API[".NET 9 Web API Service"]
-        Nginx <--> |Static Files| WebDir["/home/ubuntu/www (React App)"]
-        
-        API <--> |MySQL Prot.| DB[(MySQL HeatWave DB)]
-        API <--> |Local Storage| Files["Block Volume (Storage)"]
+    subgraph Cloud ["Hybrid Cloud Infrastructure"]
+        subgraph OCI ["Oracle Cloud Infrastructure (Core)"]
+            Nginx <--> |Port 5056| API[".NET 9 Web API Service"]
+            Nginx <--> |Static Files| WebDir["/home/ubuntu/www (React App)"]
+            
+            API <--> |Private Network| DB[(MySQL HeatWave DB)]
+        end
+
+        subgraph Alibaba ["Alibaba Cloud (Management)"]
+            Admin[Adminer DB Panel] -.-> |SSH Tunnel| DB
+        end
     end
 
     subgraph Automation ["CI/CD Pipeline"]
@@ -131,6 +136,8 @@ Projekt wykorzystuje **GitHub Actions** do pełnej automatyzacji procesów budow
     - Deploy na VM i restart usługi `alimed-api` przez SSH.
 3.  **Deploy Orchestration** (`deploy.yml`):
     - Zarządzanie sekretami i kluczami SSL w środowisku produkcyjnym.
+
+> **Note**: Zastosowano strategię **Build Offloading**. Ze względu na ograniczone zasoby maszyny produkcyjnej (ok. 1GB RAM), procesy budowania (`dotnet build`, `npm run build`) są realizowane na runnerach GitHub Actions, a na serwer trafiają gotowe artefakty.
 
 ---
 

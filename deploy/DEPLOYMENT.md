@@ -13,7 +13,32 @@ System działa w środowisku **Oracle Cloud Infrastructure (OCI)** na maszynie w
 *   **Baza Danych**: MySQL HeatWave (Managed Service w OCI).
 *   **Automatyzacja**: Cały proces od commitu do wdrożenia jest zautomatyzowany przez **GitHub Actions**.
 
+*   **Automatyzacja**: Cały proces od commitu do wdrożenia jest zautomatyzowany przez **GitHub Actions**.
+
 ---
+
+## 🌐 Konfiguracja Sieciowa (Infrastructure)
+
+System wykorzystuje model **Private Networking** w celu maksymalizacji bezpieczeństwa danych medycznych.
+
+*   **VCN Name**: `Alimed-Network`
+*   **CIDR**: `192.168.0.0/24` (Prywatna podsieć)
+*   **Adresacja IP**:
+    *   `192.168.0.218` -> **App Server** (Ubuntu VM)
+    *   `192.168.0.251` -> **MySQL HeatWave DB** (Private Endpoint)
+
+> **Bezpieczeństwo**: Baza danych nie posiada publicznego adresu IP. Komunikacja odbywa się wyłącznie wewnątrz sieci VCN.
+
+---
+
+## 🛡️ Bezpieczeństwo (Defense in Depth)
+
+Zastosowano wielowarstwową strategię ochrony:
+
+1.  **Security Lists (VCN Level)**: Otwierają tylko niezbędne porty dla całej podsieci (80, 443, 22).
+2.  **Network Security Groups (Instance Level)**:
+    *   Reguła `alimeddb-nsg`: Zezwala na ruch na porcie 3306 **TYLKO** z adresu IP serwera aplikacji (`192.168.0.218/32`).
+3.  **SSH Tunneling**: Dostęp administracyjny do bazy możliwy jest tylko tunelem SSH przez serwer pośredniczący (Bastion Host / Management VM).
 
 ## 🔄 Jak to działa? (GitHub Actions Workflows)
 
@@ -25,6 +50,9 @@ Proces CI/CD składa się z trzech powiązanych ze sobą plików workflow (`.git
 Ten proces uruchamia się automatycznie przy każdym wypchnięciu zmian (push) do katalogu `WebAPI/`.
 
 **Kroki procesu:**
+> **Strategia: Build Offloading**
+> Maszyna produkcyjna posiada tylko ~1GB RAM, co uniemożliwia budowanie aplikacji na serwerze. Cały proces kompilacji odbywa się na runnerach GitHub, a na serwer trafiają tylko gotowe pliki.
+
 1.  **Build**: Kompilacja kodu .NET 9.0.
 2.  **Test**: Uruchomienie testów jednostkowych i integracyjnych.
 3.  **Publish**: Stworzenie paczki wdrożeniowej (artefaktu) gotowej do uruchomienia na serwerze.
@@ -120,6 +148,13 @@ sudo systemctl restart alimed-api
 # Restart Nginx
 sudo systemctl restart nginx
 ```
+
+### Monitoring Dashboard (Custom MOTD)
+
+Serwer posiada niestandardowy skrypt **Message of the Day (MOTD)**, który wyświetla kluczowe metryki od razu po zalogowaniu przez SSH:
+*   Status usług (Nginx, API, DB).
+*   Użycie pamięci i dysku.
+*   Datę ostatniego backupu bazy danych.
 
 ---
 

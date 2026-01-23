@@ -31,6 +31,12 @@ dotnet run
 Backend będzie dostępny: **http://localhost:5056**  
 Swagger docs: **http://localhost:5056/swagger**
 
+#### Jak korzystać z Swagger UI?
+
+1.  **Login**: Wykonaj `POST /api/Auth/login` (użyj danych demo), skopiuj `token` z odpowiedzi.
+2.  **Authorize**: Kliknij kłódkę na górze strony, wpisz `Bearer <TWOJ_TOKEN>` i zatwierdź.
+3.  **Test**: Teraz możesz wykonywać zapytania do zabezpieczonych endpointów (np. `/api/Wizyty/moje-wizyty`).
+
 ### 3. Uruchom frontend ręcznie
 
 ```bash
