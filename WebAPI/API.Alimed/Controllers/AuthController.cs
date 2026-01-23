@@ -1,5 +1,6 @@
 using API.Alimed.Data;
 using API.Alimed.Dtos;
+using API.Alimed.Entities;
 using API.Alimed.Interfaces;
 using API.Alimed.Services;
 using Microsoft.AspNetCore.Http;
@@ -221,8 +222,27 @@ namespace API.Alimed.Controllers
                 user.Role.ToString()
                 );
 
-            tokenInDb.ExpiresOnUtc = DateTime.UtcNow.AddDays(7);
+            // rotate refresh token
+            tokenInDb.IsRevoked = true;
+            var newRefreshToken = Guid.NewGuid().ToString("N") + Guid.NewGuid().ToString();
+            _db.RefreshToken.Add(new RefreshToken
+            {
+                Id = Guid.NewGuid(),
+                UserId = user.UserId,
+                Token = newRefreshToken,
+                ExpiresOnUtc = DateTime.UtcNow.AddDays(7),
+                IsRevoked = false
+            });
             await _db.SaveChangesAsync();
+
+            Response.Cookies.Append("refresh_token", newRefreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTime.UtcNow.AddDays(7),
+                Path = "/api"
+            });
 
             return Ok(new { accessToken = newAccessToken });
 

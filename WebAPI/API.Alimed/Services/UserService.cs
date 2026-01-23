@@ -60,7 +60,7 @@ namespace API.Alimed.Services
                 Id = Guid.NewGuid(),
                 UserId = userId,
                 Token = token,
-                ExpiresOnUtc = DateTime.UtcNow.AddMinutes(3) // czas trwania ref tkn
+                ExpiresOnUtc = DateTime.UtcNow.AddDays(7) // czas trwania ref tkn
             };
 
             _db.RefreshToken.Add(refreshToken);

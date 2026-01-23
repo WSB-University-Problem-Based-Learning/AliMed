@@ -4,8 +4,11 @@ using API.Alimed.Extensions;
 using API.Alimed.Interfaces;
 using API.Alimed.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.OpenApi.Models;
+using System.Globalization;
+using System.Threading.RateLimiting;
 
 //trigger gh actions by olek
 var builder = WebApplication.CreateBuilder(args);
@@ -32,6 +35,27 @@ builder.Services.AddHttpClient(); // http
 
 builder.Services.AddRateLimiter(options =>
 {
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.OnRejected = async (context, token) =>
+    {
+        int? retryAfterSeconds = null;
+        if (context.Lease.TryGetMetadata(MetadataName.RetryAfter, out var retryAfter))
+        {
+            retryAfterSeconds = (int)Math.Ceiling(retryAfter.TotalSeconds);
+            context.HttpContext.Response.Headers.RetryAfter =
+                retryAfterSeconds.Value.ToString(CultureInfo.InvariantCulture);
+        }
+
+        var message = retryAfterSeconds.HasValue
+            ? $"Za duzo prob. Sprobuj ponownie za {retryAfterSeconds.Value} s."
+            : "Za duzo prob. Sprobuj ponownie pozniej.";
+
+        context.HttpContext.Response.ContentType = "application/json";
+        await context.HttpContext.Response.WriteAsJsonAsync(
+            new { error = message, retryAfterSeconds },
+            cancellationToken: token);
+    };
+
     options.AddFixedWindowLimiter("auth_login", limiterOptions =>
     {
         limiterOptions.PermitLimit = 20;

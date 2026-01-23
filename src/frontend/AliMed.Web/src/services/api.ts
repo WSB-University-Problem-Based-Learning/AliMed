@@ -30,6 +30,91 @@ const getHeaders = (includeAuth = false): Record<string, string> => {
   return headers;
 };
 
+const parseErrorPayload = async (response: Response): Promise<unknown> => {
+  const contentType = response.headers.get('content-type') || '';
+  if (contentType.includes('application/json')) {
+    try {
+      return await response.json();
+    } catch {
+      return null;
+    }
+  }
+  try {
+    return await response.text();
+  } catch {
+    return null;
+  }
+};
+
+const extractServerMessage = (payload: unknown): string => {
+  if (!payload) return '';
+  if (typeof payload === 'string') {
+    const trimmed = payload.trim();
+    if (trimmed.startsWith('<')) return '';
+    return payload;
+  }
+  if (typeof payload === 'object') {
+    const record = payload as Record<string, unknown>;
+    if (record.errors && typeof record.errors === 'object') {
+      return JSON.stringify(payload);
+    }
+    const error = record.error ?? record.message;
+    if (typeof error === 'string') {
+      const trimmed = error.trim();
+      if (trimmed.startsWith('<')) return '';
+      return error;
+    }
+  }
+  return '';
+};
+
+const getRetryAfterSeconds = (response: Response, payload: unknown): number | null => {
+  if (payload && typeof payload === 'object' && 'retryAfterSeconds' in payload) {
+    const value = Number((payload as Record<string, unknown>).retryAfterSeconds);
+    if (Number.isFinite(value) && value > 0) {
+      return Math.ceil(value);
+    }
+  }
+  const header = response.headers.get('Retry-After');
+  if (!header) return null;
+  const headerValue = Number(header);
+  if (Number.isFinite(headerValue) && headerValue > 0) {
+    return Math.ceil(headerValue);
+  }
+  return null;
+};
+
+const buildErrorMessage = (response: Response, payload: unknown, fallback: string): string => {
+  const serverMessage = extractServerMessage(payload);
+  if (serverMessage) {
+    return serverMessage;
+  }
+
+  switch (response.status) {
+    case 401:
+      return 'Brak autoryzacji. Zaloguj sie ponownie.';
+    case 403:
+      return 'Brak dostepu do tego zasobu.';
+    case 429: {
+      const retryAfter = getRetryAfterSeconds(response, payload);
+      if (retryAfter) {
+        return `Za duzo prob. Sprobuj ponownie za ${retryAfter} s.`;
+      }
+      return 'Za duzo prob. Sprobuj ponownie pozniej.';
+    }
+    case 503:
+      return 'Usluga chwilowo niedostepna. Sprobuj ponownie.';
+    default:
+      return fallback;
+  }
+};
+
+const throwApiError = async (response: Response, fallback: string): Promise<never> => {
+  const payload = await parseErrorPayload(response);
+  const message = buildErrorMessage(response, payload, fallback);
+  throw new Error(message);
+};
+
 const normalizeStatus = (value: unknown): string | undefined => {
   if (typeof value === 'string') {
     const trimmed = value.trim();
@@ -76,7 +161,7 @@ export const apiService = {
       body: JSON.stringify({ code }),
       credentials: 'include', // Include cookies for refresh token
     });
-    if (!response.ok) throw new Error('Failed to authenticate with GitHub');
+    if (!response.ok) await throwApiError(response, 'Failed to authenticate with GitHub');
     const data = await response.json();
     // Backend returns only 'token', but refresh token is in HttpOnly cookie
     return {
@@ -93,10 +178,7 @@ export const apiService = {
       body: JSON.stringify(credentials),
       credentials: 'include',
     });
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(errorText || 'Niepoprawny email lub hasło');
-    }
+    if (!response.ok) await throwApiError(response, 'Niepoprawny email lub hasło');
     const data = await response.json();
     return {
       token: data.token,
@@ -112,10 +194,7 @@ export const apiService = {
       body: JSON.stringify(data),
       credentials: 'include',
     });
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(errorText || 'Nie udało się utworzyć konta');
-    }
+    if (!response.ok) await throwApiError(response, 'Nie udało się utworzyć konta');
     const result = await response.json();
     return {
       token: result.token,
@@ -129,7 +208,7 @@ export const apiService = {
       headers: getHeaders(true),
       credentials: 'include',
     });
-    if (!response.ok) throw new Error('Failed to fetch pacjenci');
+    if (!response.ok) await throwApiError(response, 'Failed to fetch pacjenci');
     return response.json();
   },
 
@@ -138,7 +217,7 @@ export const apiService = {
       headers: getHeaders(true),
       credentials: 'include',
     });
-    if (!response.ok) throw new Error('Failed to fetch pacjent');
+    if (!response.ok) await throwApiError(response, 'Failed to fetch pacjent');
     return response.json();
   },
 
@@ -148,7 +227,7 @@ export const apiService = {
       headers: getHeaders(true),
       credentials: 'include',
     });
-    if (!response.ok) throw new Error('Failed to fetch lekarze');
+    if (!response.ok) await throwApiError(response, 'Failed to fetch lekarze');
     return response.json();
   },
 
@@ -157,7 +236,7 @@ export const apiService = {
       headers: getHeaders(true),
       credentials: 'include',
     });
-    if (!response.ok) throw new Error('Failed to fetch lekarz');
+    if (!response.ok) await throwApiError(response, 'Failed to fetch lekarz');
     return response.json();
   },
 
@@ -167,7 +246,7 @@ export const apiService = {
       headers: getHeaders(true),
       credentials: 'include',
     });
-    if (!response.ok) throw new Error('Failed to fetch wizyty');
+    if (!response.ok) await throwApiError(response, 'Failed to fetch wizyty');
     const data = await response.json();
     return data.map((w: any) => ({
       wizytaId: w.wizytaId,
@@ -185,7 +264,7 @@ export const apiService = {
       headers: getHeaders(true),
       credentials: 'include',
     });
-    if (!response.ok) throw new Error('Failed to fetch wizyta');
+    if (!response.ok) await throwApiError(response, 'Failed to fetch wizyta');
     const data = await response.json();
     return {
       wizytaId: data.wizytaId,
@@ -206,10 +285,7 @@ export const apiService = {
       credentials: 'include',
       body: JSON.stringify(wizyta),
     });
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(errorText || 'Failed to create wizyta');
-    }
+    if (!response.ok) await throwApiError(response, 'Failed to create wizyta');
     return response.json();
   },
 
@@ -230,10 +306,7 @@ export const apiService = {
       headers: getHeaders(true),
       credentials: 'include',
     });
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(errorText || 'Failed to fetch available slots');
-    }
+    if (!response.ok) await throwApiError(response, 'Failed to fetch available slots');
     return response.json();
   },
 
@@ -243,7 +316,7 @@ export const apiService = {
       headers: getHeaders(true),
       credentials: 'include',
     });
-    if (!response.ok) throw new Error('Failed to fetch placowki');
+    if (!response.ok) await throwApiError(response, 'Failed to fetch placowki');
     // Map API response to Placowka type (API returns Adres instead of adresPlacowki)
     const data = await response.json();
     return data.map((p: { placowkaId: number; nazwa?: string; adres?: { miasto?: string; ulica?: string } }) => ({
@@ -262,7 +335,7 @@ export const apiService = {
       headers: getHeaders(true),
       credentials: 'include',
     });
-    if (!response.ok) throw new Error('Failed to fetch dokumenty');
+    if (!response.ok) await throwApiError(response, 'Failed to fetch dokumenty');
     return response.json();
   },
 
@@ -271,7 +344,7 @@ export const apiService = {
       headers: getHeaders(true),
       credentials: 'include',
     });
-    if (!response.ok) throw new Error('Failed to fetch dokument');
+    if (!response.ok) await throwApiError(response, 'Failed to fetch dokument');
     return response.json();
   },
 
@@ -280,7 +353,7 @@ export const apiService = {
       headers: getHeaders(true),
       credentials: 'include',
     });
-    if (!response.ok) throw new Error('Failed to download dokument');
+    if (!response.ok) await throwApiError(response, 'Failed to download dokument');
     return response.blob();
   },
 
@@ -291,10 +364,7 @@ export const apiService = {
       credentials: 'include',
       body: JSON.stringify(data),
     });
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(errorText || 'Failed to create dokument');
-    }
+    if (!response.ok) await throwApiError(response, 'Failed to create dokument');
     return response.json();
   },
 
@@ -305,10 +375,7 @@ export const apiService = {
       credentials: 'include',
       body: JSON.stringify(diagnoza),
     });
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(errorText || 'Failed to update visit status');
-    }
+    if (!response.ok) await throwApiError(response, 'Failed to update visit status');
   },
 
   async cancelWizyta(id: number): Promise<void> {
@@ -317,10 +384,7 @@ export const apiService = {
       headers: getHeaders(true),
       credentials: 'include',
     });
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(errorText || 'Failed to cancel visit');
-    }
+    if (!response.ok) await throwApiError(response, 'Failed to cancel visit');
   },
 
   async markWizytaNieobecnosc(id: number): Promise<void> {
@@ -329,10 +393,7 @@ export const apiService = {
       headers: getHeaders(true),
       credentials: 'include',
     });
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(errorText || 'Failed to mark absence');
-    }
+    if (!response.ok) await throwApiError(response, 'Failed to mark absence');
   },
 
   async getDokumentyWizyty(wizytaId: number): Promise<Dokument[]> {
@@ -340,7 +401,7 @@ export const apiService = {
       headers: getHeaders(true),
       credentials: 'include',
     });
-    if (!response.ok) throw new Error('Failed to fetch visit documents');
+    if (!response.ok) await throwApiError(response, 'Failed to fetch visit documents');
     return response.json();
   },
 
@@ -349,7 +410,7 @@ export const apiService = {
       headers: getHeaders(true),
       credentials: 'include',
     });
-    if (!response.ok) throw new Error('Failed to fetch visit documents');
+    if (!response.ok) await throwApiError(response, 'Failed to fetch visit documents');
     return response.json();
   },
 
@@ -360,10 +421,7 @@ export const apiService = {
       credentials: 'include',
       body: JSON.stringify(data),
     });
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(errorText || 'Failed to update document');
-    }
+    if (!response.ok) await throwApiError(response, 'Failed to update document');
     return response.json();
   },
 
@@ -373,7 +431,7 @@ export const apiService = {
       method: 'POST',
       credentials: 'include', // Send HttpOnly cookie
     });
-    if (!response.ok) throw new Error('Failed to refresh token');
+    if (!response.ok) await throwApiError(response, 'Failed to refresh token');
     return response.json();
   },
 
@@ -399,7 +457,7 @@ export const apiService = {
       headers: getHeaders(true),
       credentials: 'include',
     });
-    if (!response.ok) throw new Error('Failed to fetch patient profile');
+    if (!response.ok) await throwApiError(response, 'Failed to fetch patient profile');
     const data = await response.json();
     return {
       pacjentId: data.pacjentId,
@@ -427,10 +485,7 @@ export const apiService = {
       credentials: 'include',
       body: JSON.stringify(payload),
     });
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(errorText || 'Failed to update profile');
-    }
+    if (!response.ok) await throwApiError(response, 'Failed to update profile');
   },
 
   // Admin
@@ -439,7 +494,7 @@ export const apiService = {
       headers: getHeaders(true),
       credentials: 'include',
     });
-    if (!response.ok) throw new Error('Failed to fetch admin users');
+    if (!response.ok) await throwApiError(response, 'Failed to fetch admin users');
     return response.json();
   },
 
@@ -450,10 +505,7 @@ export const apiService = {
       credentials: 'include',
       body: JSON.stringify(data),
     });
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(errorText || 'Failed to promote user');
-    }
+    if (!response.ok) await throwApiError(response, 'Failed to promote user');
     return response.json();
   },
 
@@ -462,7 +514,7 @@ export const apiService = {
       headers: getHeaders(true),
       credentials: 'include',
     });
-    if (!response.ok) throw new Error('Failed to fetch admin patients');
+    if (!response.ok) await throwApiError(response, 'Failed to fetch admin patients');
     return response.json();
   },
 
@@ -471,7 +523,7 @@ export const apiService = {
       headers: getHeaders(true),
       credentials: 'include',
     });
-    if (!response.ok) throw new Error('Failed to fetch admin doctors');
+    if (!response.ok) await throwApiError(response, 'Failed to fetch admin doctors');
     return response.json();
   },
 
@@ -493,7 +545,7 @@ export const apiService = {
       headers: getHeaders(true),
       credentials: 'include',
     });
-    if (!response.ok) throw new Error('Failed to fetch doctor day visits');
+    if (!response.ok) await throwApiError(response, 'Failed to fetch doctor day visits');
     const data = await response.json();
     return data.map((row: any) => this.mapLekarzWizyta(row));
   },
@@ -504,7 +556,7 @@ export const apiService = {
       headers: getHeaders(true),
       credentials: 'include',
     });
-    if (!response.ok) throw new Error('Failed to fetch doctor week visits');
+    if (!response.ok) await throwApiError(response, 'Failed to fetch doctor week visits');
     const data = await response.json();
     return data.map((row: any) => this.mapLekarzWizyta(row));
   },
@@ -518,7 +570,7 @@ export const apiService = {
       headers: getHeaders(true),
       credentials: 'include',
     });
-    if (!response.ok) throw new Error('Failed to fetch doctor month visits');
+    if (!response.ok) await throwApiError(response, 'Failed to fetch doctor month visits');
     const data = await response.json();
     return data.map((row: any) => this.mapLekarzWizyta(row));
   },
@@ -528,7 +580,7 @@ export const apiService = {
       headers: getHeaders(true),
       credentials: 'include',
     });
-    if (!response.ok) throw new Error('Failed to fetch doctor visits');
+    if (!response.ok) await throwApiError(response, 'Failed to fetch doctor visits');
     const data = await response.json();
     return data.map((row: any) => this.mapLekarzWizyta(row));
   },
@@ -539,7 +591,7 @@ export const apiService = {
       headers: getHeaders(true),
       credentials: 'include',
     });
-    if (!response.ok) throw new Error('Failed to fetch doctor patients');
+    if (!response.ok) await throwApiError(response, 'Failed to fetch doctor patients');
     return response.json();
   },
 
@@ -548,7 +600,7 @@ export const apiService = {
       headers: getHeaders(true),
       credentials: 'include',
     });
-    if (!response.ok) throw new Error('Failed to fetch patient details');
+    if (!response.ok) await throwApiError(response, 'Failed to fetch patient details');
     const data = await response.json();
     const adres = data.adresZamieszkania ?? data.adres;
     return {
@@ -588,7 +640,7 @@ export const apiService = {
       headers: getHeaders(true),
       credentials: 'include',
     });
-    if (!response.ok) throw new Error('Failed to fetch doctor profile');
+    if (!response.ok) await throwApiError(response, 'Failed to fetch doctor profile');
     const data = await response.json();
     return {
       lekarzId: data.lekarzId,
