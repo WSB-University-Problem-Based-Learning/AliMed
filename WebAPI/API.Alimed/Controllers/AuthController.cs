@@ -14,7 +14,6 @@ namespace API.Alimed.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [EnableRateLimiting("auth")]
     public class AuthController : ControllerBase
     {
         private readonly IHttpClientFactory _httpClientFactory;
@@ -191,6 +190,7 @@ namespace API.Alimed.Controllers
 
 
         [HttpPost("refresh")]
+        [EnableRateLimiting("auth_refresh")]
         public async Task<IActionResult> RefreshToken()
         {
             var refreshToken = Request.Cookies["refresh_token"];
@@ -230,6 +230,7 @@ namespace API.Alimed.Controllers
 
 
         [HttpPost("register")]
+        [EnableRateLimiting("auth_login")]
         public async Task<IActionResult> Register([FromBody] RegisterDto dto)
         {
             if (!ModelState.IsValid)
@@ -282,6 +283,7 @@ namespace API.Alimed.Controllers
 
 
         [HttpPost("login")]
+        [EnableRateLimiting("auth_login")]
         public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
             if (!ModelState.IsValid)

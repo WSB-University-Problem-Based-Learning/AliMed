@@ -32,9 +32,15 @@ builder.Services.AddHttpClient(); // http
 
 builder.Services.AddRateLimiter(options =>
 {
-    options.AddFixedWindowLimiter("auth", limiterOptions =>
+    options.AddFixedWindowLimiter("auth_login", limiterOptions =>
     {
-        limiterOptions.PermitLimit = 5;
+        limiterOptions.PermitLimit = 20;
+        limiterOptions.Window = TimeSpan.FromMinutes(1);
+        limiterOptions.QueueLimit = 0;
+    });
+    options.AddFixedWindowLimiter("auth_refresh", limiterOptions =>
+    {
+        limiterOptions.PermitLimit = 60;
         limiterOptions.Window = TimeSpan.FromMinutes(1);
         limiterOptions.QueueLimit = 0;
     });
